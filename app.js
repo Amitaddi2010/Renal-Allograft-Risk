@@ -377,10 +377,74 @@ function initMolecularDiagram() {
     });
 }
 
+/* ==========================================================================
+   VIEW SWITCHING & NAVIGATION CONTROLLER (Landing Page <-> Calculator Dashboard)
+   ========================================================================== */
+function switchView(viewName) {
+    const landingView = document.getElementById('landing-view');
+    const calcView = document.getElementById('calculator-view');
+    const navLanding = document.getElementById('nav-btn-landing');
+    const navCalc = document.getElementById('nav-btn-calc');
+    const navLaunchBtn = document.getElementById('nav-launch-btn');
+
+    if (viewName === 'calculator') {
+        landingView.classList.remove('active-view');
+        calcView.classList.add('active-view');
+
+        if (navLanding) navLanding.classList.remove('active');
+        if (navCalc) navCalc.classList.add('active');
+        if (navLaunchBtn) navLaunchBtn.style.display = 'none';
+
+        window.location.hash = 'dashboard';
+        calculateRisk();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        calcView.classList.remove('active-view');
+        landingView.classList.add('active-view');
+
+        if (navCalc) navCalc.classList.remove('active');
+        if (navLanding) navLanding.classList.add('active');
+        if (navLaunchBtn) navLaunchBtn.style.display = 'inline-flex';
+
+        window.location.hash = 'landing';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function scrollToSection(sectionId) {
+    const landingView = document.getElementById('landing-view');
+    if (!landingView.classList.contains('active-view')) {
+        switchView('landing');
+    }
+    setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, 100);
+}
+
+// Handle browser back/forward buttons
+window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#dashboard') {
+        switchView('calculator');
+    } else {
+        switchView('landing');
+    }
+});
+
 // Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
     updateTotalMM();
     calculateRisk();
     initParticleSphere();
     initMolecularDiagram();
+
+    // Check initial route
+    if (window.location.hash === '#dashboard') {
+        switchView('calculator');
+    } else {
+        switchView('landing');
+    }
 });
+
