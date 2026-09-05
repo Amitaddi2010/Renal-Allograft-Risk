@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUROS // PGIMER Renal Allograft Risk Terminal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 3D Bioluminescent Particle Sphere Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Navigation Header -->
+    <header class="auros-nav">
+        <div class="brand-wrapper">
+            <div class="brand-symbol"></div>
+            <span class="brand-wordmark">AUROS // IMMUNOPATHOLOGY</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="#nomogram" class="nav-link active">NOMOGRAM</a>
+            <a href="#matrix" class="nav-link">STRATA MATRIX</a>
+            <a href="#protocol" class="nav-link">CLINICAL PROTOCOL</a>
+            <a href="#audit" class="nav-link">EVIDENCE AUDIT</a>
+        </nav>
+
+        <div class="nav-badge">
+            <span class="status-dot"></span>
+            <span>N = 443 AUDITED COHORT</span>
+        </div>
+    </header>
+
+    <div class="page-wrapper">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="section-eyebrow">
+                <span>PGIMER DOCTORAL RESEARCH</span>
+                <span>/</span>
+                <span>HEERA SINGH & PROF. RANJANA WALKER MINZ</span>
+            </div>
+            <h1 class="hero-title">Renal Allograft Multimodal Risk Terminal.</h1>
+            <p class="hero-subtext">Evidence-based acute rejection prediction model integrating recipient clinical parameters, allele-level HLA mismatches, and pre-transplant flow cytometric crossmatching.</p>
+        </section>
+
+        <!-- Signature Statistics Counter Ribbon (Lavender Phosphor Highlights) -->
+        <section class="stats-ribbon">
+            <div class="stat-block">
+                <span class="stat-number">0.6926</span>
+                <span class="stat-label">MULTIMODAL ROC-AUC [0.629–0.751]</span>
+            </div>
+            <div class="stat-block">
+                <span class="stat-number">+0.1018</span>
+                <span class="stat-label">INCREMENTAL GAIN (DELONG P &lt; 0.001)</span>
+            </div>
+            <div class="stat-block">
+                <span class="stat-number">6.4×</span>
+                <span class="stat-label">MONOTONIC RISK GRADIENT (5.6% → 36.0%)</span>
+            </div>
+            <div class="stat-block">
+                <span class="stat-number">0.5132</span>
+                <span class="stat-label">HOSMER-LEMESHOW CALIBRATION (P-VALUE)</span>
+            </div>
+        </section>
+
+        <!-- Main Terminal Dashboard -->
+        <div class="terminal-grid" id="nomogram">
+            <!-- Left Surface Card: Inputs -->
+            <section class="surface-card">
+                <div class="card-header-bar">
+                    <div>
+                        <h2 class="card-title">Parameter Instrumentation</h2>
+                        <p class="card-subtitle">Pre-transplant clinical, molecular HLA, and flow crossmatch metrics.</p>
+                    </div>
+                    <button class="arrow-btn" type="button" aria-label="Details">↗</button>
+                </div>
+
+                <form id="calculator-form" onsubmit="event.preventDefault(); calculateRisk();">
+                    <!-- Section 1: Demographics & Organ Source -->
+                    <div class="instrument-group">
+                        <div class="group-kicker">01 // CLINICAL & DEMOGRAPHIC COVARIATES</div>
+                        <div class="grid-cols-2">
+                            <div class="control-field">
+                                <label for="recipient-age" class="control-label">Recipient Age (Years)</label>
+                                <input type="number" id="recipient-age" class="control-input" min="10" max="80" value="38" required>
+                                <span class="control-caption">COHORT MEAN: 38.4 YRS</span>
+                            </div>
+                            <div class="control-field">
+                                <label for="donor-age" class="control-label">Donor Age (Years)</label>
+                                <input type="number" id="donor-age" class="control-input" min="18" max="75" value="45" required>
+                                <span class="control-caption">PRIMARY SURVIVAL HAZARD (HR: 1.049/YR)</span>
+                            </div>
+                        </div>
+
+                        <div class="grid-cols-3">
+                            <div class="control-field">
+                                <label for="donor-source" class="control-label">Donor Source</label>
+                                <select id="donor-source" class="control-select">
+                                    <option value="0">Living-Related Donor (88.7%)</option>
+                                    <option value="1">Deceased / Cadaveric Donor (11.3%)</option>
+                                </select>
+                            </div>
+                            <div class="control-field">
+                                <label for="sibling-donor" class="control-label">Sibling Donor?</label>
+                                <select id="sibling-donor" class="control-select">
+                                    <option value="0">No (Unrelated / Non-Sibling)</option>
+                                    <option value="1">Yes (Full Sibling, Protective OR: 0.44)</option>
+                                </select>
+                            </div>
+                            <div class="control-field">
+                                <label for="standard-induction" class="control-label">Induction Regimen</label>
+                                <select id="standard-induction" class="control-select">
+                                    <option value="1">Standard (Basiliximab / IL-2RA)</option>
+                                    <option value="0">Intensified (Anti-Thymocyte Globulin)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid-cols-2" style="margin-top: 12px;">
+                            <div class="control-field">
+                                <label for="pre-creat" class="control-label">Baseline Pre-Tx Creatinine (mg/dL)</label>
+                                <input type="number" id="pre-creat" class="control-input" step="0.1" min="1.0" max="25.0" value="7.5" required>
+                            </div>
+                            <div class="control-field">
+                                <label for="gender" class="control-label">Recipient Gender</label>
+                                <select id="gender" class="control-select">
+                                    <option value="1">Male (78.3%)</option>
+                                    <option value="0">Female (21.7%)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Allele-Level HLA Matching -->
+                    <div class="instrument-group">
+                        <div class="group-kicker">02 // ALLELE-LEVEL HLA MISMATCH BURDEN</div>
+                        <div class="grid-cols-4">
+                            <div class="control-field">
+                                <label for="mm-a" class="control-label">HLA-A</label>
+                                <select id="mm-a" class="control-select" onchange="updateTotalMM()">
+                                    <option value="0">0 MM</option>
+                                    <option value="1" selected>1 MM</option>
+                                    <option value="2">2 MM</option>
+                                </select>
+                            </div>
+                            <div class="control-field">
+                                <label for="mm-b" class="control-label">HLA-B</label>
+                                <select id="mm-b" class="control-select" onchange="updateTotalMM()">
+                                    <option value="0">0 MM</option>
+                                    <option value="1" selected>1 MM</option>
+                                    <option value="2">2 MM</option>
+                                </select>
+                            </div>
+                            <div class="control-field">
+                                <label for="mm-drb1" class="control-label">HLA-DRB1</label>
+                                <select id="mm-drb1" class="control-select" onchange="updateTotalMM()">
+                                    <option value="0">0 MM</option>
+                                    <option value="1" selected>1 MM</option>
+                                    <option value="2">2 MM</option>
+                                </select>
+                            </div>
+                            <div class="control-field">
+                                <label for="total-mm" class="control-label">Total Load</label>
+                                <input type="number" id="total-mm" class="control-input calculated" value="3" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Flow Cytometric Crossmatch -->
+                    <div class="instrument-group">
+                        <div class="group-kicker">03 // PRE-TRANSPLANT FLOW CYTOMETRIC CROSSMATCH (FCXM)</div>
+                        <div class="grid-cols-3">
+                            <div class="control-field">
+                                <label for="mcs-t" class="control-label">T-Cell Channel Shift (T-MCS)</label>
+                                <input type="number" id="mcs-t" class="control-input" step="1" min="0" max="300" value="12" required>
+                                <span class="control-caption">COHORT MEDIAN: 10.0</span>
+                            </div>
+                            <div class="control-field">
+                                <label for="mcs-b" class="control-label">B-Cell Channel Shift (B-MCS)</label>
+                                <input type="number" id="mcs-b" class="control-input" step="1" min="0" max="500" value="48" required>
+                                <span class="control-caption">COHORT MEDIAN: 48.0</span>
+                            </div>
+                            <div class="control-field">
+                                <label for="fcxm-qual" class="control-label">Qualitative FCXM</label>
+                                <select id="fcxm-qual" class="control-select">
+                                    <option value="0">Negative (80% NPV Rule-Out Gate)</option>
+                                    <option value="1">Positive (Heightened Risk)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signature Aurora Action Button -->
+                    <div class="action-cluster">
+                        <button type="button" class="btn-aurora" onclick="calculateRisk()" id="calculate-btn">
+                            <span>Execute Multimodal Evaluation</span>
+                            <span>↗</span>
+                        </button>
+                        <button type="button" class="btn-ghost" onclick="resetDefaults()" id="reset-btn">
+                            Reset Parameters
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right Surface Card: Output & Strata Matrix -->
+            <section class="surface-card">
+                <div class="card-header-bar">
+                    <div>
+                        <h2 class="card-title">Risk Synthesis & Stratification</h2>
+                        <p class="card-subtitle">Predicted probabilistic outcome mapped to PGIMER nomogram quintiles.</p>
+                    </div>
+                    <button class="arrow-btn" type="button" aria-label="Details">↗</button>
+                </div>
+
+                <!-- Primary Statistical Result (Lavender Phosphor Display) -->
+                <div class="result-hero">
+                    <div class="risk-display-num" id="risk-percent">15.4%</div>
+                    <div class="risk-meta-stack">
+                        <div class="quintile-indicator" id="quintile-title">Quintile 3 — Moderate Risk</div>
+                        <div class="quintile-subtext" id="quintile-subtext">Observed Rejection in Cohort: 20.2% (18/89) [95% CI: 13.2%–29.7%]</div>
+                    </div>
+                </div>
+
+                <!-- Stratum Matrix Table -->
+                <div class="matrix-container" id="matrix">
+                    <table class="table-matrix">
+                        <thead>
+                            <tr>
+                                <th>Stratum</th>
+                                <th>Predicted Band</th>
+                                <th>Observed Rate</th>
+                                <th>Wilson 95% CI</th>
+                                <th>Relative Risk</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="row-q1">
+                                <td><span class="stratum-bullet"></span>Q1 Very Low</td>
+                                <td>&lt; 8.3%</td>
+                                <td>5.6% (5/89)</td>
+                                <td>2.4% – 12.5%</td>
+                                <td>1.0× (Baseline)</td>
+                            </tr>
+                            <tr id="row-q2">
+                                <td><span class="stratum-bullet"></span>Q2 Low</td>
+                                <td>8.3% – 13.2%</td>
+                                <td>10.2% (9/88)</td>
+                                <td>5.5% – 18.3%</td>
+                                <td>1.8× Risk</td>
+                            </tr>
+                            <tr id="row-q3" class="active-stratum">
+                                <td><span class="active-pill"></span><strong>Q3 Moderate</strong></td>
+                                <td>13.2% – 18.2%</td>
+                                <td><strong>20.2% (18/89)</strong></td>
+                                <td>13.2% – 29.7%</td>
+                                <td>3.6× Risk</td>
+                            </tr>
+                            <tr id="row-q4">
+                                <td><span class="stratum-bullet"></span>Q4 High</td>
+                                <td>18.2% – 29.2%</td>
+                                <td>21.6% (19/88)</td>
+                                <td>14.3% – 31.3%</td>
+                                <td>3.9× Risk</td>
+                            </tr>
+                            <tr id="row-q5">
+                                <td><span class="stratum-bullet"></span>Q5 Extreme</td>
+                                <td>&gt; 29.2%</td>
+                                <td>36.0% (32/89)</td>
+                                <td>26.8% – 46.3%</td>
+                                <td>6.4× Risk</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Clinical Protocol Panel -->
+                <div class="protocol-panel" id="protocol">
+                    <div class="protocol-header">Clinical Action Protocol (PGIMER Guidelines)</div>
+                    <ul class="protocol-items" id="protocol-items">
+                        <li><strong>Induction Therapy:</strong> Standard IL-2 receptor antagonist (basiliximab) induction is acceptable given intermediate risk.</li>
+                        <li><strong>Calcineurin Inhibitor Target:</strong> Maintain strict tacrolimus trough levels between 8–10 ng/mL through post-transplant month 3.</li>
+                        <li><strong>Biopsy Protocol:</strong> Protocol biopsy at month 6; prompt indication biopsy for unexplained creatinine elevation &gt; 20%.</li>
+                        <li><strong>Humoral Surveillance:</strong> Longitudinal Luminex SAB monitoring at 3, 6, and 12 months for de novo DSA emergence.</li>
+                    </ul>
+                </div>
+
+                <!-- Model Progression Panel -->
+                <div class="progression-panel" id="audit">
+                    <div class="progression-title">Audited Incremental Gain (Identical N = 443 Cohort)</div>
+                    <div class="bar-row">
+                        <div class="bar-meta"><span>Config 1: Clinical Baseline</span><span>AUC: 0.5908</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width: 59.08%;"></div></div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-meta"><span>Config 2: Clinical + HLA Mismatches</span><span>AUC: 0.6719 (+0.0811)</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="width: 67.19%;"></div></div>
+                    </div>
+                    <div class="bar-row">
+                        <div class="bar-meta"><span style="color: var(--color-liquid-mist);">Config 3: Full Multimodal (+ FCXM)</span><span style="color: var(--color-platinum); font-weight: 500;">AUC: 0.6926 (+0.1018, DeLong p = 0.00074)</span></div>
+                        <div class="bar-track"><div class="bar-fill highlight" style="width: 69.26%;"></div></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Geometric Molecular Exploration Card -->
+        <section class="explore-molecule">
+            <div>
+                <div class="section-eyebrow">IMMUNOGENETIC TOPOLOGY</div>
+                <h3 class="molecule-heading">Co-stimulatory & Epitope Networks</h3>
+                <p class="molecule-body">The multimodal model synthesizes three complementary axes of alloimmunity: recipient co-inhibitory checkpoint variations (*PD-L1* rs4143815), donor organ senescence (cellular aging), and sub-CDC flow crossmatch channel shifts.</p>
+                <div class="action-cluster" style="margin-top: 0;">
+                    <a href="processed_data/thesis_chapters/discussion_and_conclusion_chapter.md" target="_blank" class="btn-aurora" style="text-decoration: none;">
+                        <span>Read Thesis Discussion</span>
+                        <span>↗</span>
+                    </a>
+                </div>
+            </div>
+            <div>
+                <!-- Molecular diagram canvas -->
+                <canvas id="molecule-canvas" class="diagram-canvas"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <!-- Recessed Deep Footer -->
+    <footer class="auros-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>PGIMER Immunopathology // Auros Terminal</h3>
+                <p>Doctoral dissertation research: <em>Impact of HLA-epitope analysis and non-HLA immune regulatory genes polymorphism on graft outcome in kidney transplantation</em>.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Doctoral Registry</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Master Cohort (N = 2,220)</a></li>
+                    <li><a href="#">Biopsy Repository (N = 2,492)</a></li>
+                    <li><a href="#">Genotyping Screen (N = 1,586)</a></li>
+                    <li><a href="#">Crossmatch Tests (N = 11,653)</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Governance & Audit</h4>
+                <ul class="footer-links">
+                    <li><a href="#">DeLong Significance (p = 0.00074)</a></li>
+                    <li><a href="#">Fold-Level t-Test (p &lt; 10⁻⁶)</a></li>
+                    <li><a href="#">Hosmer-Lemeshow (p = 0.5132)</a></li>
+                    <li><a href="#">Ethics Committee Approval</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>Candidate: Heera Singh, MSc • Supervisor: Prof. Ranjana Walker Minz, MD</span>
+            <span>Department of Immunopathology, PGIMER Chandigarh • Academic Research Use Only</span>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
