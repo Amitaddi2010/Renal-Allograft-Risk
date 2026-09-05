@@ -1,5 +1,5 @@
 /**
- * AUROS // PGIMER Renal Allograft Risk Terminal
+ * RAMRT // PGIMER Renal Allograft Risk Terminal
  * Core Application Logic & 3D Bioluminescent Visualizations
  * Primary Model: ElasticNet Logistic Regression (Tier 3 Multimodal, N = 443)
  */
@@ -292,7 +292,7 @@ window.addEventListener('resize', () => {
 });
 
 /* ==========================================================================
-   AUROS 3D BIOLUMINESCENT PARTICLE SPHERE VISUAL
+   RAMRT 3D BIOLUMINESCENT PARTICLE SPHERE VISUAL
    Teal-cyan and lavender-pink particles orbiting in 3D space
    ========================================================================== */
 function initParticleSphere() {
@@ -386,7 +386,7 @@ function initParticleSphere() {
 }
 
 /* ==========================================================================
-   AUROS GEOMETRIC MOLECULAR DIAGRAM (Right Column Illustration)
+   RAMRT GEOMETRIC MOLECULAR DIAGRAM (Right Column Illustration)
    White/silver circles and thin connector lines forming abstract topology
    ========================================================================== */
 function initMolecularDiagram() {

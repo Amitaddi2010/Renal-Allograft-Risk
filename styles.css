@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AUROS DESIGN SYSTEM — FULLY RESPONSIVE STYLESHEET
+   RAMRT DESIGN SYSTEM — FULLY RESPONSIVE STYLESHEET
    Theme: Abyssal Terminal with Bioluminescent Data Orbs
    Optimized for: Mobile (320px+), Tablet, Laptop, Desktop & Ultra-wide
    ========================================================================== */
@@ -66,7 +66,7 @@
     --spacing-80: 80px;
     --spacing-120: 120px;
 
-    /* Border Radii (Strict Auros Tokens) */
+    /* Border Radii (Strict RAMRT Tokens) */
     --radius-small: 6px;
     --radius-buttons: 6px;
     --radius-cards: 16px;
@@ -129,7 +129,7 @@ body {
 /* ==========================================================================
    GLOBAL NAVIGATION — RESPONSIVE HAMBURGER + DESKTOP INLINE
    ========================================================================== */
-.auros-nav {
+.ramrt-nav {
     position: sticky;
     top: 0;
     left: 0;
@@ -1051,7 +1051,7 @@ body {
 /* ==========================================================================
    RECESSED DEEP FOOTER
    ========================================================================== */
-.auros-footer {
+.ramrt-footer {
     background-color: var(--color-liquid-deep);
     border-radius: var(--radius-cards) var(--radius-cards) 0 0;
     padding: var(--spacing-80) var(--spacing-48) var(--spacing-48);
@@ -1159,7 +1159,7 @@ body {
         display: block;
     }
 
-    .auros-nav {
+    .ramrt-nav {
         padding: 0 var(--spacing-24);
         height: 64px;
     }
@@ -1218,7 +1218,7 @@ body {
         grid-column: 1 / -1;
     }
 
-    .auros-footer {
+    .ramrt-footer {
         padding: var(--spacing-64) var(--spacing-24) var(--spacing-32);
     }
 
@@ -1258,7 +1258,7 @@ body {
         --section-gap: 40px;
     }
 
-    .auros-nav {
+    .ramrt-nav {
         padding: 0 var(--spacing-16);
         height: 56px;
     }
@@ -1373,7 +1373,7 @@ body {
         gap: 6px;
     }
 
-    .auros-footer {
+    .ramrt-footer {
         padding: var(--spacing-48) var(--spacing-16) var(--spacing-24);
     }
 
@@ -1448,7 +1448,7 @@ body {
         display: none;
     }
 
-    .auros-nav {
+    .ramrt-nav {
         height: 50px;
     }
 
@@ -1524,7 +1524,7 @@ body {
    ========================================================================== */
 @media print {
     #particle-canvas,
-    .auros-nav,
+    .ramrt-nav,
     .hamburger-btn,
     .mobile-nav-overlay,
     .btn-aurora,

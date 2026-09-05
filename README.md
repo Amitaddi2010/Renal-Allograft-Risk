@@ -1,7 +1,7 @@
-# AUROS // Renal Allograft Multimodal Risk Terminal
+# RAMRT // Renal Allograft Multimodal Risk Terminal
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT)
-[![Theme: Auros](https://img.shields.io/badge/Theme-Auros%20Abyssal%20Terminal-003734.svg)](#auros-design-system)
+[![Theme: RAMRT](https://img.shields.io/badge/Theme-RAMRT%20Abyssal%20Terminal-003734.svg)](#ramrt-design-system)
 [![Model: ElasticNet](https://img.shields.io/badge/Model-ElasticNet%20Logistic%20(N%3D443)-38bdf8.svg)](#model-architecture)
 [![Validation: DeLong p < 0.001](https://img.shields.io/badge/DeLong%20Test-p%20%3D%200.00074-10b981.svg)](#validation-and-audited-evidence)
 
@@ -31,9 +31,9 @@ An evidence-based point-of-care clinical risk nomogram and abyssal terminal inte
 
 ---
 
-## 🎨 Auros Design System
+## 🎨 RAMRT Design System
 
-The application is styled following the **Auros Design System** — an abyssal fintech terminal aesthetic:
+The application is styled following the **RAMRT Design System** — an abyssal fintech terminal aesthetic:
 - **Canvas:** Liquid Abyss (`#012624`) with an interactive 3D rotating bioluminescent particle sphere.
 - **Surfaces:** Liquid Deep (`#011d1c`) for recessed panels and Liquid Kelp (`#003734`) for lifted feature cards.
 - **Strict Elevation:** Zero drop shadows or artificial box shadows; depth is communicated through water-immersion surface tiers.
@@ -62,8 +62,8 @@ Open your browser at `http://localhost:8080/`.
 ## 📂 Repository Structure
 
 ```
-├── index.html     # Semantic Auros HTML terminal markup & inputs
-├── styles.css     # Auros design tokens, responsive breakpoints & layout
+├── index.html     # Semantic RAMRT HTML terminal markup & inputs
+├── styles.css     # RAMRT design tokens, responsive breakpoints & layout
 ├── app.js         # ElasticNet model math, 3D particle sphere & molecular canvas
 ├── README.md      # Documentation, clinical context & model metrics
 └── .gitignore     # Git hygiene
