@@ -4,7 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AUROS // PGIMER Renal Allograft Risk Terminal</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20260905_eplet">
+    <style>
+        /* Immediate Critical Nav Styles (Guarantees zero wrapping/stacking regardless of caching) */
+        header.auros-nav {
+            position: sticky !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 72px !important;
+            z-index: 1000 !important;
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 0 40px !important;
+            background: rgba(1, 38, 36, 0.94) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-sizing: border-box !important;
+            flex-wrap: nowrap !important;
+        }
+        .brand-wrapper {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 16px !important;
+            flex-shrink: 0 !important;
+            cursor: pointer;
+        }
+        .nav-links {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 24px !important;
+            flex-wrap: nowrap !important;
+        }
+        .nav-action-wrap {
+            display: flex !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
+        }
+        @media (max-width: 860px) {
+            header.auros-nav {
+                height: auto !important;
+                padding: 12px 20px !important;
+                flex-wrap: wrap !important;
+            }
+            .nav-links {
+                order: 3 !important;
+                width: 100% !important;
+                overflow-x: auto !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
@@ -393,6 +447,38 @@
                             </div>
                         </div>
 
+                        <!-- Section 4: Molecular HLA Eplet Mismatches (Objective 3) -->
+                        <div class="instrument-group">
+                            <div class="group-kicker">04 // MOLECULAR HLA EPLET MISMATCH BURDEN (OBJECTIVE 3)</div>
+                            <div class="grid-cols-3">
+                                <div class="control-field">
+                                    <label for="eplet-class1" class="control-label">Class I Eplet Mismatches</label>
+                                    <input type="number" id="eplet-class1" class="control-input" min="0" max="30" value="1" onchange="updateTotalEplets(); calculateRisk();" oninput="updateTotalEplets(); calculateRisk();" required>
+                                    <span class="control-caption">HLA-A/B/C (MEDIAN: 1.0)</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="eplet-class2" class="control-label">Class II Eplet Mismatches</label>
+                                    <input type="number" id="eplet-class2" class="control-input" min="0" max="30" value="1" onchange="updateTotalEplets(); calculateRisk();" oninput="updateTotalEplets(); calculateRisk();" required>
+                                    <span class="control-caption">HLA-DR/DQ (MEDIAN: 1.0)</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="total-eplets" class="control-label">Total Molecular Load</label>
+                                    <input type="number" id="total-eplets" class="control-input calculated" value="2" readonly>
+                                    <span class="control-caption">CLASS I + II LOAD</span>
+                                </div>
+                            </div>
+                            <div class="control-field" style="margin-top: var(--spacing-16);">
+                                <label for="dominant-eplet" class="control-label">Dominant Epitope Target Specificity</label>
+                                <select id="dominant-eplet" class="control-select" onchange="calculateRisk()">
+                                    <option value="0">Standard / Non-Dominant Repertoire</option>
+                                    <option value="1">Class I Dominant Target (163LG / 65GK Epitope)</option>
+                                    <option value="2">Class II Dominant Target (130Q / 86G2 Epitope)</option>
+                                    <option value="3">Dual Class High-Risk Epitopes (163LG + 130Q)</option>
+                                </select>
+                                <span class="control-caption">PGIMER REFERENCE IMMUNOGENIC EPLET REPERTOIRE</span>
+                            </div>
+                        </div>
+
                         <!-- Actions -->
                         <div class="action-cluster">
                             <button type="button" class="btn-aurora" onclick="calculateRisk()" id="calculate-btn">
@@ -509,6 +595,6 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=20260905_eplet"></script>
 </body>
 </html>

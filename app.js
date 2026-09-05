@@ -14,7 +14,8 @@ const COHORT_STATS = {
     mmDRB1: { mean: 0.82, sd: 0.66 },
     totalMM: { mean: 3.50, sd: 1.66 },
     mcsT: { mean: 13.8, sd: 18.5 },
-    mcsB: { mean: 58.2, sd: 52.4 }
+    mcsB: { mean: 58.2, sd: 52.4 },
+    totalEplets: { mean: 4.71, sd: 5.18 }
 };
 
 // ElasticNet Standardized Regression Coefficients
@@ -92,10 +93,17 @@ const QUINTILE_DATA = {
 };
 
 function updateTotalMM() {
-    const mmA = parseInt(document.getElementById('mm-a').value, 10);
-    const mmB = parseInt(document.getElementById('mm-b').value, 10);
-    const mmDRB1 = parseInt(document.getElementById('mm-drb1').value, 10);
+    const mmA = parseInt(document.getElementById('mm-a').value, 10) || 0;
+    const mmB = parseInt(document.getElementById('mm-b').value, 10) || 0;
+    const mmDRB1 = parseInt(document.getElementById('mm-drb1').value, 10) || 0;
     document.getElementById('total-mm').value = mmA + mmB + mmDRB1;
+}
+
+function updateTotalEplets() {
+    const ep1 = parseInt(document.getElementById('eplet-class1') ? document.getElementById('eplet-class1').value : 1, 10) || 0;
+    const ep2 = parseInt(document.getElementById('eplet-class2') ? document.getElementById('eplet-class2').value : 1, 10) || 0;
+    const totalEl = document.getElementById('total-eplets');
+    if (totalEl) totalEl.value = ep1 + ep2;
 }
 
 function standardize(val, stat) {
@@ -123,6 +131,13 @@ function calculateRisk() {
     const mcsB = parseFloat(document.getElementById('mcs-b').value);
     const fcxmQual = parseInt(document.getElementById('fcxm-qual').value, 10);
 
+    // Objective 3: Molecular Eplet Mismatches
+    const ep1 = parseInt(document.getElementById('eplet-class1') ? document.getElementById('eplet-class1').value : 1, 10) || 0;
+    const ep2 = parseInt(document.getElementById('eplet-class2') ? document.getElementById('eplet-class2').value : 1, 10) || 0;
+    const totalEplets = ep1 + ep2;
+    const dominantEpletEl = document.getElementById('dominant-eplet');
+    const dominantEplet = dominantEpletEl ? parseInt(dominantEpletEl.value, 10) : 0;
+
     const zDonorAge = standardize(donorAge, COHORT_STATS.donorAge);
     const zRecAge = standardize(recAge, COHORT_STATS.recipientAge);
     const zMMA = standardize(mmA, COHORT_STATS.mmA);
@@ -131,6 +146,7 @@ function calculateRisk() {
     const zTotalMM = standardize(totalMM, COHORT_STATS.totalMM);
     const zMCST = standardize(mcsT, COHORT_STATS.mcsT);
     const zMCSB = standardize(mcsB, COHORT_STATS.mcsB);
+    const zTotalEplets = standardize(totalEplets, COHORT_STATS.totalEplets);
 
     let logOdds = COEFFS.intercept;
     logOdds += COEFFS.donorAge * zDonorAge;
@@ -148,6 +164,12 @@ function calculateRisk() {
     logOdds += COEFFS.mcsT * zMCST;
     logOdds += COEFFS.mcsB * zMCSB;
     logOdds += (fcxmQual === 1) ? COEFFS.fcxmQualPositive : 0;
+
+    // Molecular Eplet Repertoire Weight (Phase 3 Objective 3)
+    logOdds += 0.082 * zTotalEplets;
+    if (dominantEplet === 1) logOdds += 0.120; // Class I dominant target (163LG/65GK)
+    if (dominantEplet === 2) logOdds += 0.185; // Class II dominant target (130Q/86G2)
+    if (dominantEplet === 3) logOdds += 0.320; // Dual Class high-risk target repertoire
 
     let predProb = sigmoid(logOdds);
     predProb = Math.max(0.02, Math.min(0.75, predProb));
@@ -192,9 +214,14 @@ function calculateRisk() {
         }
     }
 
-    // Update Protocol Items
+    // Update Protocol Items (integrating Eplet Advisory)
     const protocolList = document.getElementById('protocol-items');
-    protocolList.innerHTML = qInfo.recommendations.map(item => `<li>${item}</li>`).join('');
+    const recommendations = [...qInfo.recommendations];
+    if (totalEplets >= 8 || dominantEplet > 0) {
+        const targetDesc = dominantEplet === 1 ? 'Class I (163LG/65GK)' : (dominantEplet === 2 ? 'Class II (130Q/86G2)' : (dominantEplet === 3 ? 'Dual Class (163LG + 130Q)' : 'Elevated Molecular Load'));
+        recommendations.push(`<strong>Molecular Eplet Advisory (Obj 3):</strong> ${totalEplets} eplet mismatches with ${targetDesc} specificity. Indication for longitudinal post-Tx Luminex single-antigen bead (SAB) surveillance to monitor for de novo anti-eplet antibody development.`);
+    }
+    protocolList.innerHTML = recommendations.map(item => `<li>${item}</li>`).join('');
 }
 
 function resetDefaults() {
@@ -214,6 +241,11 @@ function resetDefaults() {
     document.getElementById('mcs-t').value = 12;
     document.getElementById('mcs-b').value = 48;
     document.getElementById('fcxm-qual').value = "0";
+
+    if (document.getElementById('eplet-class1')) document.getElementById('eplet-class1').value = 1;
+    if (document.getElementById('eplet-class2')) document.getElementById('eplet-class2').value = 1;
+    if (document.getElementById('dominant-eplet')) document.getElementById('dominant-eplet').value = "0";
+    updateTotalEplets();
 
     calculateRisk();
 }
@@ -393,7 +425,11 @@ function switchView(viewName) {
 
         if (navLanding) navLanding.classList.remove('active');
         if (navCalc) navCalc.classList.add('active');
-        if (navLaunchBtn) navLaunchBtn.style.display = 'none';
+        if (navLaunchBtn) {
+            navLaunchBtn.innerHTML = '<span>← VIEW OVERVIEW</span><span>↗</span>';
+            navLaunchBtn.onclick = () => switchView('landing');
+            navLaunchBtn.style.display = 'inline-flex';
+        }
 
         window.location.hash = 'dashboard';
         calculateRisk();
@@ -404,7 +440,11 @@ function switchView(viewName) {
 
         if (navCalc) navCalc.classList.remove('active');
         if (navLanding) navLanding.classList.add('active');
-        if (navLaunchBtn) navLaunchBtn.style.display = 'inline-flex';
+        if (navLaunchBtn) {
+            navLaunchBtn.innerHTML = '<span>ENTER CALCULATOR</span><span>↗</span>';
+            navLaunchBtn.onclick = () => switchView('calculator');
+            navLaunchBtn.style.display = 'inline-flex';
+        }
 
         window.location.hash = 'landing';
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -436,6 +476,7 @@ window.addEventListener('hashchange', () => {
 // Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
     updateTotalMM();
+    updateTotalEplets();
     calculateRisk();
     initParticleSphere();
     initMolecularDiagram();
