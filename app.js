@@ -222,6 +222,15 @@ function calculateRisk() {
         recommendations.push(`<strong>Molecular Eplet Advisory (Obj 3):</strong> ${totalEplets} eplet mismatches with ${targetDesc} specificity. Indication for longitudinal post-Tx Luminex single-antigen bead (SAB) surveillance to monitor for de novo anti-eplet antibody development.`);
     }
     protocolList.innerHTML = recommendations.map(item => `<li>${item}</li>`).join('');
+
+    // Update Sidebar Badges in Real-Time
+    const sideRiskBadge = document.getElementById('side-risk-badge');
+    const sideStratumBadge = document.getElementById('side-stratum-badge');
+    if (sideRiskBadge) sideRiskBadge.textContent = percentStr;
+    if (sideStratumBadge) {
+        const shortName = qInfo.title.split('—')[1]?.trim() || `Quintile ${quintile}`;
+        sideStratumBadge.textContent = `Q${quintile} ${shortName}`;
+    }
 }
 
 function resetDefaults() {
@@ -248,6 +257,114 @@ function resetDefaults() {
     updateTotalEplets();
 
     calculateRisk();
+}
+
+/**
+ * Quick Clinical Scenario Presets (Standard Living Donor, Sensitized High Risk, Sibling Low Risk)
+ */
+function applyPreset(presetName) {
+    if (presetName === 'median') {
+        resetDefaults();
+        return;
+    }
+
+    if (presetName === 'sensitized') {
+        // High Risk Sensitized Archetype (Q5 Extreme)
+        document.getElementById('recipient-age').value = 44;
+        document.getElementById('donor-age').value = 58;
+        document.getElementById('gender').value = "1";
+        document.getElementById('pre-creat').value = 9.4;
+        document.getElementById('donor-source').value = "1"; // Deceased
+        document.getElementById('sibling-donor').value = "0";
+        document.getElementById('standard-induction').value = "1";
+
+        document.getElementById('mm-a').value = "2";
+        document.getElementById('mm-b').value = "2";
+        document.getElementById('mm-drb1').value = "2";
+        updateTotalMM();
+
+        document.getElementById('mcs-t').value = 28;
+        document.getElementById('mcs-b').value = 110;
+        document.getElementById('fcxm-qual').value = "1"; // Positive FCXM
+
+        if (document.getElementById('eplet-class1')) document.getElementById('eplet-class1').value = 5;
+        if (document.getElementById('eplet-class2')) document.getElementById('eplet-class2').value = 6;
+        if (document.getElementById('dominant-eplet')) document.getElementById('dominant-eplet').value = "3"; // Dual Class 163LG + 130Q
+        updateTotalEplets();
+
+        calculateRisk();
+        return;
+    }
+
+    if (presetName === 'low_risk_sibling') {
+        // Optimal Low Risk Sibling Archetype (Q1 Very Low)
+        document.getElementById('recipient-age').value = 30;
+        document.getElementById('donor-age').value = 32;
+        document.getElementById('gender').value = "1";
+        document.getElementById('pre-creat').value = 6.2;
+        document.getElementById('donor-source').value = "0"; // Living-related
+        document.getElementById('sibling-donor').value = "1"; // Full Sibling
+        document.getElementById('standard-induction').value = "1";
+
+        document.getElementById('mm-a').value = "0";
+        document.getElementById('mm-b').value = "0";
+        document.getElementById('mm-drb1').value = "0";
+        updateTotalMM();
+
+        document.getElementById('mcs-t').value = 6;
+        document.getElementById('mcs-b').value = 22;
+        document.getElementById('fcxm-qual').value = "0"; // Negative FCXM
+
+        if (document.getElementById('eplet-class1')) document.getElementById('eplet-class1').value = 0;
+        if (document.getElementById('eplet-class2')) document.getElementById('eplet-class2').value = 0;
+        if (document.getElementById('dominant-eplet')) document.getElementById('dominant-eplet').value = "0";
+        updateTotalEplets();
+
+        calculateRisk();
+        return;
+    }
+}
+
+/**
+ * Mobile / Off-Canvas Sidebar Navigation Drawer
+ */
+function toggleSidebar(forceState) {
+    const sidebar = document.getElementById('dash-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar) return;
+
+    const isOpen = sidebar.classList.contains('open');
+    const nextState = (forceState !== undefined) ? forceState : !isOpen;
+
+    if (nextState) {
+        sidebar.classList.add('open');
+        if (backdrop) backdrop.classList.add('open');
+        document.body.style.overflow = window.innerWidth <= 1080 ? 'hidden' : '';
+    } else {
+        sidebar.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+}
+
+/**
+ * Smooth Section Quick-Jump & Active Link Highlighting
+ */
+function navToSection(sectionId) {
+    const target = document.getElementById(sectionId);
+    if (target) {
+        const yOffset = -90;
+        const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+
+        document.querySelectorAll('.sidebar-nav-item').forEach(el => el.classList.remove('active'));
+        const activeLink = document.querySelector(`a[onclick*="${sectionId}"]`);
+        if (activeLink) activeLink.classList.add('active');
+
+        if (window.innerWidth <= 1080) {
+            toggleSidebar(false);
+        }
+    }
 }
 
 /* ==========================================================================
@@ -473,6 +590,43 @@ window.addEventListener('hashchange', () => {
     }
 });
 
+function initScrollSpy() {
+    const sectionIds = [
+        'sec-clinical',
+        'sec-hla',
+        'sec-fcxm',
+        'sec-eplet',
+        'sec-synthesis',
+        'sec-quintiles',
+        'sec-protocol',
+        'sec-progression'
+    ];
+
+    window.addEventListener('scroll', () => {
+        const calcView = document.getElementById('calculator-view');
+        if (!calcView || !calcView.classList.contains('active-view')) return;
+
+        const scrollPos = window.scrollY + 140;
+        let currentSectionId = '';
+
+        for (let i = 0; i < sectionIds.length; i++) {
+            const el = document.getElementById(sectionIds[i]);
+            if (el) {
+                const top = el.offsetTop;
+                if (scrollPos >= top) {
+                    currentSectionId = sectionIds[i];
+                }
+            }
+        }
+
+        if (currentSectionId) {
+            document.querySelectorAll('.sidebar-nav-item').forEach(item => item.classList.remove('active'));
+            const activeItem = document.querySelector(`a[onclick*="${currentSectionId}"]`);
+            if (activeItem) activeItem.classList.add('active');
+        }
+    }, { passive: true });
+}
+
 // Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
     updateTotalMM();
@@ -480,6 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
     calculateRisk();
     initParticleSphere();
     initMolecularDiagram();
+    initScrollSpy();
 
     // Check initial route
     if (window.location.hash === '#dashboard') {
@@ -488,4 +643,5 @@ document.addEventListener('DOMContentLoaded', () => {
         switchView('landing');
     }
 });
+
 
