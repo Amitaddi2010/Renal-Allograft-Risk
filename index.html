@@ -129,7 +129,7 @@
 
                 <div class="surface-card" style="padding: var(--spacing-28);">
                     <div class="matrix-container">
-                        <table class="table-matrix">
+                        <table class="table-matrix evidence-table">
                             <thead>
                                 <tr>
                                     <th>Objective #</th>
@@ -178,23 +178,23 @@
                                 <tr>
                                     <td><strong>Obj 2×HLA</strong></td>
                                     <td>Gene–HLA Epistatic Synergy</td>
-                                    <td>N = 49 Triply Linked</td>
+                                    <td>N = 215 / 192</td>
                                     <td><span class="status-tag tag-null">Tested / Null</span></td>
-                                    <td>Attenuates to null under biopsy gold-standard adjudication (OR = 3.03, p = 0.1343; interaction p = 0.2438).</td>
+                                    <td>Interaction tests non-significant (*PD-L1* × DRB1 p = 0.941; *CTLA4* × DRB1 p = 0.584).</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Obj 3</strong></td>
-                                    <td>PGIMER Eplet Catalog</td>
-                                    <td>N = 1,435 Evaluations</td>
-                                    <td><span class="status-tag tag-confirmed">Confirmed</span></td>
-                                    <td>Established 71 Class I and 76 Class II verified eplets; clinical sensitization rose 16.8% → 66.5%.</td>
+                                    <td>Class I/II Eplet Repertoire</td>
+                                    <td>N = 1,435 Eplets</td>
+                                    <td><span class="status-tag tag-confirmed">Cataloged</span></td>
+                                    <td>Identified 71 Class I & 76 Class II PGIMER immunogenic eplets (163LG & 130Q dominant targets).</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Phase 4</strong></td>
-                                    <td>Multimodal Risk Prediction</td>
+                                    <td><strong>Obj 4</strong></td>
+                                    <td>Multimodal Risk Nomogram</td>
                                     <td>N = 443 Complete</td>
                                     <td><span class="status-tag tag-confirmed">Confirmed</span></td>
-                                    <td>+0.1018 AUC gain over clinical baseline (DeLong p = 0.00074; 25-fold paired t-test p = 2.45 × 10⁻⁷).</td>
+                                    <td>ROC-AUC 0.6926 (+0.1018 over clinical alone, DeLong p = 0.00074). 6.4× monotonic gradient (5.6% → 36.0%).</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -202,15 +202,15 @@
                 </div>
             </section>
 
-            <!-- Pre-Transplant Launch Banner -->
+            <!-- Pre-Transplant Calculator Launch Banner Card -->
             <section class="launch-banner-card">
                 <div>
-                    <div class="section-eyebrow" style="margin-bottom: 8px;">CLINICAL DECISION SUPPORT</div>
-                    <h2 class="card-title" style="font-size: 28px; margin-bottom: 8px;">Evaluate a Prospective Recipient.</h2>
-                    <p class="card-subtitle" style="max-width: 600px;">Input clinical demographics, allele-level HLA mismatches, and flow crossmatch channel shifts to compute personalized acute rejection probabilities and nomogram risk quintiles.</p>
+                    <span class="group-kicker">03 // CLINICAL TRANSLATION</span>
+                    <h2 class="section-heading-sm">Ready for Patient Evaluation?</h2>
+                    <p class="section-desc">Launch the interactive clinical risk terminal to calculate predicted 1-year rejection probability and nomogram quintile placement.</p>
                 </div>
                 <button type="button" class="btn-aurora" onclick="switchView('calculator')" style="flex-shrink: 0;">
-                    <span>Launch Calculator Dashboard</span>
+                    <span>Launch Terminal Dashboard</span>
                     <span>↗</span>
                 </button>
             </section>
@@ -292,44 +292,44 @@
                                     <input type="number" id="donor-age" class="control-input" min="18" max="75" value="45" required>
                                     <span class="control-caption">PRIMARY SURVIVAL HAZARD (HR: 1.049/YR)</span>
                                 </div>
-                            </div>
-
-                            <div class="grid-cols-3">
-                                <div class="control-field">
-                                    <label for="donor-source" class="control-label">Donor Source</label>
-                                    <select id="donor-source" class="control-select">
-                                        <option value="0">Living-Related Donor (88.7%)</option>
-                                        <option value="1">Deceased / Cadaveric Donor (11.3%)</option>
-                                    </select>
-                                </div>
-                                <div class="control-field">
-                                    <label for="sibling-donor" class="control-label">Sibling Donor?</label>
-                                    <select id="sibling-donor" class="control-select">
-                                        <option value="0">No (Unrelated / Non-Sibling)</option>
-                                        <option value="1">Yes (Full Sibling, Protective OR: 0.44)</option>
-                                    </select>
-                                </div>
-                                <div class="control-field">
-                                    <label for="standard-induction" class="control-label">Induction Regimen</label>
-                                    <select id="standard-induction" class="control-select">
-                                        <option value="1">Standard (Basiliximab / IL-2RA)</option>
-                                        <option value="0">Intensified (Anti-Thymocyte Globulin)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="grid-cols-2" style="margin-top: 12px;">
-                                <div class="control-field">
-                                    <label for="pre-creat" class="control-label">Baseline Pre-Tx Creatinine (mg/dL)</label>
-                                    <input type="number" id="pre-creat" class="control-input" step="0.1" min="1.0" max="25.0" value="7.5" required>
-                                </div>
                                 <div class="control-field">
                                     <label for="gender" class="control-label">Recipient Gender</label>
                                     <select id="gender" class="control-select">
                                         <option value="1">Male (78.3%)</option>
                                         <option value="0">Female (21.7%)</option>
                                     </select>
+                                    <span class="control-caption">COHORT DISTRIBUTION</span>
                                 </div>
+                                <div class="control-field">
+                                    <label for="pre-creat" class="control-label">Baseline Pre-Tx Creatinine (mg/dL)</label>
+                                    <input type="number" id="pre-creat" class="control-input" step="0.1" min="1.0" max="25.0" value="7.5" required>
+                                    <span class="control-caption">COHORT MEAN: 7.5 MG/DL</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="donor-source" class="control-label">Donor Source</label>
+                                    <select id="donor-source" class="control-select">
+                                        <option value="0">Living-Related (88.7%)</option>
+                                        <option value="1">Deceased / Cadaveric (11.3%)</option>
+                                    </select>
+                                    <span class="control-caption">ALLOGRAFT SOURCE</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="sibling-donor" class="control-label">Sibling Donor?</label>
+                                    <select id="sibling-donor" class="control-select">
+                                        <option value="0">Unrelated / Non-Sibling</option>
+                                        <option value="1">Full Sibling (OR: 0.44)</option>
+                                    </select>
+                                    <span class="control-caption">HISTOCOMPATIBILITY BENEFIT</span>
+                                </div>
+                            </div>
+
+                            <div class="control-field" style="margin-top: var(--spacing-16);">
+                                <label for="standard-induction" class="control-label">Induction Regimen</label>
+                                <select id="standard-induction" class="control-select">
+                                    <option value="1">Standard Induction (Basiliximab / IL-2RA)</option>
+                                    <option value="0">Intensified Induction (Anti-Thymocyte Globulin / ATG)</option>
+                                </select>
+                                <span class="control-caption">IMMUNOSUPPRESSIVE REGIMEN</span>
                             </div>
                         </div>
 
@@ -371,7 +371,7 @@
                         <!-- Section 3: Flow Cytometric Crossmatch -->
                         <div class="instrument-group">
                             <div class="group-kicker">03 // PRE-TRANSPLANT FLOW CYTOMETRIC CROSSMATCH (FCXM)</div>
-                            <div class="grid-cols-3">
+                            <div class="grid-cols-2">
                                 <div class="control-field">
                                     <label for="mcs-t" class="control-label">T-Cell Channel Shift (T-MCS)</label>
                                     <input type="number" id="mcs-t" class="control-input" step="1" min="0" max="300" value="12" required>
@@ -382,13 +382,14 @@
                                     <input type="number" id="mcs-b" class="control-input" step="1" min="0" max="500" value="48" required>
                                     <span class="control-caption">COHORT MEDIAN: 48.0</span>
                                 </div>
-                                <div class="control-field">
-                                    <label for="fcxm-qual" class="control-label">Qualitative FCXM</label>
-                                    <select id="fcxm-qual" class="control-select">
-                                        <option value="0">Negative (80% NPV Rule-Out Gate)</option>
-                                        <option value="1">Positive (Heightened Risk)</option>
-                                    </select>
-                                </div>
+                            </div>
+                            <div class="control-field" style="margin-top: var(--spacing-16);">
+                                <label for="fcxm-qual" class="control-label">Qualitative FCXM Interpretation</label>
+                                <select id="fcxm-qual" class="control-select">
+                                    <option value="0">Negative FCXM (82.1% Specificity, 79.6% NPV Rule-Out Gate)</option>
+                                    <option value="1">Positive FCXM (Sub-CDC Channel Shift / Heightened Risk)</option>
+                                </select>
+                                <span class="control-caption">CELLULAR FLOW CROSSMATCH STATUS</span>
                             </div>
                         </div>
 
@@ -426,7 +427,7 @@
 
                     <!-- Stratum Matrix Table -->
                     <div class="matrix-container" id="matrix">
-                        <table class="table-matrix">
+                        <table class="table-matrix quintile-table">
                             <thead>
                                 <tr>
                                     <th>Stratum</th>
