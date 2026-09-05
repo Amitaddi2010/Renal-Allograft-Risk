@@ -4,78 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AUROS // PGIMER Renal Allograft Risk Terminal</title>
-    <link rel="stylesheet" href="styles.css?v=20260905_eplet">
-    <style>
-        /* Immediate Critical Nav Styles (Guarantees zero wrapping/stacking regardless of caching) */
-        header.auros-nav {
-            position: sticky !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 72px !important;
-            z-index: 1000 !important;
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            padding: 0 40px !important;
-            background: rgba(1, 38, 36, 0.94) !important;
-            backdrop-filter: blur(16px) !important;
-            -webkit-backdrop-filter: blur(16px) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-            box-sizing: border-box !important;
-            flex-wrap: nowrap !important;
-        }
-        .brand-wrapper {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            gap: 16px !important;
-            flex-shrink: 0 !important;
-            cursor: pointer;
-        }
-        .nav-links {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            gap: 24px !important;
-            flex-wrap: nowrap !important;
-        }
-        .nav-action-wrap {
-            display: flex !important;
-            align-items: center !important;
-            flex-shrink: 0 !important;
-        }
-        @media (max-width: 860px) {
-            header.auros-nav {
-                height: auto !important;
-                padding: 12px 20px !important;
-                flex-wrap: wrap !important;
-            }
-            .nav-links {
-                order: 3 !important;
-                width: 100% !important;
-                overflow-x: auto !important;
-            }
-        }
-    </style>
+    <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
+    <link rel="stylesheet" href="styles.css?v=20260905_responsive">
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
     <canvas id="particle-canvas"></canvas>
 
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="nav-overlay" onclick="closeNav()"></div>
+
     <!-- Global Navigation Header -->
     <header class="auros-nav">
-        <div class="brand-wrapper" onclick="switchView('landing')" style="cursor: pointer;">
+        <div class="brand-wrapper" onclick="switchView('landing')">
             <div class="brand-symbol"></div>
             <span class="brand-wordmark">AUROS // IMMUNOPATHOLOGY</span>
         </div>
 
-        <nav class="nav-links">
-            <button type="button" class="nav-link active" id="nav-btn-landing" onclick="switchView('landing')">OVERVIEW</button>
-            <button type="button" class="nav-link" id="nav-btn-evidence" onclick="scrollToSection('evidence-section')">EVIDENCE AUDIT</button>
-            <button type="button" class="nav-link" id="nav-btn-domains" onclick="scrollToSection('domains-section')">IMMUNE DOMAINS</button>
-            <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator')">CALCULATOR</button>
+        <nav class="nav-links" id="nav-links">
+            <button type="button" class="nav-link active" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">OVERVIEW</button>
+            <button type="button" class="nav-link" id="nav-btn-evidence" onclick="scrollToSection('evidence-section'); closeNav();">EVIDENCE AUDIT</button>
+            <button type="button" class="nav-link" id="nav-btn-domains" onclick="scrollToSection('domains-section'); closeNav();">IMMUNE DOMAINS</button>
+            <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); closeNav();">CALCULATOR</button>
         </nav>
 
         <div class="nav-action-wrap">
@@ -84,6 +34,13 @@
                 <span>↗</span>
             </button>
         </div>
+
+        <!-- Hamburger Button (visible on tablet/mobile) -->
+        <button type="button" class="hamburger-btn" id="hamburger-btn" onclick="toggleNav()" aria-label="Toggle navigation menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
     </header>
 
     <!-- ==========================================================================
@@ -595,6 +552,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260905_eplet"></script>
+    <script src="app.js?v=20260905_responsive"></script>
 </body>
 </html>

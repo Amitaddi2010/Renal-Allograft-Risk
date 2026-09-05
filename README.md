@@ -65,6 +65,9 @@ Open your browser at `http://localhost:8080/`.
 ├── index.html     # Semantic Auros HTML terminal markup & inputs
 ├── styles.css     # Auros design tokens, responsive breakpoints & layout
 ├── app.js         # ElasticNet model math, 3D particle sphere & molecular canvas
+├── docs/          # Publication manuscripts (.docx & .md) and 300 DPI figures
+│   ├── manuscripts/ # Manuscript 1 & Manuscript 2 (.docx & .md)
+│   └── figures/     # Figures 1–5 in 300 DPI PNG & vector PDF
 ├── README.md      # Documentation, clinical context & model metrics
 └── .gitignore     # Git hygiene
 ```

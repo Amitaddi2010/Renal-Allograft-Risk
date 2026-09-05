@@ -165,12 +165,7 @@ function calculateRisk() {
     logOdds += COEFFS.mcsB * zMCSB;
     logOdds += (fcxmQual === 1) ? COEFFS.fcxmQualPositive : 0;
 
-    // Molecular Eplet Repertoire Weight (Phase 3 Objective 3)
-    logOdds += 0.082 * zTotalEplets;
-    if (dominantEplet === 1) logOdds += 0.120; // Class I dominant target (163LG/65GK)
-    if (dominantEplet === 2) logOdds += 0.185; // Class II dominant target (130Q/86G2)
-    if (dominantEplet === 3) logOdds += 0.320; // Dual Class high-risk target repertoire
-
+    // Primary Multimodal ElasticNet Probability (Strictly Locked Cohort N = 443)
     let predProb = sigmoid(logOdds);
     predProb = Math.max(0.02, Math.min(0.75, predProb));
     const percentStr = (predProb * 100).toFixed(1) + "%";
@@ -219,7 +214,7 @@ function calculateRisk() {
     const recommendations = [...qInfo.recommendations];
     if (totalEplets >= 8 || dominantEplet > 0) {
         const targetDesc = dominantEplet === 1 ? 'Class I (163LG/65GK)' : (dominantEplet === 2 ? 'Class II (130Q/86G2)' : (dominantEplet === 3 ? 'Dual Class (163LG + 130Q)' : 'Elevated Molecular Load'));
-        recommendations.push(`<strong>Molecular Eplet Advisory (Obj 3):</strong> ${totalEplets} eplet mismatches with ${targetDesc} specificity. Indication for longitudinal post-Tx Luminex single-antigen bead (SAB) surveillance to monitor for de novo anti-eplet antibody development.`);
+        recommendations.push(`<strong>Molecular Eplet Advisory (Objective 3):</strong> ${totalEplets} total eplet mismatches with ${targetDesc} specificity. <em>Clinical Context:</em> In the audited PGIMER cohort, numerical eplet burden alone does not predict acute cellular rejection (AUC = 0.32–0.50), but guides longitudinal Luminex single-antigen bead (SAB) surveillance at 3, 6, and 12 months to detect de novo anti-eplet DSA development.`);
     }
     protocolList.innerHTML = recommendations.map(item => `<li>${item}</li>`).join('');
 }
@@ -251,6 +246,52 @@ function resetDefaults() {
 }
 
 /* ==========================================================================
+   RESPONSIVE HAMBURGER NAVIGATION CONTROLLER
+   ========================================================================== */
+function toggleNav() {
+    const navLinks = document.getElementById('nav-links');
+    const hamburger = document.getElementById('hamburger-btn');
+    const overlay = document.getElementById('nav-overlay');
+    
+    if (navLinks && hamburger) {
+        const isOpen = navLinks.classList.toggle('open');
+        hamburger.classList.toggle('active', isOpen);
+        if (overlay) {
+            if (isOpen) {
+                overlay.style.display = 'block';
+                requestAnimationFrame(() => overlay.classList.add('visible'));
+            } else {
+                overlay.classList.remove('visible');
+                setTimeout(() => { overlay.style.display = 'none'; }, 300);
+            }
+        }
+        // Prevent body scroll when drawer is open
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+}
+
+function closeNav() {
+    const navLinks = document.getElementById('nav-links');
+    const hamburger = document.getElementById('hamburger-btn');
+    const overlay = document.getElementById('nav-overlay');
+    
+    if (navLinks) navLinks.classList.remove('open');
+    if (hamburger) hamburger.classList.remove('active');
+    if (overlay) {
+        overlay.classList.remove('visible');
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    }
+    document.body.style.overflow = '';
+}
+
+// Close drawer on window resize past mobile breakpoint
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 860) {
+        closeNav();
+    }
+});
+
+/* ==========================================================================
    AUROS 3D BIOLUMINESCENT PARTICLE SPHERE VISUAL
    Teal-cyan and lavender-pink particles orbiting in 3D space
    ========================================================================== */
@@ -267,8 +308,10 @@ function initParticleSphere() {
         height = canvas.height = window.innerHeight;
     });
 
-    const numParticles = 650;
-    const radius = Math.min(width, height) * 0.38;
+    // Reduce particles on mobile for performance
+    const isMobile = window.innerWidth < 640;
+    const numParticles = isMobile ? 300 : 650;
+    const radius = Math.min(width, height) * (isMobile ? 0.32 : 0.38);
     const particles = [];
 
     // Distribute particles across sphere surface via Fibonacci lattice
@@ -291,8 +334,8 @@ function initParticleSphere() {
     function render() {
         ctx.clearRect(0, 0, width, height);
 
-        // Center orb in top right / hero quadrant
-        const centerX = width * 0.65;
+        // Center orb — shift towards right on desktop, center on mobile
+        const centerX = width < 640 ? width * 0.5 : width * 0.65;
         const centerY = height * 0.42;
 
         const cosX = Math.cos(angleX);
