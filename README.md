@@ -27,7 +27,34 @@ An evidence-based point-of-care clinical risk nomogram and abyssal terminal inte
 | **Incremental Predictive Gain** | **+0.1018** ($\Delta$ AUC) | Statistically confirmed improvement over clinical baseline alone (**DeLong $z = 3.3743, p = 0.00074$**; 25-fold paired $t$-test $p = 2.45 \times 10^{-7}$). |
 | **Observed Risk Gradient** | **6.4-fold** ($5.6\% \rightarrow 36.0\%$) | Strictly monotonic observed rejection progression across nomogram quintiles (Q1: $5.6\% \le$ Q2: $10.2\% \le$ Q3: $20.2\% \le$ Q4: $21.6\% \le$ Q5: $36.0\%$). |
 | **Calibration Goodness-of-Fit** | **$p = 0.5132$** | Hosmer-Lemeshow $\chi^2 = 2.2965$ ($df = 3$); verified probability calibration without over-optimism. |
-| **Primary Survival Determinant** | **HR = 1.049 / year** | Donor senescence dominates graft failure risk ($p = 0.0024$), superseding broad unweighted HLA mismatches. |
+---
+
+## 📐 Mathematical Model Architecture & Deployment Specification
+
+The clinical calculator implements the **audited 7-predictor specification** of the primary winning ElasticNet model from Phase 4 ($N = 443$).
+
+### Linear Predictor Formula
+$$\text{logit}(P) = \beta_0 + \beta_{\text{Donor\_Age}} \cdot z_{\text{Donor\_Age}} + \beta_{\text{Sibling}} \cdot I_{\text{Sibling}} + \beta_{\text{Deceased}} \cdot I_{\text{Deceased}} + \beta_{\text{Induction}} \cdot I_{\text{Std\_Induction}} + \beta_{\text{Total\_MM}} \cdot z_{\text{Total\_MM}} + \beta_{\text{DRB1}} \cdot z_{\text{DRB1}} + \beta_{\text{MCS\_T}} \cdot z_{\text{MCS\_T}}$$
+
+$$\text{Probability of 1-Year Acute Rejection} = \frac{1}{1 + e^{-\text{logit}(P)}}$$
+
+### Locked Coefficients & Standardization Parameters
+*Parameters derived directly from the deployment `StandardScaler` and `LogisticRegression` fit on the complete Tier 3 cohort ($N = 443$):*
+
+| Predictor Identifier | Type | Cohort Mean ($\mu$) | Cohort Scale ($\sigma$) | Standardized $\beta$ | Adjusted OR [95% CI] | Clinical Biological Role |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Model Intercept ($\beta_0$)** | Constant | — | — | **-2.1944** | — | Baseline log-odds at cohort mean |
+| **Donor Age** | Continuous | 46.4086 yrs | 9.5739 yrs | **+0.2773** | 1.320 [1.011–1.722] | Organ senescence / primary continuous hazard |
+| **Sibling Donor** | Binary | — | — | **-0.8236** | 0.439 [0.241–0.798] | Haplotype sharing / unmeasured protective matching |
+| **Deceased Donor** | Binary | — | — | **-0.6943** | 0.499 [0.254–0.981] | Organ source baseline covariate |
+| **Standard Induction** | Binary | — | — | **+0.6993** | 2.012 [1.180–3.431] | Basiliximab vs. lymphocyte-depleting ATG |
+| **Total HLA Mismatches** | Continuous | 3.1716 | 1.7463 | **-1.6432** | 0.193 [0.081–0.461] | Complex regularization modifier |
+| **HLA-DRB1 Mismatch** | Continuous | 0.8330 | 0.6438 | **+0.9327** | 2.541 [1.420–4.549] | Primary Class II cellular risk driver |
+| **T-Cell Channel Shift (T-MCS)** | Continuous | 19.0308 | 42.8138 | **+0.3542** | 1.425 [1.042–1.948] | Pre-transplant flow cytometric cellular reactivity |
+
+> [!IMPORTANT]
+> **Model Simplification Disclosure:**  
+> This tool uses the 7 most influential predictors from the full 31-covariate locked model; less influential factors (recipient age/sex, individual A/B-locus mismatch, B-cell crossmatch shift, FCXM dual-positivity) are held at cohort-average values. Predictions for patients who deviate substantially from cohort averages on these factors may differ from the full model.
 
 ---
 

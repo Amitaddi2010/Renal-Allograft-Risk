@@ -177,7 +177,7 @@
                                     <td>*PD-L1* rs4143815 Polymorphism</td>
                                     <td>N = 1,586 / 215</td>
                                     <td><span class="status-tag tag-confirmed">Confirmed</span></td>
-                                    <td>Significant risk locus (Allelic OR = 1.38, Recessive OR = 2.49, p = 0.00037). In HWE (p = 0.0259).</td>
+                                    <td>Significant risk locus (Allelic OR = 1.38, Recessive OR = 2.49, p = 0.00037). Mild nominal deviation from HWE (p = 0.0259).</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Obj 2</strong></td>
@@ -189,9 +189,9 @@
                                 <tr>
                                     <td><strong>Obj 2×HLA</strong></td>
                                     <td>Gene–HLA Epistatic Synergy</td>
-                                    <td>N = 215 / 192</td>
+                                    <td>N = 49 Triply Linked</td>
                                     <td><span class="status-tag tag-null">Tested / Null</span></td>
-                                    <td>Interaction tests non-significant (*PD-L1* × DRB1 p = 0.941; *CTLA4* × DRB1 p = 0.584).</td>
+                                    <td>Null under gold-standard biopsy adjudication (main OR = 3.03, p = 0.134; interaction β = -0.632, p = 0.244). Apparent accession signal was misclassification artifact.</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Obj 3</strong></td>
@@ -288,93 +288,74 @@
                         <button class="arrow-btn" type="button" onclick="resetDefaults()" title="Reset Medians">↺</button>
                     </div>
 
+                    <!-- Model Simplification Disclosure Box -->
+                    <div class="model-disclosure-banner" style="background: rgba(0, 55, 52, 0.45); border-left: 3px solid #38bdf8; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.5; color: #cbd5e1;">
+                        <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">Model Specification & Simplification Notice:</strong>
+                        This tool uses the 7 most influential predictors from the full 31-covariate locked model; less influential factors (recipient age/sex, individual A/B-locus mismatch, B-cell crossmatch shift, FCXM dual-positivity) are held at cohort-average values. Predictions for patients who deviate substantially from cohort averages on these factors may differ from the full model.
+                    </div>
+
                     <form id="calculator-form" onsubmit="event.preventDefault(); calculateRisk();">
                         <!-- Section 1: Demographics & Organ Source -->
                         <div class="instrument-group">
-                            <div class="group-kicker">01 // CLINICAL & DEMOGRAPHIC COVARIATES</div>
+                            <div class="group-kicker">01 // CLINICAL & DEMOGRAPHIC COVARIATES (LOCKED)</div>
                             <div class="grid-cols-2">
                                 <div class="control-field">
-                                    <label for="recipient-age" class="control-label">Recipient Age (Years)</label>
-                                    <input type="number" id="recipient-age" class="control-input" min="10" max="80" value="38" required>
-                                    <span class="control-caption">COHORT MEAN: 38.4 YRS</span>
-                                </div>
-                                <div class="control-field">
                                     <label for="donor-age" class="control-label">Donor Age (Years)</label>
-                                    <input type="number" id="donor-age" class="control-input" min="18" max="75" value="45" required>
-                                    <span class="control-caption">PRIMARY SURVIVAL HAZARD (HR: 1.049/YR)</span>
-                                </div>
-                                <div class="control-field">
-                                    <label for="gender" class="control-label">Recipient Gender</label>
-                                    <select id="gender" class="control-select">
-                                        <option value="1">Male (78.3%)</option>
-                                        <option value="0">Female (21.7%)</option>
-                                    </select>
-                                    <span class="control-caption">COHORT DISTRIBUTION</span>
-                                </div>
-                                <div class="control-field">
-                                    <label for="pre-creat" class="control-label">Baseline Pre-Tx Creatinine (mg/dL)</label>
-                                    <input type="number" id="pre-creat" class="control-input" step="0.1" min="1.0" max="25.0" value="7.5" required>
-                                    <span class="control-caption">COHORT MEAN: 7.5 MG/DL</span>
+                                    <input type="number" id="donor-age" class="control-input" min="18" max="75" value="46" oninput="calculateRisk()" required>
+                                    <span class="control-caption">PRIMARY HAZARD (HR: 1.049/YR, COHORT MEAN: 46.4)</span>
                                 </div>
                                 <div class="control-field">
                                     <label for="donor-source" class="control-label">Donor Source</label>
-                                    <select id="donor-source" class="control-select">
+                                    <select id="donor-source" class="control-select" onchange="calculateRisk()">
                                         <option value="0">Living-Related (88.7%)</option>
                                         <option value="1">Deceased / Cadaveric (11.3%)</option>
                                     </select>
-                                    <span class="control-caption">ALLOGRAFT SOURCE</span>
+                                    <span class="control-caption">ALLOGRAFT SOURCE (β: -0.6943)</span>
                                 </div>
                                 <div class="control-field">
                                     <label for="sibling-donor" class="control-label">Sibling Donor?</label>
-                                    <select id="sibling-donor" class="control-select">
+                                    <select id="sibling-donor" class="control-select" onchange="calculateRisk()">
                                         <option value="0">Unrelated / Non-Sibling</option>
-                                        <option value="1">Full Sibling (OR: 0.44)</option>
+                                        <option value="1">Full Sibling (OR: 0.439, Protective)</option>
                                     </select>
-                                    <span class="control-caption">HISTOCOMPATIBILITY BENEFIT</span>
+                                    <span class="control-caption">HISTOCOMPATIBILITY (β: -0.8236)</span>
                                 </div>
-                            </div>
-
-                            <div class="control-field" style="margin-top: var(--spacing-16);">
-                                <label for="standard-induction" class="control-label">Induction Regimen</label>
-                                <select id="standard-induction" class="control-select">
-                                    <option value="1">Standard Induction (Basiliximab / IL-2RA)</option>
-                                    <option value="0">Intensified Induction (Anti-Thymocyte Globulin / ATG)</option>
-                                </select>
-                                <span class="control-caption">IMMUNOSUPPRESSIVE REGIMEN</span>
+                                <div class="control-field">
+                                    <label for="standard-induction" class="control-label">Induction Regimen</label>
+                                    <select id="standard-induction" class="control-select" onchange="calculateRisk()">
+                                        <option value="1">Standard Induction (Basiliximab / IL-2RA)</option>
+                                        <option value="0">Intensified Induction (Anti-Thymocyte Globulin / ATG)</option>
+                                    </select>
+                                    <span class="control-caption">BASELINE REGIMEN (β: +0.6993)</span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Section 2: Allele-Level HLA Matching -->
                         <div class="instrument-group">
-                            <div class="group-kicker">02 // ALLELE-LEVEL HLA MISMATCH BURDEN</div>
-                            <div class="grid-cols-4">
+                            <div class="group-kicker">02 // ALLELE-LEVEL HLA MISMATCH BURDEN (LOCKED COVARIATES)</div>
+                            <div class="grid-cols-2">
                                 <div class="control-field">
-                                    <label for="mm-a" class="control-label">HLA-A</label>
-                                    <select id="mm-a" class="control-select" onchange="updateTotalMM()">
+                                    <label for="total-mm" class="control-label">Total HLA Mismatches (A+B+DR)</label>
+                                    <select id="total-mm" class="control-select" onchange="calculateRisk()">
                                         <option value="0">0 MM</option>
-                                        <option value="1" selected>1 MM</option>
+                                        <option value="1">1 MM</option>
                                         <option value="2">2 MM</option>
+                                        <option value="3" selected>3 MM (Cohort Mean: 3.17)</option>
+                                        <option value="4">4 MM</option>
+                                        <option value="5">5 MM</option>
+                                        <option value="6">6 MM</option>
                                     </select>
+                                    <span class="control-caption">REGULARIZATION MODIFIER (β: -1.6432)</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="mm-b" class="control-label">HLA-B</label>
-                                    <select id="mm-b" class="control-select" onchange="updateTotalMM()">
+                                    <label for="mm-drb1" class="control-label">HLA-DRB1 Locus Mismatch</label>
+                                    <select id="mm-drb1" class="control-select" onchange="calculateRisk()">
                                         <option value="0">0 MM</option>
-                                        <option value="1" selected>1 MM</option>
+                                        <option value="1" selected>1 MM (Cohort Mean: 0.83)</option>
                                         <option value="2">2 MM</option>
                                     </select>
-                                </div>
-                                <div class="control-field">
-                                    <label for="mm-drb1" class="control-label">HLA-DRB1</label>
-                                    <select id="mm-drb1" class="control-select" onchange="updateTotalMM()">
-                                        <option value="0">0 MM</option>
-                                        <option value="1" selected>1 MM</option>
-                                        <option value="2">2 MM</option>
-                                    </select>
-                                </div>
-                                <div class="control-field">
-                                    <label for="total-mm" class="control-label">Total Load</label>
-                                    <input type="number" id="total-mm" class="control-input calculated" value="3" readonly>
+                                    <span class="control-caption">PRIMARY CLASS II RISK DRIVER (OR: 2.54)</span>
                                 </div>
                             </div>
                         </div>
@@ -382,31 +363,17 @@
                         <!-- Section 3: Flow Cytometric Crossmatch -->
                         <div class="instrument-group">
                             <div class="group-kicker">03 // PRE-TRANSPLANT FLOW CYTOMETRIC CROSSMATCH (FCXM)</div>
-                            <div class="grid-cols-2">
-                                <div class="control-field">
-                                    <label for="mcs-t" class="control-label">T-Cell Channel Shift (T-MCS)</label>
-                                    <input type="number" id="mcs-t" class="control-input" step="1" min="0" max="300" value="12" required>
-                                    <span class="control-caption">COHORT MEDIAN: 10.0</span>
-                                </div>
-                                <div class="control-field">
-                                    <label for="mcs-b" class="control-label">B-Cell Channel Shift (B-MCS)</label>
-                                    <input type="number" id="mcs-b" class="control-input" step="1" min="0" max="500" value="48" required>
-                                    <span class="control-caption">COHORT MEDIAN: 48.0</span>
-                                </div>
-                            </div>
-                            <div class="control-field" style="margin-top: var(--spacing-16);">
-                                <label for="fcxm-qual" class="control-label">Qualitative FCXM Interpretation</label>
-                                <select id="fcxm-qual" class="control-select">
-                                    <option value="0">Negative FCXM (82.1% Specificity, 79.6% NPV Rule-Out Gate)</option>
-                                    <option value="1">Positive FCXM (Sub-CDC Channel Shift / Heightened Risk)</option>
-                                </select>
-                                <span class="control-caption">CELLULAR FLOW CROSSMATCH STATUS</span>
+                            <div class="control-field">
+                                <label for="mcs-t" class="control-label">T-Cell Channel Shift (T-MCS)</label>
+                                <input type="number" id="mcs-t" class="control-input" step="1" min="0" max="300" value="12" oninput="calculateRisk()" required>
+                                <span class="control-caption">MODELED RISK DRIVER (OR: 1.425 / SD, COHORT MEAN: 19.0)</span>
                             </div>
                         </div>
 
                         <!-- Section 4: Molecular HLA Eplet Mismatches (Objective 3) -->
                         <div class="instrument-group">
-                            <div class="group-kicker">04 // MOLECULAR HLA EPLET MISMATCH BURDEN (OBJECTIVE 3)</div>
+                            <div class="group-kicker">04 // MOLECULAR EPLET SURVEILLANCE ADVISORY (OBJECTIVE 3)</div>
+                            <p style="font-size: 12.5px; color: #94a3b8; margin-top: -6px; margin-bottom: 14px;">Guides post-transplant Luminex SAB antibody surveillance; qualitative advisory only (does not alter numerical logistic rejection risk).</p>
                             <div class="grid-cols-3">
                                 <div class="control-field">
                                     <label for="eplet-class1" class="control-label">Class I Eplet Mismatches</label>

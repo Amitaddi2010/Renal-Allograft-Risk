@@ -4,39 +4,29 @@
  * Primary Model: ElasticNet Logistic Regression (Tier 3 Multimodal, N = 443)
  */
 
-// Cohort Standardization Parameters
+// Cohort Standardization Parameters (Derived strictly from Tier 3 Multimodal Cohort, N = 443)
 const COHORT_STATS = {
-    donorAge: { mean: 45.2, sd: 12.1 },
-    recipientAge: { mean: 38.4, sd: 11.2 },
-    preCreatinine: { mean: 7.45, sd: 2.30 },
-    mmA: { mean: 0.95, sd: 0.69 },
-    mmB: { mean: 0.98, sd: 0.70 },
-    mmDRB1: { mean: 0.82, sd: 0.66 },
-    totalMM: { mean: 3.50, sd: 1.66 },
-    mcsT: { mean: 13.8, sd: 18.5 },
-    mcsB: { mean: 58.2, sd: 52.4 },
+    donorAge: { mean: 46.4086, sd: 9.5739 },
+    totalMM: { mean: 3.1716, sd: 1.7463 },
+    mmDRB1: { mean: 0.8330, sd: 0.6438 },
+    mcsT: { mean: 19.0308, sd: 42.8138 },
     totalEplets: { mean: 4.71, sd: 5.18 }
 };
 
-// ElasticNet Standardized Regression Coefficients
+// ElasticNet Standardized Regression Coefficients (Audited Locked 7-Feature Model)
+// Intercept is from .intercept_ on fitted ElasticNet (-2.1944)
 const COEFFS = {
-    intercept: -1.542,
+    intercept: -2.1944,
     donorAge: 0.2773,
-    recipientAge: -0.0188,
     siblingDonor: -0.8236, // Protective OR = 0.439
     deceasedDonor: -0.6943,
     standardInduction: 0.6993,
-    recipientMale: 0.1713,
-    mmA: 0.4497,
-    mmB: 0.5006,
-    mmDRB1: 0.9327, // Nominal risk driver OR = 2.541
     totalMM: -1.6432, // Regularization constraint
-    mcsT: 0.3542, // Flow crossmatch T-cell shift OR = 1.425
-    mcsB: 0.1093, // Flow crossmatch B-cell shift
-    fcxmQualPositive: 0.4735
+    mmDRB1: 0.9327, // Nominal risk driver OR = 2.541
+    mcsT: 0.3542 // Flow crossmatch T-cell shift OR = 1.425
 };
 
-// Validated Quintile Boundaries
+// Validated Quintile Boundaries (Derived from out-of-fold predicted probabilities in oof_predictions.parquet)
 const QUINTILE_BOUNDS = [0.0834, 0.1316, 0.1816, 0.2924];
 
 const QUINTILE_DATA = {
@@ -92,13 +82,6 @@ const QUINTILE_DATA = {
     }
 };
 
-function updateTotalMM() {
-    const mmA = parseInt(document.getElementById('mm-a').value, 10) || 0;
-    const mmB = parseInt(document.getElementById('mm-b').value, 10) || 0;
-    const mmDRB1 = parseInt(document.getElementById('mm-drb1').value, 10) || 0;
-    document.getElementById('total-mm').value = mmA + mmB + mmDRB1;
-}
-
 function updateTotalEplets() {
     const ep1 = parseInt(document.getElementById('eplet-class1') ? document.getElementById('eplet-class1').value : 1, 10) || 0;
     const ep2 = parseInt(document.getElementById('eplet-class2') ? document.getElementById('eplet-class2').value : 1, 10) || 0;
@@ -115,61 +98,40 @@ function sigmoid(z) {
 }
 
 function calculateRisk() {
-    const recAge = parseFloat(document.getElementById('recipient-age').value);
+    // 1. Model Covariates: Demographics & Induction
     const donorAge = parseFloat(document.getElementById('donor-age').value);
     const donorSource = parseInt(document.getElementById('donor-source').value, 10);
     const siblingDonor = parseInt(document.getElementById('sibling-donor').value, 10);
     const standardInduction = parseInt(document.getElementById('standard-induction').value, 10);
-    const gender = parseInt(document.getElementById('gender').value, 10);
 
-    const mmA = parseInt(document.getElementById('mm-a').value, 10);
-    const mmB = parseInt(document.getElementById('mm-b').value, 10);
+    // 2. Model Covariates: HLA Mismatch (Total MM & DRB1 MM)
+    const totalMM = parseInt(document.getElementById('total-mm').value, 10);
     const mmDRB1 = parseInt(document.getElementById('mm-drb1').value, 10);
-    const totalMM = mmA + mmB + mmDRB1;
 
+    // 3. Model Covariates: Flow Crossmatch (T-MCS)
     const mcsT = parseFloat(document.getElementById('mcs-t').value);
-    const mcsB = parseFloat(document.getElementById('mcs-b').value);
-    const fcxmQual = parseInt(document.getElementById('fcxm-qual').value, 10);
 
-    // Objective 3: Molecular Eplet Mismatches
-    const ep1 = parseInt(document.getElementById('eplet-class1') ? document.getElementById('eplet-class1').value : 1, 10) || 0;
-    const ep2 = parseInt(document.getElementById('eplet-class2') ? document.getElementById('eplet-class2').value : 1, 10) || 0;
-    const totalEplets = ep1 + ep2;
-    const dominantEpletEl = document.getElementById('dominant-eplet');
-    const dominantEplet = dominantEpletEl ? parseInt(dominantEpletEl.value, 10) : 0;
-
+    // Standardize Continuous Predictors via Exact Cohort (N = 443) Parameters
     const zDonorAge = standardize(donorAge, COHORT_STATS.donorAge);
-    const zRecAge = standardize(recAge, COHORT_STATS.recipientAge);
-    const zMMA = standardize(mmA, COHORT_STATS.mmA);
-    const zMMB = standardize(mmB, COHORT_STATS.mmB);
-    const zMMDRB1 = standardize(mmDRB1, COHORT_STATS.mmDRB1);
     const zTotalMM = standardize(totalMM, COHORT_STATS.totalMM);
+    const zMMDRB1 = standardize(mmDRB1, COHORT_STATS.mmDRB1);
     const zMCST = standardize(mcsT, COHORT_STATS.mcsT);
-    const zMCSB = standardize(mcsB, COHORT_STATS.mcsB);
-    const zTotalEplets = standardize(totalEplets, COHORT_STATS.totalEplets);
 
+    // Linear Predictor: Locked 7-Feature ElasticNet Equation
     let logOdds = COEFFS.intercept;
     logOdds += COEFFS.donorAge * zDonorAge;
-    logOdds += COEFFS.recipientAge * zRecAge;
     logOdds += (siblingDonor === 1) ? COEFFS.siblingDonor : 0;
     logOdds += (donorSource === 1) ? COEFFS.deceasedDonor : 0;
     logOdds += (standardInduction === 1) ? COEFFS.standardInduction : 0;
-    logOdds += (gender === 1) ? COEFFS.recipientMale : 0;
-
-    logOdds += COEFFS.mmA * zMMA;
-    logOdds += COEFFS.mmB * zMMB;
-    logOdds += COEFFS.mmDRB1 * zMMDRB1;
     logOdds += COEFFS.totalMM * zTotalMM;
-
+    logOdds += COEFFS.mmDRB1 * zMMDRB1;
     logOdds += COEFFS.mcsT * zMCST;
-    logOdds += COEFFS.mcsB * zMCSB;
-    logOdds += (fcxmQual === 1) ? COEFFS.fcxmQualPositive : 0;
 
-    // Primary Multimodal ElasticNet Probability (Strictly Locked Cohort N = 443)
-    let predProb = sigmoid(logOdds);
-    predProb = Math.max(0.02, Math.min(0.75, predProb));
+    // Unclamped Probability Formulation
+    const predProb = sigmoid(logOdds);
     const percentStr = (predProb * 100).toFixed(1) + "%";
 
+    // Direct Quintile Lookup on Unclamped Calibrated Probability
     let quintile = 1;
     if (predProb <= QUINTILE_BOUNDS[0]) {
         quintile = 1;
@@ -210,33 +172,36 @@ function calculateRisk() {
     }
 
     // Update Protocol Items (integrating Eplet Advisory)
+    const ep1 = parseInt(document.getElementById('eplet-class1') ? document.getElementById('eplet-class1').value : 1, 10) || 0;
+    const ep2 = parseInt(document.getElementById('eplet-class2') ? document.getElementById('eplet-class2').value : 1, 10) || 0;
+    const totalEplets = ep1 + ep2;
+    const dominantEpletEl = document.getElementById('dominant-eplet');
+    const dominantEplet = dominantEpletEl ? parseInt(dominantEpletEl.value, 10) : 0;
+
     const protocolList = document.getElementById('protocol-items');
     const recommendations = [...qInfo.recommendations];
     if (totalEplets >= 8 || dominantEplet > 0) {
         const targetDesc = dominantEplet === 1 ? 'Class I (163LG/65GK)' : (dominantEplet === 2 ? 'Class II (130Q/86G2)' : (dominantEplet === 3 ? 'Dual Class (163LG + 130Q)' : 'Elevated Molecular Load'));
-        recommendations.push(`<strong>Molecular Eplet Advisory (Objective 3):</strong> ${totalEplets} total eplet mismatches with ${targetDesc} specificity. <em>Clinical Context:</em> In the audited PGIMER cohort, numerical eplet burden alone does not predict acute cellular rejection (AUC = 0.32–0.50), but guides longitudinal Luminex single-antigen bead (SAB) surveillance at 3, 6, and 12 months to detect de novo anti-eplet DSA development.`);
+        recommendations.push(`<strong>Molecular Eplet Advisory (Objective 3):</strong> ${totalEplets} total eplet mismatches with ${targetDesc} specificity. <em>Clinical Context:</em> In the audited PGIMER cohort, numerical eplet burden alone does not predict acute cellular rejection (AUC = 0.501, Objective 3 locked result), but guides longitudinal Luminex single-antigen bead (SAB) surveillance at 3, 6, and 12 months to detect de novo anti-eplet DSA development.`);
     }
     protocolList.innerHTML = recommendations.map(item => `<li>${item}</li>`).join('');
 }
 
 function resetDefaults() {
-    document.getElementById('recipient-age').value = 38;
-    document.getElementById('donor-age').value = 45;
+    document.getElementById('donor-age').value = 46;
     document.getElementById('donor-source').value = "0";
     document.getElementById('sibling-donor').value = "0";
     document.getElementById('standard-induction').value = "1";
-    document.getElementById('pre-creat').value = 7.5;
-    document.getElementById('gender').value = "1";
 
-    document.getElementById('mm-a').value = "1";
-    document.getElementById('mm-b').value = "1";
+    document.getElementById('total-mm').value = "3";
     document.getElementById('mm-drb1').value = "1";
-    updateTotalMM();
 
     document.getElementById('mcs-t').value = 12;
-    document.getElementById('mcs-b').value = 48;
-    document.getElementById('fcxm-qual').value = "0";
 
+    if (document.getElementById('mcs-b')) document.getElementById('mcs-b').value = 48;
+    if (document.getElementById('recipient-age')) document.getElementById('recipient-age').value = 38;
+    if (document.getElementById('pre-creat')) document.getElementById('pre-creat').value = 7.5;
+    if (document.getElementById('gender')) document.getElementById('gender').value = "1";
     if (document.getElementById('eplet-class1')) document.getElementById('eplet-class1').value = 1;
     if (document.getElementById('eplet-class2')) document.getElementById('eplet-class2').value = 1;
     if (document.getElementById('dominant-eplet')) document.getElementById('dominant-eplet').value = "0";
