@@ -10,10 +10,11 @@ const COHORT_STATS = {
     totalMM: { mean: 3.1716, sd: 1.7463 },
     mmDRB1: { mean: 0.8330, sd: 0.6438 },
     mcsT: { mean: 19.0308, sd: 42.8138 },
+    mcsB: { mean: 71.6557, sd: 67.6920 },
     totalEplets: { mean: 4.71, sd: 5.18 }
 };
 
-// ElasticNet Standardized Regression Coefficients (Audited Locked 7-Feature Model)
+// ElasticNet Standardized Regression Coefficients (Audited Locked 8-Feature Model)
 // Intercept is from .intercept_ on fitted ElasticNet (-2.1944)
 const COEFFS = {
     intercept: -2.1944,
@@ -23,7 +24,8 @@ const COEFFS = {
     standardInduction: 0.6993,
     totalMM: -1.6432, // Regularization constraint
     mmDRB1: 0.9327, // Nominal risk driver OR = 2.541
-    mcsT: 0.3542 // Flow crossmatch T-cell shift OR = 1.425
+    mcsT: 0.3542, // Flow crossmatch T-cell shift OR = 1.425
+    mcsB: 0.1093  // Flow crossmatch B-cell shift OR = 1.116
 };
 
 // Validated Quintile Boundaries (Derived from out-of-fold predicted probabilities in oof_predictions.parquet)
@@ -111,16 +113,18 @@ function calculateRisk() {
     const totalMM = parseInt(document.getElementById('total-mm').value, 10);
     const mmDRB1 = parseInt(document.getElementById('mm-drb1').value, 10);
 
-    // 3. Model Covariates: Flow Crossmatch (T-MCS)
+    // 3. Model Covariates: Flow Crossmatch (T-MCS & B-MCS)
     const mcsT = parseFloat(document.getElementById('mcs-t').value);
+    const mcsB = parseFloat(document.getElementById('mcs-b') ? document.getElementById('mcs-b').value : 48);
 
     // Standardize Continuous Predictors via Exact Cohort (N = 443) Parameters
     const zDonorAge = standardize(donorAge, COHORT_STATS.donorAge);
     const zTotalMM = standardize(totalMM, COHORT_STATS.totalMM);
     const zMMDRB1 = standardize(mmDRB1, COHORT_STATS.mmDRB1);
     const zMCST = standardize(mcsT, COHORT_STATS.mcsT);
+    const zMCSB = standardize(mcsB, COHORT_STATS.mcsB);
 
-    // Linear Predictor: Locked 7-Feature ElasticNet Equation
+    // Linear Predictor: Locked 8-Feature ElasticNet Equation
     let logOdds = COEFFS.intercept;
     logOdds += COEFFS.donorAge * zDonorAge;
     logOdds += (siblingDonor === 1) ? COEFFS.siblingDonor : 0;
@@ -129,6 +133,7 @@ function calculateRisk() {
     logOdds += COEFFS.totalMM * zTotalMM;
     logOdds += COEFFS.mmDRB1 * zMMDRB1;
     logOdds += COEFFS.mcsT * zMCST;
+    logOdds += COEFFS.mcsB * zMCSB;
 
     // Unclamped Probability Formulation
     const predProb = sigmoid(logOdds);
@@ -473,6 +478,71 @@ function scrollToSection(sectionId) {
             el.scrollIntoView({ behavior: 'smooth' });
         }
     }, 100);
+}
+
+/* ==========================================================================
+   CALCULATOR TAB SWITCHER (NOMOGRAM vs IMMUNOGENIC EPLET ADVISORY)
+   ========================================================================== */
+function switchCalculatorTab(tabName) {
+    const tabNomogram = document.getElementById('calc-tab-nomogram');
+    const tabEplet = document.getElementById('calc-tab-eplet');
+    const paneNomogram = document.getElementById('pane-nomogram');
+    const paneEplet = document.getElementById('pane-eplet');
+
+    if (tabName === 'eplet') {
+        if (tabNomogram) tabNomogram.classList.remove('active');
+        if (tabEplet) tabEplet.classList.add('active');
+        if (paneNomogram) paneNomogram.classList.add('hidden-tab');
+        if (paneEplet) paneEplet.classList.remove('hidden-tab');
+        updateAdvisoryEplets();
+    } else {
+        if (tabEplet) tabEplet.classList.remove('active');
+        if (tabNomogram) tabNomogram.classList.add('active');
+        if (paneEplet) paneEplet.classList.add('hidden-tab');
+        if (paneNomogram) paneNomogram.classList.remove('hidden-tab');
+        calculateRisk();
+    }
+}
+
+function updateAdvisoryEplets() {
+    const ep1 = parseInt(document.getElementById('adv-eplet-c1') ? document.getElementById('adv-eplet-c1').value : 0, 10) || 0;
+    const ep2 = parseInt(document.getElementById('adv-eplet-c2') ? document.getElementById('adv-eplet-c2').value : 0, 10) || 0;
+    const totalAdv = ep1 + ep2;
+
+    const totalEl = document.getElementById('adv-eplet-total');
+    if (totalEl) totalEl.value = totalAdv;
+
+    // Check specific dominant targets (163LG, 65GK, 130Q, 86G2)
+    const t163LG = document.getElementById('target-163lg') ? document.getElementById('target-163lg').checked : false;
+    const t65GK = document.getElementById('target-65gk') ? document.getElementById('target-65gk').checked : false;
+    const t130Q = document.getElementById('target-130q') ? document.getElementById('target-130q').checked : false;
+    const t86G2 = document.getElementById('target-86g2') ? document.getElementById('target-86g2').checked : false;
+
+    const matchedList = [];
+    if (t163LG) matchedList.push('163LG (Class I Dominant)');
+    if (t65GK) matchedList.push('65GK (Class I High-Frequency)');
+    if (t130Q) matchedList.push('130Q (Class II Dominant)');
+    if (t86G2) matchedList.push('86G2 (Class II High-Frequency)');
+
+    const targetsContainer = document.getElementById('adv-matched-targets');
+    if (targetsContainer) {
+        if (matchedList.length > 0) {
+            targetsContainer.innerHTML = matchedList.map(t => `<span class="eplet-tag-pill eplet-tag-matched">✓ ${t}</span>`).join(' ');
+        } else {
+            targetsContainer.innerHTML = '<span class="eplet-tag-pill eplet-tag-unmatched">No dominant clinical targets selected</span>';
+        }
+    }
+
+    const summaryText = document.getElementById('adv-eplet-summary-text');
+    if (summaryText) {
+        let text = `<strong>Cataloged Molecular Burden:</strong> ${totalAdv} total immunogenic eplet mismatches (${ep1} Class I, ${ep2} Class II). `;
+        if (matchedList.length > 0) {
+            text += `Includes high-frequency clinical targets: <strong>${matchedList.join(', ')}</strong>. Recommend tailored post-transplant Luminex single-antigen bead (SAB) monitoring at 3, 6, and 12 months for donor-specific anti-eplet antibody emergence.`;
+        } else {
+            text += `Standard institutional post-transplant surveillance protocol applies.`;
+        }
+        summaryText.innerHTML = text;
+    }
 }
 
 // Handle browser back/forward buttons

@@ -25,7 +25,8 @@
             <button type="button" class="nav-link active" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">OVERVIEW</button>
             <button type="button" class="nav-link" id="nav-btn-evidence" onclick="scrollToSection('evidence-section'); closeNav();">EVIDENCE AUDIT</button>
             <button type="button" class="nav-link" id="nav-btn-domains" onclick="scrollToSection('domains-section'); closeNav();">IMMUNE DOMAINS</button>
-            <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); closeNav();">CALCULATOR</button>
+            <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">CALCULATOR</button>
+            <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">EPLETS (ADVISORY)</button>
         </nav>
 
         <div class="nav-action-wrap">
@@ -276,10 +277,23 @@
                 </div>
             </div>
 
-            <!-- Main Terminal Grid -->
-            <div class="terminal-grid" id="nomogram">
-                <!-- Left Surface Card: Inputs -->
-                <section class="surface-card">
+            <!-- Calculator Mode Tab Bar -->
+            <div class="calc-tab-bar">
+                <button type="button" class="calc-tab-btn active" id="calc-tab-nomogram" onclick="switchCalculatorTab('nomogram')">
+                    <span>01 // MULTIMODAL NOMOGRAM (AUDITED)</span>
+                </button>
+                <button type="button" class="calc-tab-btn" id="calc-tab-eplet" onclick="switchCalculatorTab('eplet')">
+                    <span>02 // IMMUNOGENIC EPLET LOAD</span>
+                    <span class="tab-badge-advisory">ADVISORY ONLY</span>
+                </button>
+            </div>
+
+            <!-- TAB PANE 1: QUANTITATIVE RISK NOMOGRAM -->
+            <div id="pane-nomogram" class="calc-tab-pane">
+                <!-- Main Terminal Grid -->
+                <div class="terminal-grid" id="nomogram">
+                    <!-- Left Surface Card: Inputs -->
+                    <section class="surface-card">
                     <div class="card-header-bar">
                         <div>
                             <h2 class="card-title">Patient Parameter Instrumentation</h2>
@@ -291,7 +305,7 @@
                     <!-- Model Simplification Disclosure Box -->
                     <div class="model-disclosure-banner" style="background: rgba(0, 55, 52, 0.45); border-left: 3px solid #38bdf8; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.5; color: #cbd5e1;">
                         <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">Model Specification & Simplification Notice:</strong>
-                        This tool uses the 7 most influential predictors from the full 31-covariate locked model; less influential factors (recipient age/sex, individual A/B-locus mismatch, B-cell crossmatch shift, FCXM dual-positivity) are held at cohort-average values. Predictions for patients who deviate substantially from cohort averages on these factors may differ from the full model.
+                        This tool uses the 8 most influential predictors from the full 31-covariate locked model; less influential factors (recipient age/sex, individual A/B-locus mismatch, FCXM dual-positivity) are held at cohort-average values. Predictions for patients who deviate substantially from cohort averages on these factors may differ from the full model.
                     </div>
 
                     <form id="calculator-form" onsubmit="event.preventDefault(); calculateRisk();">
@@ -363,10 +377,17 @@
                         <!-- Section 3: Flow Cytometric Crossmatch -->
                         <div class="instrument-group">
                             <div class="group-kicker">03 // PRE-TRANSPLANT FLOW CYTOMETRIC CROSSMATCH (FCXM)</div>
-                            <div class="control-field">
-                                <label for="mcs-t" class="control-label">T-Cell Channel Shift (T-MCS)</label>
-                                <input type="number" id="mcs-t" class="control-input" step="1" min="0" max="300" value="12" oninput="calculateRisk()" required>
-                                <span class="control-caption">MODELED RISK DRIVER (OR: 1.425 / SD, COHORT MEAN: 19.0)</span>
+                            <div class="grid-cols-2">
+                                <div class="control-field">
+                                    <label for="mcs-t" class="control-label">T-Cell Channel Shift (T-MCS)</label>
+                                    <input type="number" id="mcs-t" class="control-input" step="1" min="0" max="300" value="12" oninput="calculateRisk()" required>
+                                    <span class="control-caption">T-CELL HAZARD (OR: 1.425 / SD, MEAN: 19.0)</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="mcs-b" class="control-label">B-Cell Channel Shift (B-MCS)</label>
+                                    <input type="number" id="mcs-b" class="control-input" step="1" min="0" max="400" value="48" oninput="calculateRisk()" required>
+                                    <span class="control-caption">B-CELL HAZARD (OR: 1.116 / SD, MEAN: 71.7)</span>
+                                </div>
                             </div>
                         </div>
 
@@ -516,6 +537,139 @@
                     </div>
                 </section>
             </div>
+            </div><!-- /#pane-nomogram -->
+
+            <!-- TAB PANE 2: IMMUNOGENIC EPLET LOAD (ADVISORY ONLY) -->
+            <div id="pane-eplet" class="calc-tab-pane hidden-tab">
+                <div class="terminal-grid">
+                    <!-- Left Surface Card: Eplet Profiler -->
+                    <section class="surface-card">
+                        <div class="card-header-bar">
+                            <div>
+                                <h2 class="card-title">Immunogenic Eplet Profiler (Catalogue Logic)</h2>
+                                <p class="card-subtitle">Matched against PGIMER IE.xlsx reference eplet catalogue.</p>
+                            </div>
+                            <button class="arrow-btn" type="button" onclick="updateAdvisoryEplets()" title="Recompute Advisory">↺</button>
+                        </div>
+
+                        <!-- Mandatory Scientific Advisory Disclosure Banner -->
+                        <div class="eplet-advisory-banner">
+                            <strong style="display: block; margin-bottom: 4px; color: #f59e0b; font-size: 13.5px;">Scientific Advisory Notice (Objective 3):</strong>
+                            <em>"Immunogenic-weighted eplet scoring is an active area of refinement (Mostafa et al. 2026 methodology) and has not yet been validated against this cohort's outcomes. This tab is for reference and surveillance planning only and does not affect the calculated risk percentage."</em>
+                        </div>
+
+                        <form id="eplet-advisory-form" onsubmit="event.preventDefault(); updateAdvisoryEplets();">
+                            <div class="instrument-group">
+                                <div class="group-kicker">01 // MOLECULAR EPLET COUNTS (CLASS I & CLASS II)</div>
+                                <div class="grid-cols-3">
+                                    <div class="control-field">
+                                        <label for="adv-eplet-c1" class="control-label">Class I Immunogenic Eplets</label>
+                                        <input type="number" id="adv-eplet-c1" class="control-input" min="0" max="40" value="3" oninput="updateAdvisoryEplets()">
+                                        <span class="control-caption">HLA-A/B/C SPECIFICITIES</span>
+                                    </div>
+                                    <div class="control-field">
+                                        <label for="adv-eplet-c2" class="control-label">Class II Immunogenic Eplets</label>
+                                        <input type="number" id="adv-eplet-c2" class="control-input" min="0" max="40" value="4" oninput="updateAdvisoryEplets()">
+                                        <span class="control-caption">HLA-DR/DQ SPECIFICITIES</span>
+                                    </div>
+                                    <div class="control-field">
+                                        <label for="adv-eplet-total" class="control-label">Total Immunogenic Burden</label>
+                                        <input type="number" id="adv-eplet-total" class="control-input calculated" value="7" readonly>
+                                        <span class="control-caption">UNWEIGHTED SUM</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="instrument-group" style="margin-top: var(--spacing-20);">
+                                <div class="group-kicker">02 // DOMINANT CLINICAL TARGET SPECIFICITIES (IE.XLSX)</div>
+                                <p style="font-size: 12.5px; color: #94a3b8; margin-top: -6px; margin-bottom: 12px;">Select verified high-immunogenicity target eplets identified in the PGIMER kidney transplant cohort:</p>
+                                <div class="grid-cols-2">
+                                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 12px; cursor: pointer;">
+                                        <input type="checkbox" id="target-163lg" onchange="updateAdvisoryEplets()" checked>
+                                        <div>
+                                            <strong style="color: #e0f2fe; font-size: 13px;">163LG (Class I)</strong>
+                                            <div style="font-size: 11px; color: #94a3b8;">Dominant HLA-A/B clinical target</div>
+                                        </div>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 12px; cursor: pointer;">
+                                        <input type="checkbox" id="target-65gk" onchange="updateAdvisoryEplets()">
+                                        <div>
+                                            <strong style="color: #e0f2fe; font-size: 13px;">65GK (Class I)</strong>
+                                            <div style="font-size: 11px; color: #94a3b8;">High-frequency HLA-A target</div>
+                                        </div>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 12px; cursor: pointer;">
+                                        <input type="checkbox" id="target-130q" onchange="updateAdvisoryEplets()" checked>
+                                        <div>
+                                            <strong style="color: #e0f2fe; font-size: 13px;">130Q (Class II)</strong>
+                                            <div style="font-size: 11px; color: #94a3b8;">Dominant HLA-DRB1 target</div>
+                                        </div>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 12px; cursor: pointer;">
+                                        <input type="checkbox" id="target-86g2" onchange="updateAdvisoryEplets()">
+                                        <div>
+                                            <strong style="color: #e0f2fe; font-size: 13px;">86G2 (Class II)</strong>
+                                            <div style="font-size: 11px; color: #94a3b8;">Recurrent HLA-DQB1 target</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="action-cluster" style="margin-top: var(--spacing-24);">
+                                <button type="button" class="btn-aurora" onclick="updateAdvisoryEplets()">
+                                    <span>Update Advisory Assessment</span>
+                                    <span>↗</span>
+                                </button>
+                                <button type="button" class="btn-ghost" onclick="switchCalculatorTab('nomogram')">
+                                    ← Return to Risk Nomogram
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Right Surface Card: Surveillance Synthesis -->
+                    <section class="surface-card">
+                        <div class="card-header-bar">
+                            <div>
+                                <h2 class="card-title">Molecular Surveillance Protocol</h2>
+                                <p class="card-subtitle">Objective 3 evidence-grounded clinical decision support.</p>
+                            </div>
+                            <button class="arrow-btn" type="button" onclick="window.print()" title="Print Advisory">↗</button>
+                        </div>
+
+                        <!-- Active Matched Targets Display -->
+                        <div class="eplet-catalog-card">
+                            <div class="group-kicker" style="color: #38bdf8; margin-bottom: 8px;">AUDITED HIGH-RISK TARGETS PRESENT</div>
+                            <div id="adv-matched-targets" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; align-items: center;">
+                                <span class="eplet-tag-pill eplet-tag-matched">✓ 163LG (Class I Dominant)</span>
+                                <span class="eplet-tag-pill eplet-tag-matched">✓ 130Q (Class II Dominant)</span>
+                            </div>
+                        </div>
+
+                        <!-- Objective 3 Scientific Grounding Summary -->
+                        <div class="protocol-panel" style="margin-top: var(--spacing-20);">
+                            <div class="protocol-header">Objective 3 Audited Scientific Finding</div>
+                            <p id="adv-eplet-summary-text" style="font-size: 13.5px; line-height: 1.6; color: #cbd5e1; margin-bottom: 12px;">
+                                <strong>Cataloged Molecular Burden:</strong> 7 total immunogenic eplet mismatches (3 Class I, 4 Class II). Includes high-frequency clinical targets: <strong>163LG, 130Q</strong>.
+                            </p>
+                            <div style="background: rgba(1, 38, 36, 0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5; color: #94a3b8;">
+                                <strong style="color: #edfffe;">Audited Objective 3 Benchmark:</strong> In the PGIMER doctoral cohort, unweighted numerical eplet burden does not discriminate acute cellular rejection (<strong>ROC-AUC = 0.501</strong>, non-discriminative). Eplet analysis provides qualitative epitope specificity for tailored post-transplant antibody surveillance rather than linear pre-transplant risk prediction.
+                            </div>
+                        </div>
+
+                        <!-- Recommended Surveillance Schedule -->
+                        <div class="protocol-panel" style="margin-top: var(--spacing-20);">
+                            <div class="protocol-header">Tailored Luminex SAB Surveillance Protocol</div>
+                            <ul class="protocol-items">
+                                <li><strong>Pre-Transplant Gate:</strong> Negative CDC crossmatch and flow crossmatch thresholding (&lt; 20 MCS T-cell, &lt; 80 MCS B-cell).</li>
+                                <li><strong>Month 3 Screening:</strong> Luminex single-antigen bead (SAB) assay targeted specifically to identify anti-163LG or anti-130Q dnDSA.</li>
+                                <li><strong>Month 6 Protocol:</strong> Protocol allograft biopsy if eplet burden exceeds institutional surveillance threshold and any de novo DSA is detected.</li>
+                                <li><strong>Month 12 Horizon:</strong> Longitudinal annual SAB panel and chronic allograft injury screening.</li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+            </div><!-- /#pane-eplet -->
         </div>
     </div>
 
