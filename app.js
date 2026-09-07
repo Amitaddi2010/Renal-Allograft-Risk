@@ -89,6 +89,9 @@ function updateTotalEplets() {
     if (totalEl) totalEl.value = ep1 + ep2;
 }
 
+// Legacy no-op for backward compatibility with cached client scripts
+function updateTotalMM() {}
+
 function standardize(val, stat) {
     return (val - stat.mean) / stat.sd;
 }
@@ -483,7 +486,6 @@ window.addEventListener('hashchange', () => {
 
 // Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
-    updateTotalMM();
     updateTotalEplets();
     calculateRisk();
     initParticleSphere();
