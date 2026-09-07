@@ -305,7 +305,7 @@
                     <!-- Model Simplification Disclosure Box -->
                     <div class="model-disclosure-banner" style="background: rgba(0, 55, 52, 0.45); border-left: 3px solid #38bdf8; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.5; color: #cbd5e1;">
                         <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">Model Specification & Simplification Notice:</strong>
-                        This tool uses the 8 most influential predictors from the full 31-covariate locked model; less influential factors (recipient age/sex, individual A/B-locus mismatch, FCXM dual-positivity) are held at cohort-average values. Predictions for patients who deviate substantially from cohort averages on these factors may differ from the full model.
+                        This tool uses the 11 most influential predictors from the full 31-covariate locked model (incorporating discrete HLA-A, HLA-B, HLA-DRB1, and HLA-DQB1 mismatches alongside regularized total mismatch burden and flow crossmatch T/B channel shifts); less influential factors (recipient age/sex, FCXM dual-positivity) are held at cohort-average values. Predictions for patients who deviate substantially from cohort averages on these factors may differ from the full model.
                     </div>
 
                     <form id="calculator-form" onsubmit="event.preventDefault(); calculateRisk();">
@@ -347,29 +347,55 @@
 
                         <!-- Section 2: Allele-Level HLA Matching -->
                         <div class="instrument-group">
-                            <div class="group-kicker">02 // ALLELE-LEVEL HLA MISMATCH BURDEN (LOCKED COVARIATES)</div>
-                            <div class="grid-cols-2">
+                            <div class="group-kicker">02 // ALLELE-LEVEL HLA MISMATCH BURDEN (PER-LOCUS & TOTAL)</div>
+                            <div class="grid-cols-4">
                                 <div class="control-field">
-                                    <label for="total-mm" class="control-label">Total HLA Mismatches (A+B+DR)</label>
-                                    <select id="total-mm" class="control-select" onchange="calculateRisk()">
+                                    <label for="mm-a" class="control-label">HLA-A MM</label>
+                                    <select id="mm-a" class="control-select" onchange="updateTotalMM(); calculateRisk();">
                                         <option value="0">0 MM</option>
-                                        <option value="1">1 MM</option>
+                                        <option value="1" selected>1 MM (Mean: 0.93)</option>
                                         <option value="2">2 MM</option>
-                                        <option value="3" selected>3 MM (Cohort Mean: 3.17)</option>
-                                        <option value="4">4 MM</option>
-                                        <option value="5">5 MM</option>
-                                        <option value="6">6 MM</option>
                                     </select>
-                                    <span class="control-caption">REGULARIZATION MODIFIER (β: -1.6432)</span>
+                                    <span class="control-caption">LOCUS A (OR: 1.568)</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="mm-drb1" class="control-label">HLA-DRB1 Locus Mismatch</label>
-                                    <select id="mm-drb1" class="control-select" onchange="calculateRisk()">
+                                    <label for="mm-b" class="control-label">HLA-B MM</label>
+                                    <select id="mm-b" class="control-select" onchange="updateTotalMM(); calculateRisk();">
                                         <option value="0">0 MM</option>
-                                        <option value="1" selected>1 MM (Cohort Mean: 0.83)</option>
+                                        <option value="1" selected>1 MM (Mean: 0.98)</option>
                                         <option value="2">2 MM</option>
                                     </select>
-                                    <span class="control-caption">PRIMARY CLASS II RISK DRIVER (OR: 2.54)</span>
+                                    <span class="control-caption">LOCUS B (OR: 1.650)</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="mm-drb1" class="control-label">HLA-DRB1 MM</label>
+                                    <select id="mm-drb1" class="control-select" onchange="updateTotalMM(); calculateRisk();">
+                                        <option value="0">0 MM</option>
+                                        <option value="1" selected>1 MM (Mean: 0.83)</option>
+                                        <option value="2">2 MM</option>
+                                    </select>
+                                    <span class="control-caption">PRIMARY DRIVER (OR: 2.541)</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="mm-dqb1" class="control-label">HLA-DQB1 MM</label>
+                                    <select id="mm-dqb1" class="control-select" onchange="updateTotalMM(); calculateRisk();">
+                                        <option value="0">0 MM</option>
+                                        <option value="1" selected>1 MM (Mean: 0.79)</option>
+                                        <option value="2">2 MM</option>
+                                    </select>
+                                    <span class="control-caption">LOCUS DQ (OR: 1.451)</span>
+                                </div>
+                            </div>
+                            <div class="grid-cols-2" style="margin-top: var(--spacing-16);">
+                                <div class="control-field">
+                                    <label for="total-mm" class="control-label">Total HLA Mismatches (A+B+DR)</label>
+                                    <input type="number" id="total-mm" class="control-input calculated" value="3" readonly>
+                                    <span class="control-caption">MODELED REGULARIZATION CONSTRAINT (β: -1.6432, MEAN: 3.17)</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="extended-total-mm" class="control-label">Extended Total Burden (A+B+DR+DQ)</label>
+                                    <input type="number" id="extended-total-mm" class="control-input calculated" value="4" readonly>
+                                    <span class="control-caption">EXTENDED 4-LOCUS TOTAL (FOR REFERENCE)</span>
                                 </div>
                             </div>
                         </div>
@@ -560,20 +586,26 @@
 
                         <form id="eplet-advisory-form" onsubmit="event.preventDefault(); updateAdvisoryEplets();">
                             <div class="instrument-group">
-                                <div class="group-kicker">01 // MOLECULAR EPLET COUNTS (CLASS I & CLASS II)</div>
-                                <div class="grid-cols-3">
+                                <div class="group-kicker">01 // MOLECULAR EPLET COUNTS BY LOCUS GROUP (ADVISORY / DOCUMENTATION ONLY)</div>
+                                <p style="font-size: 12.5px; color: #94a3b8; margin-top: -6px; margin-bottom: 12px;">Documentation aid for post-transplant surveillance; per-locus-group counts are completely isolated from risk probability calculations (Objective 3 locked result: AUC = 0.501, non-discriminative).</p>
+                                <div class="grid-cols-4">
                                     <div class="control-field">
-                                        <label for="adv-eplet-c1" class="control-label">Class I Immunogenic Eplets</label>
-                                        <input type="number" id="adv-eplet-c1" class="control-input" min="0" max="40" value="3" oninput="updateAdvisoryEplets()">
-                                        <span class="control-caption">HLA-A/B/C SPECIFICITIES</span>
+                                        <label for="adv-eplet-abc" class="control-label">HLA-ABC Eplets</label>
+                                        <input type="number" id="adv-eplet-abc" class="control-input" min="0" max="40" value="3" oninput="updateAdvisoryEplets()">
+                                        <span class="control-caption">CLASS I LOAD</span>
                                     </div>
                                     <div class="control-field">
-                                        <label for="adv-eplet-c2" class="control-label">Class II Immunogenic Eplets</label>
-                                        <input type="number" id="adv-eplet-c2" class="control-input" min="0" max="40" value="4" oninput="updateAdvisoryEplets()">
-                                        <span class="control-caption">HLA-DR/DQ SPECIFICITIES</span>
+                                        <label for="adv-eplet-dr" class="control-label">HLA-DR Eplets</label>
+                                        <input type="number" id="adv-eplet-dr" class="control-input" min="0" max="40" value="2" oninput="updateAdvisoryEplets()">
+                                        <span class="control-caption">CLASS II (DR)</span>
                                     </div>
                                     <div class="control-field">
-                                        <label for="adv-eplet-total" class="control-label">Total Immunogenic Burden</label>
+                                        <label for="adv-eplet-dq" class="control-label">HLA-DQ Eplets</label>
+                                        <input type="number" id="adv-eplet-dq" class="control-input" min="0" max="40" value="2" oninput="updateAdvisoryEplets()">
+                                        <span class="control-caption">CLASS II (DQ)</span>
+                                    </div>
+                                    <div class="control-field">
+                                        <label for="adv-eplet-total" class="control-label">Total Eplet Burden</label>
                                         <input type="number" id="adv-eplet-total" class="control-input calculated" value="7" readonly>
                                         <span class="control-caption">UNWEIGHTED SUM</span>
                                     </div>

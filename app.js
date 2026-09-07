@@ -8,13 +8,16 @@
 const COHORT_STATS = {
     donorAge: { mean: 46.4086, sd: 9.5739 },
     totalMM: { mean: 3.1716, sd: 1.7463 },
+    mmA: { mean: 0.9255, sd: 0.6241 },
+    mmB: { mean: 0.9842, sd: 0.6064 },
     mmDRB1: { mean: 0.8330, sd: 0.6438 },
+    mmDQB1: { mean: 0.7901, sd: 0.5364 },
     mcsT: { mean: 19.0308, sd: 42.8138 },
     mcsB: { mean: 71.6557, sd: 67.6920 },
     totalEplets: { mean: 4.71, sd: 5.18 }
 };
 
-// ElasticNet Standardized Regression Coefficients (Audited Locked 8-Feature Model)
+// ElasticNet Standardized Regression Coefficients (Audited Locked 11-Feature Model)
 // Intercept is from .intercept_ on fitted ElasticNet (-2.1944)
 const COEFFS = {
     intercept: -2.1944,
@@ -23,7 +26,10 @@ const COEFFS = {
     deceasedDonor: -0.6943,
     standardInduction: 0.6993,
     totalMM: -1.6432, // Regularization constraint
-    mmDRB1: 0.9327, // Nominal risk driver OR = 2.541
+    mmA: 0.4497,  // HLA-A mismatch OR = 1.568
+    mmB: 0.5006,  // HLA-B mismatch OR = 1.650
+    mmDRB1: 0.9327, // Primary Class II risk driver OR = 2.541
+    mmDQB1: 0.3720, // HLA-DQB1 mismatch OR = 1.451
     mcsT: 0.3542, // Flow crossmatch T-cell shift OR = 1.425
     mcsB: 0.1093  // Flow crossmatch B-cell shift OR = 1.116
 };
@@ -91,8 +97,20 @@ function updateTotalEplets() {
     if (totalEl) totalEl.value = ep1 + ep2;
 }
 
-// Legacy no-op for backward compatibility with cached client scripts
-function updateTotalMM() {}
+// Auto-compute Total HLA Mismatches (A + B + DR) and Extended Total (A + B + DR + DQ)
+function updateTotalMM() {
+    const mmA = parseInt(document.getElementById('mm-a') ? document.getElementById('mm-a').value : 1, 10) || 0;
+    const mmB = parseInt(document.getElementById('mm-b') ? document.getElementById('mm-b').value : 1, 10) || 0;
+    const mmDR = parseInt(document.getElementById('mm-drb1') ? document.getElementById('mm-drb1').value : 1, 10) || 0;
+    const mmDQ = parseInt(document.getElementById('mm-dqb1') ? document.getElementById('mm-dqb1').value : 1, 10) || 0;
+
+    const totalMM = mmA + mmB + mmDR;
+    const totalEl = document.getElementById('total-mm');
+    if (totalEl) totalEl.value = totalMM;
+
+    const extTotalEl = document.getElementById('extended-total-mm');
+    if (extTotalEl) extTotalEl.value = totalMM + mmDQ;
+}
 
 function standardize(val, stat) {
     return (val - stat.mean) / stat.sd;
@@ -109,9 +127,15 @@ function calculateRisk() {
     const siblingDonor = parseInt(document.getElementById('sibling-donor').value, 10);
     const standardInduction = parseInt(document.getElementById('standard-induction').value, 10);
 
-    // 2. Model Covariates: HLA Mismatch (Total MM & DRB1 MM)
-    const totalMM = parseInt(document.getElementById('total-mm').value, 10);
-    const mmDRB1 = parseInt(document.getElementById('mm-drb1').value, 10);
+    // 2. Model Covariates: HLA Mismatch (Per-Locus & Auto-Computed Total MM)
+    const mmA = parseInt(document.getElementById('mm-a') ? document.getElementById('mm-a').value : 1, 10);
+    const mmB = parseInt(document.getElementById('mm-b') ? document.getElementById('mm-b').value : 1, 10);
+    const mmDRB1 = parseInt(document.getElementById('mm-drb1') ? document.getElementById('mm-drb1').value : 1, 10);
+    const mmDQB1 = parseInt(document.getElementById('mm-dqb1') ? document.getElementById('mm-dqb1').value : 1, 10);
+    
+    // Auto-update total inputs
+    updateTotalMM();
+    const totalMM = mmA + mmB + mmDRB1;
 
     // 3. Model Covariates: Flow Crossmatch (T-MCS & B-MCS)
     const mcsT = parseFloat(document.getElementById('mcs-t').value);
@@ -120,18 +144,24 @@ function calculateRisk() {
     // Standardize Continuous Predictors via Exact Cohort (N = 443) Parameters
     const zDonorAge = standardize(donorAge, COHORT_STATS.donorAge);
     const zTotalMM = standardize(totalMM, COHORT_STATS.totalMM);
+    const zMMA = standardize(mmA, COHORT_STATS.mmA);
+    const zMMB = standardize(mmB, COHORT_STATS.mmB);
     const zMMDRB1 = standardize(mmDRB1, COHORT_STATS.mmDRB1);
+    const zMMDQB1 = standardize(mmDQB1, COHORT_STATS.mmDQB1);
     const zMCST = standardize(mcsT, COHORT_STATS.mcsT);
     const zMCSB = standardize(mcsB, COHORT_STATS.mcsB);
 
-    // Linear Predictor: Locked 8-Feature ElasticNet Equation
+    // Linear Predictor: Locked 11-Feature ElasticNet Equation
     let logOdds = COEFFS.intercept;
     logOdds += COEFFS.donorAge * zDonorAge;
     logOdds += (siblingDonor === 1) ? COEFFS.siblingDonor : 0;
     logOdds += (donorSource === 1) ? COEFFS.deceasedDonor : 0;
     logOdds += (standardInduction === 1) ? COEFFS.standardInduction : 0;
     logOdds += COEFFS.totalMM * zTotalMM;
+    logOdds += COEFFS.mmA * zMMA;
+    logOdds += COEFFS.mmB * zMMB;
     logOdds += COEFFS.mmDRB1 * zMMDRB1;
+    logOdds += COEFFS.mmDQB1 * zMMDQB1;
     logOdds += COEFFS.mcsT * zMCST;
     logOdds += COEFFS.mcsB * zMCSB;
 
@@ -201,8 +231,11 @@ function resetDefaults() {
     document.getElementById('sibling-donor').value = "0";
     document.getElementById('standard-induction').value = "1";
 
-    document.getElementById('total-mm').value = "3";
-    document.getElementById('mm-drb1').value = "1";
+    if (document.getElementById('mm-a')) document.getElementById('mm-a').value = "1";
+    if (document.getElementById('mm-b')) document.getElementById('mm-b').value = "1";
+    if (document.getElementById('mm-drb1')) document.getElementById('mm-drb1').value = "1";
+    if (document.getElementById('mm-dqb1')) document.getElementById('mm-dqb1').value = "1";
+    updateTotalMM();
 
     document.getElementById('mcs-t').value = 12;
 
@@ -505,9 +538,10 @@ function switchCalculatorTab(tabName) {
 }
 
 function updateAdvisoryEplets() {
-    const ep1 = parseInt(document.getElementById('adv-eplet-c1') ? document.getElementById('adv-eplet-c1').value : 0, 10) || 0;
-    const ep2 = parseInt(document.getElementById('adv-eplet-c2') ? document.getElementById('adv-eplet-c2').value : 0, 10) || 0;
-    const totalAdv = ep1 + ep2;
+    const epABC = parseInt(document.getElementById('adv-eplet-abc') ? document.getElementById('adv-eplet-abc').value : 0, 10) || 0;
+    const epDR = parseInt(document.getElementById('adv-eplet-dr') ? document.getElementById('adv-eplet-dr').value : 0, 10) || 0;
+    const epDQ = parseInt(document.getElementById('adv-eplet-dq') ? document.getElementById('adv-eplet-dq').value : 0, 10) || 0;
+    const totalAdv = epABC + epDR + epDQ;
 
     const totalEl = document.getElementById('adv-eplet-total');
     if (totalEl) totalEl.value = totalAdv;
@@ -535,7 +569,7 @@ function updateAdvisoryEplets() {
 
     const summaryText = document.getElementById('adv-eplet-summary-text');
     if (summaryText) {
-        let text = `<strong>Cataloged Molecular Burden:</strong> ${totalAdv} total immunogenic eplet mismatches (${ep1} Class I, ${ep2} Class II). `;
+        let text = `<strong>Cataloged Molecular Burden:</strong> ${totalAdv} total immunogenic eplet mismatches (${epABC} ABC, ${epDR} DR, ${epDQ} DQ). `;
         if (matchedList.length > 0) {
             text += `Includes high-frequency clinical targets: <strong>${matchedList.join(', ')}</strong>. Recommend tailored post-transplant Luminex single-antigen bead (SAB) monitoring at 3, 6, and 12 months for donor-specific anti-eplet antibody emergence.`;
         } else {
