@@ -167,6 +167,21 @@ function calculateRisk() {
 
     // Unclamped Probability Formulation
     const predProb = sigmoid(logOdds);
+
+    // Contribution of each input to the log-odds (relative to a typical cohort patient)
+    renderRiskDrivers([
+        { label: 'Donor age', c: COEFFS.donorAge * zDonorAge },
+        { label: 'Sibling donor', c: (siblingDonor === 1) ? COEFFS.siblingDonor : 0 },
+        { label: 'Deceased donor', c: (donorSource === 1) ? COEFFS.deceasedDonor : 0 },
+        { label: 'Standard induction (basiliximab)', c: (standardInduction === 1) ? COEFFS.standardInduction : 0 },
+        { label: 'HLA-DRB1 mismatch', c: COEFFS.mmDRB1 * zMMDRB1 },
+        { label: 'HLA-A mismatch', c: COEFFS.mmA * zMMA },
+        { label: 'HLA-B mismatch', c: COEFFS.mmB * zMMB },
+        { label: 'HLA-DQB1 mismatch', c: COEFFS.mmDQB1 * zMMDQB1 },
+        { label: 'Total mismatches (A+B+DR)', c: COEFFS.totalMM * zTotalMM },
+        { label: 'T-cell crossmatch shift', c: COEFFS.mcsT * zMCST },
+        { label: 'B-cell crossmatch shift', c: COEFFS.mcsB * zMCSB }
+    ]);
     const percentStr = (predProb * 100).toFixed(1) + "%";
 
     // Direct Quintile Lookup on Unclamped Calibrated Probability
@@ -484,7 +499,7 @@ function switchView(viewName) {
             navLaunchBtn.style.display = 'inline-flex';
         }
 
-        if (!/^#(dashboard|hla)/.test(window.location.hash)) window.location.hash = 'dashboard';
+        if (!/^#(dashboard|home|hla|risk)/.test(window.location.hash)) window.location.hash = 'dashboard';
         calculateRisk();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -526,6 +541,21 @@ function switchCalculatorTab(tabName) {
     const paneNomogram = document.getElementById('pane-nomogram');
     const paneEplet = document.getElementById('pane-eplet');
 
+    const paneHome = document.getElementById('pane-home');
+    const tabHome = document.getElementById('calc-tab-home');
+    if (tabName === 'home') {
+        [tabNomogram, tabEplet].forEach(function (b) { if (b) b.classList.remove('active'); });
+        if (tabHome) tabHome.classList.add('active');
+        if (paneNomogram) paneNomogram.classList.add('hidden-tab');
+        if (paneEplet) paneEplet.classList.add('hidden-tab');
+        if (paneHome) paneHome.classList.remove('hidden-tab');
+        if (window.DashboardHome) DashboardHome.render();
+        if (window.location.hash !== '#dashboard' && window.location.hash !== '#home') window.location.hash = 'dashboard';
+        syncNavActive('home');
+        return;
+    }
+    if (paneHome) paneHome.classList.add('hidden-tab');
+    if (tabHome) tabHome.classList.remove('active');
     if (tabName === 'eplet') {
         if (tabNomogram) tabNomogram.classList.remove('active');
         if (tabEplet) tabEplet.classList.add('active');
@@ -540,21 +570,61 @@ function switchCalculatorTab(tabName) {
         if (paneEplet) paneEplet.classList.add('hidden-tab');
         if (paneNomogram) paneNomogram.classList.remove('hidden-tab');
         calculateRisk();
-        if (/^#hla/.test(window.location.hash)) window.location.hash = 'dashboard';
+        if (window.location.hash !== '#risk') window.location.hash = 'risk';
         syncNavActive('nomogram');
     }
 }
 
 // Sidebar / nav highlighting follows the open calculator tab
 function syncNavActive(tab) {
-    const calc = document.getElementById('nav-btn-calc');
-    const hla = document.getElementById('nav-btn-eplet-adv');
-    if (calc) calc.classList.toggle('active', tab === 'nomogram');
-    if (hla) hla.classList.toggle('active', tab === 'eplet');
+    const map = { 'nav-btn-home': 'home', 'nav-btn-calc': 'nomogram', 'nav-btn-eplet-adv': 'eplet' };
+    Object.keys(map).forEach(function (id) { const b = document.getElementById(id); if (b) b.classList.toggle('active', map[id] === tab); });
     const crumb = document.getElementById('module-crumb');
-    if (crumb) crumb.textContent = tab === 'eplet' ? 'HLA & eplets' : 'Risk calculator';
+    if (crumb) crumb.textContent = tab === 'eplet' ? 'HLA & eplets' : (tab === 'nomogram' ? 'Risk calculator' : 'Home');
     const landing = document.getElementById('nav-btn-landing');
     if (landing) landing.classList.remove('active');
+}
+
+/* ==========================================================================
+   RISK DRIVERS PANEL, SAVE / RESTORE ESTIMATES
+   ========================================================================== */
+function renderRiskDrivers(items) {
+    const el = document.getElementById('risk-drivers');
+    if (!el) return;
+    const maxAbs = Math.max(0.05, Math.max.apply(null, items.map(function (i) { return Math.abs(i.c); })));
+    const sorted = items.slice().sort(function (a, b) { return Math.abs(b.c) - Math.abs(a.c); });
+    el.innerHTML = sorted.map(function (i) {
+        const up = i.c > 0.0005, down = i.c < -0.0005;
+        const w = Math.round(Math.abs(i.c) / maxAbs * 100);
+        return '<div class="driver-row">' +
+            '<div class="driver-label">' + i.label + '</div>' +
+            '<div class="driver-bar"><div class="driver-fill ' + (up ? 'up' : (down ? 'down' : 'flat')) + '" style="width:' + w + '%"></div></div>' +
+            '<div class="driver-val ' + (up ? 'up' : (down ? 'down' : 'flat')) + '">' + (up ? '+' : '') + i.c.toFixed(2) + '</div></div>';
+    }).join('');
+    const hla = items.filter(function (i) { return /HLA|mismatch/i.test(i.label); }).reduce(function (s, i) { return s + i.c; }, 0);
+    el.innerHTML += '<div class="driver-net">Net effect of all HLA mismatch terms together: <strong class="' + (hla > 0 ? 'up' : 'down') + '">' + (hla > 0 ? '+' : '') + hla.toFixed(2) + '</strong> log-odds</div>';
+}
+
+function readRiskInputs() {
+    const v = function (id) { const e = document.getElementById(id); return e ? e.value : null; };
+    return { donorAge: v('donor-age'), donorSource: v('donor-source'), siblingDonor: v('sibling-donor'), standardInduction: v('standard-induction'),
+             mmA: v('mm-a'), mmB: v('mm-b'), mmDRB1: v('mm-drb1'), mmDQB1: v('mm-dqb1'), mcsT: v('mcs-t'), mcsB: v('mcs-b'),
+             epletClass1: v('eplet-class1'), epletClass2: v('eplet-class2'), dominantEplet: v('dominant-eplet') };
+}
+function saveEstimate() {
+    if (!window.DashboardHome) return;
+    calculateRisk();
+    DashboardHome.addRisk({ ts: Date.now(), inputs: readRiskInputs(), risk: document.getElementById('risk-percent').textContent, band: document.getElementById('quintile-title').textContent });
+    const f = document.getElementById('risk-flash');
+    if (f) { f.textContent = 'Estimate saved to the dashboard (this browser only)'; f.classList.add('visible'); setTimeout(function () { f.classList.remove('visible'); }, 2600); }
+}
+function restoreEstimate(entry) {
+    const set = function (id, val) { const e = document.getElementById(id); if (e && val !== null && val !== undefined) e.value = val; };
+    const i = entry.inputs || {};
+    set('donor-age', i.donorAge); set('donor-source', i.donorSource); set('sibling-donor', i.siblingDonor); set('standard-induction', i.standardInduction);
+    set('mm-a', i.mmA); set('mm-b', i.mmB); set('mm-drb1', i.mmDRB1); set('mm-dqb1', i.mmDQB1); set('mcs-t', i.mcsT); set('mcs-b', i.mcsB);
+    set('eplet-class1', i.epletClass1); set('eplet-class2', i.epletClass2); set('dominant-eplet', i.dominantEplet);
+    updateTotalMM(); updateTotalEplets(); calculateRisk();
 }
 
 function updateAdvisoryEplets() {
@@ -608,8 +678,12 @@ function routeFromHash() {
         if (h !== '#hla' && window.HLAUI) HLAUI.loadExample();
         if (h === '#hla-grid-example' && window.HLAUI) HLAUI.setMode('grid');
         if (h === '#hla-3d-example' && window.HLA3D) setTimeout(function () { HLA3D.showFirstWithMismatches(); }, 50);
-    } else if (h === '#dashboard') {
+    } else if (h === '#risk') {
         switchView('calculator');
+        switchCalculatorTab('nomogram');
+    } else if (h === '#dashboard' || h === '#home') {
+        switchView('calculator');
+        switchCalculatorTab('home');
     } else {
         switchView('landing');
     }

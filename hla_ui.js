@@ -433,8 +433,32 @@
         if (typeof updateTotalEplets === 'function') updateTotalEplets();
         if (typeof switchCalculatorTab === 'function') switchCalculatorTab('nomogram');
         const note = $('nomogram-fill-note');
-        if (note) note.textContent = 'HLA values filled from the typing analysis (result ID ' + lastResult.signature + '): ' + done + ' antigen-level mismatch counts and the class I / II eplet loads.';
+        if (note) { note.innerHTML = '<span class="ux-status-dot"></span><div>HLA values filled from the typing analysis (result ID ' + esc(lastResult.signature) + '): ' + done + ' antigen-level mismatch counts and the class I / II eplet loads.</div>'; note.hidden = false; }
+        saveRecent(true);
         flash(done + ' antigen-level mismatch value(s) sent to the risk calculator');
+    }
+
+    /* ---------------- recent analyses (dashboard home) ---------------- */
+    function saveRecent(silent) {
+        if (!lastResult || !lastResult.evaluable || !window.DashboardHome) { if (!silent) flash('Nothing to save yet: enter typing for both people first'); return; }
+        const r = lastResult;
+        DashboardHome.addHla({
+            id: r.signature, ts: Date.now(),
+            recipient: $('hla-recipient').value, donor: $('hla-donor').value, options: r.options,
+            summary: { antigenABDR: r.allele.totalABDRAntigen, eplets: r.eplet.overall.evaluated ? r.eplet.overall.total : null, immunogenic: r.eplet.overall.evaluated ? r.eplet.overall.ie : null }
+        });
+        if (!silent) flash('Saved to recent analyses (result ID ' + r.signature + ')');
+    }
+    function restore(entry) {
+        $('hla-recipient').value = entry.recipient || '';
+        $('hla-donor').value = entry.donor || '';
+        if (entry.options) {
+            if ($('hla-infer')) $('hla-infer').checked = !!entry.options.inferLinked;
+            if ($('hla-pop') && entry.options.population) $('hla-pop').value = entry.options.population;
+            if ($('hla-rule') && entry.options.alleleRule) $('hla-rule').value = entry.options.alleleRule;
+        }
+        if (mode === 'grid') fillGridFromText();
+        recalculate();
     }
 
     function runSelfTest() {
@@ -449,6 +473,6 @@
             '<div class="matrix-container"><table class="table-matrix hla-table"><thead><tr><th>Result</th><th>Check</th><th>Detail</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></details>';
     }
 
-    window.HLAUI = { init: init, recalculate: recalculate, setMode: setMode, loadExample: loadExample, clearAll: clearAll, copyReport: copyReport, downloadCsv: downloadCsv, sendToNomogram: sendToNomogram, runSelfTest: runSelfTest, last: function () { return lastResult; } };
+    window.HLAUI = { init: init, recalculate: recalculate, setMode: setMode, loadExample: loadExample, clearAll: clearAll, copyReport: copyReport, downloadCsv: downloadCsv, sendToNomogram: sendToNomogram, runSelfTest: runSelfTest, saveRecent: function () { saveRecent(false); }, restore: restore, last: function () { return lastResult; } };
     document.addEventListener('DOMContentLoaded', init);
 })();

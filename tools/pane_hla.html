@@ -7,203 +7,191 @@
                     </div>
                     <button type="button" class="btn-ghost btn-sm" onclick="switchCalculatorTab('nomogram')">Open the risk calculator →</button>
                 </div>
-                <div class="terminal-grid hla-grid">
-                    <!-- Left Surface Card: Typing Input -->
-                    <section class="surface-card">
-                        <div class="card-header-bar">
-                            <div>
-                                <h2 class="card-title">Enter HLA typing</h2>
-                                <p class="card-subtitle">Type or paste the alleles for both people. Everything on the right updates automatically.</p>
-                            </div>
-                            <button class="arrow-btn" type="button" onclick="UX.openGlossary()" title="Help and glossary">?</button>
-                        </div>
 
-                        <div class="ux-steps">
-                            <div class="ux-step"><div class="ux-step-num">1</div><div><div class="ux-step-title">Recipient typing</div><div class="ux-step-text">A, B, C, DRB1, DQB1 at least; add DRB3/4/5, DQA1, DP if known.</div></div></div>
-                            <div class="ux-step"><div class="ux-step-num">2</div><div><div class="ux-step-title">Donor typing</div><div class="ux-step-text">Same loci for the donor. Any common notation works.</div></div></div>
-                            <div class="ux-step"><div class="ux-step-num">3</div><div><div class="ux-step-title">Read the results</div><div class="ux-step-text">Mismatches and immunogenic eplets appear on the right; send them to the risk calculator.</div></div></div>
+                <!-- STEP 1: INPUT -->
+                <section class="surface-card">
+                    <div class="card-header-bar">
+                        <div>
+                            <h2 class="card-title">1 · Enter HLA typing</h2>
+                            <p class="card-subtitle">Any common notation (A*02:01, A*0201, HLA-A*02:01:01); commas, spaces or new lines between alleles; one allele at a locus means homozygous. Results update as you type. <button type="button" class="ux-link-btn" style="margin-left:0;" onclick="HLAUI.loadExample()">Load an example pair</button></p>
                         </div>
-
                         <div class="ux-seg" role="tablist" aria-label="Input mode">
                             <button type="button" id="hla-mode-paste-btn" class="active" onclick="HLAUI.setMode('paste')">Paste typing</button>
                             <button type="button" id="hla-mode-grid-btn" onclick="HLAUI.setMode('grid')">Enter by locus</button>
                         </div>
+                    </div>
 
-                        <div id="hla-mode-paste">
+                    <div id="hla-mode-paste">
+                        <div class="hla-two-col">
                             <div class="instrument-group">
-                                <div class="group-kicker">1 · Recipient <button type="button" class="ux-link-btn" onclick="HLAUI.loadExample()">Load an example pair</button></div>
+                                <div class="group-kicker">Recipient</div>
                                 <textarea id="hla-recipient" class="control-input hla-textarea" rows="3" spellcheck="false" placeholder="e.g. A*01:01, A*24:02, B*35:03, B*57:01, C*04:01, C*06:02, DRB1*11:01, DRB1*12:02, DQB1*03:01, DQB1*03:01"></textarea>
                                 <div id="hla-recipient-parsed" class="hla-parsed"></div>
                             </div>
                             <div class="instrument-group">
-                                <div class="group-kicker">2 · Donor</div>
+                                <div class="group-kicker">Donor</div>
                                 <textarea id="hla-donor" class="control-input hla-textarea" rows="3" spellcheck="false" placeholder="e.g. A*03:01, A*24:02, B*35:01, B*35:03, C*04:01, C*15:02, DRB1*11:01, DRB1*15:02, DQB1*03:01, DQB1*06:01"></textarea>
                                 <div id="hla-donor-parsed" class="hla-parsed"></div>
-                                <span class="control-caption">Accepted: two-field alleles such as A*02:01, A*0201 or HLA-A*02:01:01, separated by commas, spaces or new lines. One allele at a locus is treated as homozygous.</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div id="hla-mode-grid" hidden>
-                            <div class="instrument-group">
-                                <div class="group-kicker">Alleles by locus <span class="ux-muted">start typing to see matching alleles</span></div>
-                                <div class="matrix-container hla-gridwrap">
-                                    <table class="hla-gridtable" id="hla-gridtable">
-                                        <thead><tr><th>Locus</th><th colspan="2">Recipient</th><th colspan="2">Donor</th></tr></thead>
-                                        <tbody id="hla-gridbody"></tbody>
-                                    </table>
-                                </div>
-                                <span class="control-caption">You can type just the fields (02:01) for A, B, C, DRB1, DQA1, DQB1, DPA1, DPB1; for DRB3/4/5 type the full name (DRB3*01:01). Leave the second box empty when homozygous.</span>
+                    <div id="hla-mode-grid" hidden>
+                        <div class="instrument-group">
+                            <div class="group-kicker">Alleles by locus <span class="ux-muted">start typing to see matching alleles</span></div>
+                            <div class="matrix-container hla-gridwrap">
+                                <table class="hla-gridtable" id="hla-gridtable">
+                                    <thead><tr><th>Locus</th><th colspan="2">Recipient</th><th colspan="2">Donor</th></tr></thead>
+                                    <tbody id="hla-gridbody"></tbody>
+                                </table>
                             </div>
+                            <span class="control-caption">Type just the fields (02:01) for A, B, C, DRB1, DQA1, DQB1, DPA1, DPB1; for DRB3/4/5 type the full name (DRB3*01:01). Leave the second box empty when homozygous.</span>
                         </div>
+                    </div>
 
-                        <div id="hla-status" class="ux-status ux-status-idle"><span class="ux-status-dot"></span><div>Enter typing for both people, or load the example, to see results.</div></div>
+                    <div id="hla-status" class="ux-status ux-status-idle"><span class="ux-status-dot"></span><div>Enter typing for both people, or load the example, to see results.</div></div>
 
-                        <details id="hla-notes" class="ux-details">
-                            <summary>Notes, warnings and inferred alleles <span class="ux-count" id="hla-notes-count">0</span></summary>
-                            <div class="ux-details-body"><div id="hla-warnings" class="hla-warn-list"></div></div>
-                        </details>
-
-                        <details class="ux-details">
-                            <summary>Options <span class="ux-muted" id="hla-opt-summary"></span></summary>
-                            <div class="ux-details-body">
-                                <div class="grid-cols-3">
-                                    <div class="control-field">
-                                        <label for="hla-infer" class="control-label">Fill in DRB3/4/5 and DQA1 when not typed</label>
-                                        <label class="hla-check"><input type="checkbox" id="hla-infer" checked> Use the workbook linkage tables</label>
-                                        <span class="control-caption">Inferred alleles are labelled everywhere; type the real alleles to override them.</span>
-                                    </div>
-                                    <div class="control-field">
-                                        <label for="hla-pop" class="control-label">Population for linkage frequencies</label>
-                                        <select id="hla-pop" class="control-select">
-                                            <option value="API" selected>Asian / Pacific Islander (API)</option>
-                                            <option value="CAU">Caucasian (CAU)</option>
-                                            <option value="AFR">African (AFR)</option>
-                                            <option value="HIS">Hispanic (HIS)</option>
-                                        </select>
-                                        <span class="control-caption">Only these four populations exist in the workbook table.</span>
-                                    </div>
-                                    <div class="control-field">
-                                        <label for="hla-rule" class="control-label">Allele-level counting</label>
-                                        <select id="hla-rule" class="control-select">
-                                            <option value="unique" selected>Distinct donor alleles absent in recipient (0–2)</option>
-                                            <option value="haplotype">Per haplotype (homozygous donor counts twice)</option>
-                                        </select>
-                                        <span class="control-caption">Antigen-level counts (first field) are always shown as well; they are what the risk model uses.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </details>
-
-                        <div class="action-cluster">
-                            <button type="button" class="btn-aurora" onclick="HLAUI.sendToNomogram()" id="hla-send-btn">
-                                <span>Send to risk calculator</span>
-                                <span>↗</span>
-                            </button>
-                            <button type="button" class="btn-ghost" onclick="HLAUI.loadExample()">Load example</button>
-                            <button type="button" class="btn-ghost" onclick="HLAUI.clearAll()">Clear</button>
-                        </div>
+                    <div class="hla-toolbar">
+                        <button type="button" class="btn-aurora" onclick="HLAUI.sendToNomogram()" id="hla-send-btn"><span>Send to risk calculator</span><span>↗</span></button>
+                        <button type="button" class="btn-ghost" onclick="HLAUI.saveRecent()">Save to recent</button>
+                        <button type="button" class="btn-ghost" onclick="HLAUI.clearAll()">Clear</button>
                         <div class="ux-more-actions">
                             <button type="button" onclick="HLAUI.copyReport()">Copy text report</button>
                             <button type="button" onclick="HLAUI.downloadCsv()">Download CSV</button>
                             <button type="button" onclick="window.print()">Print</button>
                             <button type="button" onclick="HLAUI.runSelfTest()">Run self-test</button>
                         </div>
-                        <div id="hla-flash" class="hla-flash" aria-live="polite"></div>
-                        <div id="hla-selftest" class="hla-selftest"></div>
-                    </section>
+                    </div>
+                    <div id="hla-flash" class="hla-flash" aria-live="polite"></div>
 
-                    <!-- Right Surface Card: Result Dashboard -->
-                    <section class="surface-card">
-                        <div class="card-header-bar">
-                            <div>
-                                <h2 class="card-title">Results</h2>
-                                <p class="card-subtitle">Mismatches and immunogenic load for this donor–recipient pair.</p>
+                    <div class="hla-two-col hla-two-col-loose" style="margin-top: 14px;">
+                        <details id="hla-notes" class="ux-details">
+                            <summary>Notes, warnings and inferred alleles <span class="ux-count" id="hla-notes-count">0</span></summary>
+                            <div class="ux-details-body"><div id="hla-warnings" class="hla-warn-list"></div></div>
+                        </details>
+                        <details class="ux-details">
+                            <summary>Options <span class="ux-muted" id="hla-opt-summary"></span></summary>
+                            <div class="ux-details-body">
+                                <div class="control-field">
+                                    <label for="hla-infer" class="control-label">Fill in DRB3/4/5 and DQA1 when not typed</label>
+                                    <label class="hla-check"><input type="checkbox" id="hla-infer" checked> Use the workbook linkage tables</label>
+                                    <span class="control-caption">Inferred alleles are labelled everywhere; type the real alleles to override them.</span>
+                                </div>
+                                <div class="control-field" style="margin-top: 10px;">
+                                    <label for="hla-pop" class="control-label">Population for linkage frequencies</label>
+                                    <select id="hla-pop" class="control-select">
+                                        <option value="API" selected>Asian / Pacific Islander (API)</option>
+                                        <option value="CAU">Caucasian (CAU)</option>
+                                        <option value="AFR">African (AFR)</option>
+                                        <option value="HIS">Hispanic (HIS)</option>
+                                    </select>
+                                    <span class="control-caption">Only these four populations exist in the workbook table.</span>
+                                </div>
+                                <div class="control-field" style="margin-top: 10px;">
+                                    <label for="hla-rule" class="control-label">Allele-level counting</label>
+                                    <select id="hla-rule" class="control-select">
+                                        <option value="unique" selected>Distinct donor alleles absent in recipient (0–2)</option>
+                                        <option value="haplotype">Per haplotype (homozygous donor counts twice)</option>
+                                    </select>
+                                    <span class="control-caption">Antigen-level counts (first field) are always shown as well; they are what the risk model uses.</span>
+                                </div>
                             </div>
-                            <button class="arrow-btn" type="button" onclick="window.print()" title="Print">↗</button>
+                        </details>
+                    </div>
+                    <div id="hla-selftest" class="hla-selftest"></div>
+                </section>
+
+                <!-- STEP 2: RESULTS -->
+                <section class="surface-card">
+                    <div class="card-header-bar">
+                        <div>
+                            <h2 class="card-title">2 · Results</h2>
+                            <p class="card-subtitle">Mismatches and immunogenic load for this donor–recipient pair.</p>
                         </div>
+                        <button class="arrow-btn" type="button" onclick="window.print()" title="Print">↗</button>
+                    </div>
 
-                        <div id="hla-headline" class="hla-headline"></div>
-                        <div id="hla-tiles-sm" class="hla-tiles-sm"></div>
+                    <div id="hla-headline" class="hla-headline"></div>
+                    <div id="hla-tiles-sm" class="hla-tiles-sm"></div>
 
+                    <div class="hla-two-col hla-two-col-loose">
                         <div class="protocol-panel hla-panel">
                             <div class="protocol-header">By locus at a glance</div>
                             <div id="hla-glance" class="hla-glance"></div>
                         </div>
-
-                        <div class="ux-explain" id="hla-explain"></div>
-
-                        <details class="ux-details" open>
-                            <summary>Allele-level detail by locus <span class="ux-count" id="hla-count-allele">0</span></summary>
-                            <div class="ux-details-body">
-                                <div class="hla-alist-head"><div>Locus</div><div>Donor / recipient alleles and what the recipient lacks</div><div>Mismatches</div></div>
-                                <div id="hla-allele-list" class="hla-alist"></div>
-                            </div>
-                        </details>
-
-                        <details class="ux-details">
-                            <summary>Eplet detail by donor allele <span class="ux-count" id="hla-count-eplet">0</span></summary>
-                            <div class="ux-details-body">
-                                <p class="hla-legend"><span class="hla-chip hla-chip-ie">★ immunogenic (IE.xlsx)</span> <span class="hla-chip hla-chip-abv">✓ antibody-verified (HLAMatchmaker)</span> <span class="hla-chip hla-chip-plain">other mismatched eplet</span></p>
-                                <div class="matrix-container">
-                                    <table class="table-matrix hla-table">
-                                        <thead><tr><th>Class</th><th>Donor allele</th><th>Mismatched eplets (absent from every recipient molecule of the class)</th><th>Total</th><th>Ab-verified</th><th>Immunogenic</th></tr></thead>
-                                        <tbody id="hla-eplet-table"></tbody>
-                                    </table>
-                                </div>
-                                <div class="protocol-header" style="margin-top: 12px;">Locus-wise loads</div>
-                                <div class="matrix-container">
-                                    <table class="table-matrix hla-table">
-                                        <thead><tr><th>Locus / class</th><th>Total eplet MM</th><th>Immunogenic (IE)</th><th>Non-immunogenic</th><th>Ab-verified</th></tr></thead>
-                                        <tbody id="hla-locus-table"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </details>
-
-                        <details class="ux-details" open>
-                            <summary>Immunogenic eplets identified <span class="ux-count" id="hla-count-ie">0</span></summary>
-                            <div class="ux-details-body">
+                        <div>
+                            <div class="protocol-panel hla-panel">
+                                <div class="protocol-header">Immunogenic eplets identified <span class="ux-count" id="hla-count-ie">0</span></div>
                                 <div id="hla-ie-list" class="hla-chip-wrap"></div>
                                 <div class="protocol-header" style="margin-top: 14px;">Mismatched eplets by HLAMatchmaker category</div>
                                 <div id="hla-cat-list" class="hla-chip-wrap"></div>
                             </div>
-                        </details>
+                            <div class="ux-explain" id="hla-explain"></div>
+                        </div>
+                    </div>
 
-                        <details class="ux-details" id="hla3d-section">
-                            <summary>3D view of mismatched eplets on the donor molecule <span class="ux-muted">proof of concept</span> <span class="ux-count" id="hla-count-3d">0</span></summary>
-                            <div class="ux-details-body">
-                                <p class="hla-ref-info" style="margin: 0 0 10px;">Shows the donor HLA molecule with the anchor position of every mismatched eplet marked (pink = immunogenic per IE.xlsx, cyan = antibody-verified, grey = other). Solved structures come from RCSB PDB for common alleles; other alleles use a template of the same locus, or you can load a homology model downloaded from <a href="https://www.phla3d.com.br/" target="_blank" rel="noopener" style="color:#93c5fd;">pHLA3D</a> (research-use licence, cite their papers). Needs an internet connection for the viewer library and RCSB files.</p>
-                                <div class="grid-cols-2">
-                                    <div class="control-field">
-                                        <label for="hla3d-allele" class="control-label">Donor allele to display</label>
-                                        <select id="hla3d-allele" class="control-select"><option value="">No donor allele with an eplet comparison yet</option></select>
-                                    </div>
-                                    <div class="control-field">
-                                        <label for="hla3d-file" class="control-label">Optional: local PDB file for this allele (e.g. from pHLA3D)</label>
-                                        <input type="file" id="hla3d-file" class="control-input" accept=".pdb,.ent,.txt" onchange="HLA3D.loadLocalFile(this)">
-                                        <span class="control-caption"><button type="button" class="ux-link-btn" style="margin-left:0;" onclick="HLA3D.clearLocalFile()">Use built-in structures instead</button></span>
-                                    </div>
-                                </div>
-                                <div class="action-cluster" style="margin-top: 6px;">
-                                    <button type="button" class="btn-aurora" id="hla3d-load" onclick="HLA3D.show()" disabled><span>Load 3D view</span><span>↗</span></button>
-                                    <button type="button" class="btn-ghost" id="hla3d-spin" onclick="HLA3D.toggleSpin()">Rotate</button>
-                                    <button type="button" class="btn-ghost" id="hla3d-surface" data-on="0" onclick="HLA3D.toggleSurface()">Show surface</button>
-                                    <button type="button" class="btn-ghost" onclick="HLA3D.resetView()">Reset view</button>
-                                </div>
-                                <div id="hla3d-msg" class="hla-warn hla-warn-info" style="margin-top: 10px;">Choose a donor allele and press <em>Load 3D view</em>.</div>
-                                <div id="hla3d-viewer" class="hla3d-viewer" hidden></div>
-                                <p class="hla-legend" style="margin-top: 10px;"><span class="hla-chip hla-chip-ie">immunogenic eplet anchor</span> <span class="hla-chip hla-chip-abv">antibody-verified anchor</span> <span class="hla-chip hla-chip-plain">other mismatched anchor</span> <span class="hla-chip hla-chip-ok">residues within 3.5 Å</span></p>
-                            </div>
-                        </details>
+                    <details class="ux-details">
+                        <summary>Allele-level detail by locus <span class="ux-count" id="hla-count-allele">0</span></summary>
+                        <div class="ux-details-body">
+                            <div class="hla-alist-head"><div>Locus</div><div>Donor / recipient alleles and what the recipient lacks</div><div>Mismatches</div></div>
+                            <div id="hla-allele-list" class="hla-alist"></div>
+                        </div>
+                    </details>
 
-                        <details class="ux-details">
-                            <summary>Method, reference database and result ID</summary>
-                            <div class="ux-details-body hla-footer">
-                                <div id="hla-result-id" class="hla-result-id"></div>
-                                <div id="hla-ref-info" class="hla-ref-info"></div>
-                                <div class="hla-ref-info">A donor eplet counts as mismatched when it is absent from every recipient molecule of the same class (class I: A/B/C together; class II: DRB1/3/4/5, DQB1, DPB1 β chains together and DQA1/DPA1 α chains together), which is the HLAMatchmaker intra- and interlocus comparison. Loads are counts of unique mismatched eplets. Immunogenic load counts mismatched eplets whose names appear in IE.xlsx; antibody-verified load uses the workbook's own flags. Antigen-level mismatches (first field) are the counts used in the thesis registers and the risk model.</div>
+                    <details class="ux-details">
+                        <summary>Eplet detail by donor allele <span class="ux-count" id="hla-count-eplet">0</span></summary>
+                        <div class="ux-details-body">
+                            <p class="hla-legend"><span class="hla-chip hla-chip-ie">★ immunogenic (IE.xlsx)</span> <span class="hla-chip hla-chip-abv">✓ antibody-verified (HLAMatchmaker)</span> <span class="hla-chip hla-chip-plain">other mismatched eplet</span></p>
+                            <div class="matrix-container">
+                                <table class="table-matrix hla-table">
+                                    <thead><tr><th>Class</th><th>Donor allele</th><th>Mismatched eplets (absent from every recipient molecule of the class)</th><th>Total</th><th>Ab-verified</th><th>Immunogenic</th></tr></thead>
+                                    <tbody id="hla-eplet-table"></tbody>
+                                </table>
                             </div>
-                        </details>
-                    </section>
-                </div>
+                            <div class="protocol-header" style="margin-top: 12px;">Locus-wise loads</div>
+                            <div class="matrix-container">
+                                <table class="table-matrix hla-table">
+                                    <thead><tr><th>Locus / class</th><th>Total eplet MM</th><th>Immunogenic (IE)</th><th>Non-immunogenic</th><th>Ab-verified</th></tr></thead>
+                                    <tbody id="hla-locus-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="ux-details" id="hla3d-section">
+                        <summary>3D view of mismatched eplets on the donor molecule <span class="ux-count" id="hla-count-3d">0</span></summary>
+                        <div class="ux-details-body">
+                            <p class="hla-ref-info" style="margin: 0 0 10px;">Shows the donor HLA molecule with every mismatched eplet patch marked (pink = immunogenic per IE.xlsx, cyan = antibody-verified, grey = other; large sphere = anchor residue). Structures: pHLA3D homology model of the exact allele when available (research-use licence, cite <a href="https://www.phla3d.com.br/" target="_blank" rel="noopener">pHLA3D</a>), otherwise bundled RCSB crystal structures, RCSB online, or a same-locus template; or load a PDB file.</p>
+                            <div class="grid-cols-2">
+                                <div class="control-field">
+                                    <label for="hla3d-allele" class="control-label">Donor allele to display</label>
+                                    <select id="hla3d-allele" class="control-select"><option value="">No donor allele with an eplet comparison yet</option></select>
+                                </div>
+                                <div class="control-field">
+                                    <label for="hla3d-file" class="control-label">Optional: local PDB file for this allele</label>
+                                    <input type="file" id="hla3d-file" class="control-input" accept=".pdb,.ent,.txt" onchange="HLA3D.loadLocalFile(this)">
+                                    <span class="control-caption"><button type="button" class="ux-link-btn" style="margin-left:0;" onclick="HLA3D.clearLocalFile()">Use built-in structures instead</button></span>
+                                </div>
+                            </div>
+                            <div class="action-cluster" style="margin-top: 6px;">
+                                <button type="button" class="btn-aurora" id="hla3d-load" onclick="HLA3D.show()" disabled><span>Load 3D view</span><span>↗</span></button>
+                                <button type="button" class="btn-ghost" id="hla3d-spin" onclick="HLA3D.toggleSpin()">Rotate</button>
+                                <button type="button" class="btn-ghost" id="hla3d-surface" data-on="0" onclick="HLA3D.toggleSurface()">Show surface</button>
+                                <button type="button" class="btn-ghost" onclick="HLA3D.resetView()">Reset view</button>
+                            </div>
+                            <div id="hla3d-msg" class="hla-warn hla-warn-info" style="margin-top: 10px;">Choose a donor allele and press <em>Load 3D view</em>.</div>
+                            <div id="hla3d-viewer" class="hla3d-viewer" hidden></div>
+                            <p class="hla-legend" style="margin-top: 10px;"><span class="hla-chip hla-chip-ie">immunogenic eplet</span> <span class="hla-chip hla-chip-abv">antibody-verified</span> <span class="hla-chip hla-chip-plain">other mismatched eplet</span></p>
+                        </div>
+                    </details>
+
+                    <details class="ux-details">
+                        <summary>Method, reference database and result ID</summary>
+                        <div class="ux-details-body hla-footer">
+                            <div id="hla-result-id" class="hla-result-id"></div>
+                            <div id="hla-ref-info" class="hla-ref-info"></div>
+                            <div class="hla-ref-info">A donor eplet counts as mismatched when it is absent from every recipient molecule of the same class (class I: A/B/C together; class II: DRB1/3/4/5, DQB1, DPB1 β chains together and DQA1/DPA1 α chains together), which is the HLAMatchmaker intra- and interlocus comparison. Loads are counts of unique mismatched eplets. Immunogenic load counts mismatched eplets whose names appear in IE.xlsx; antibody-verified load uses the workbook's own flags. Antigen-level mismatches (first field) are the counts used in the thesis registers and the risk model.</div>
+                        </div>
+                    </details>
+                </section>
             </div><!-- /#pane-eplet -->

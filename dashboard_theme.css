@@ -98,6 +98,23 @@ body { background: var(--color-liquid-abyss); color: var(--db-text-2); }
 .landing-evidence .content-section { margin-top: 8px; }
 .landing-evidence > summary { font-size: 15px; }
 
+.lp-feature { background: #fff; border: 1px solid var(--db-border); box-shadow: var(--db-shadow); }
+.lp-feature h3 { color: var(--db-text); }
+.lp-feature p { color: var(--db-muted); }
+.lp-feature ul { color: var(--db-text-2); }
+.lp-feature-icon { background: var(--db-accent-soft); color: var(--db-accent); }
+.stat-label { text-transform: none; letter-spacing: 0.01em; font-size: 12px; }
+.nav-link-secondary { color: #94a3b8; }
+.driver-label { color: var(--db-text-2); }
+.driver-bar { background: #e2e8f0; }
+.driver-fill.up { background: #dc2626; }
+.driver-fill.down { background: #059669; }
+.driver-val.up, .driver-net .up { color: #b91c1c; }
+.driver-val.down, .driver-net .down { color: #047857; }
+.driver-net { color: var(--db-muted); }
+.ux-danger { color: #b91c1c !important; }
+.recent-pair { color: var(--db-text-2); }
+
 /* ---- top bar / breadcrumb ------------------------------------------------- */
 .dashboard-top-bar { border-bottom: 1px solid var(--db-border); padding: 18px 0; margin-bottom: 20px; }
 .back-link-btn { color: var(--db-accent); }
