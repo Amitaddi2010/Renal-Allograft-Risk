@@ -88,7 +88,8 @@ Open your browser at `http://localhost:8080/`.
 
 ## 🧭 Using the app
 
-- **Three steps**: enter recipient and donor HLA typing (tab 2), read the mismatch dashboard, then press *Send to risk calculator* to carry the antigen-level mismatches and eplet loads into tab 1 and add donor age, induction and crossmatch values.
+- **Structure**: a landing page (overview, three-step guide, KPI tiles, collapsible study evidence) and a dashboard with two modules reached from the sidebar: **Risk calculator** and **HLA & eplets**. The default look is a light clinical dashboard (`dashboard_theme.css`); the original dark "terminal" look can be switched on from the help dock.
+- **Three steps**: enter recipient and donor HLA typing (HLA & eplets), read the mismatch dashboard, then press *Send to risk calculator* to carry the antigen-level mismatches and eplet loads into the risk calculator and add donor age, induction and crossmatch values.
 - **Two input modes** on tab 2: *Paste typing* (any common notation, results update as you type) or *Enter by locus* (a grid with allele auto-complete from the reference database). Problems are shown in plain language with candidate alleles.
 - **Dashboard**: headline counts, a per-locus glance (antigen mismatches as dots, eplet load bars with the immunogenic share in pink), a "what these numbers mean" box, and collapsible detail sections (allele-level by locus, eplets by donor allele, immunogenic eplets, method and result ID).
 - **Help & glossary** button (bottom right) explains every term; **background motion** can be switched off (also follows the system reduced-motion setting).

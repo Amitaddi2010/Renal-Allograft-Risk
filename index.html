@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="styles.css?v=20260908_hla">
     <link rel="stylesheet" href="hla_styles.css?v=20260908e">
     <link rel="stylesheet" href="ux_styles.css?v=20260908d">
-    <link rel="stylesheet" id="theme-dashboard" href="dashboard_theme.css?v=20260908b">
+    <link rel="stylesheet" id="theme-dashboard" href="dashboard_theme.css?v=20260908c">
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
@@ -26,8 +26,6 @@
 
         <nav class="nav-links" id="nav-links">
             <button type="button" class="nav-link active" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">Overview</button>
-            <button type="button" class="nav-link" id="nav-btn-evidence" onclick="scrollToSection('evidence-section'); closeNav();">Evidence audit</button>
-            <button type="button" class="nav-link" id="nav-btn-domains" onclick="scrollToSection('domains-section'); closeNav();">Immune domains</button>
             <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">Risk calculator</button>
             <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">HLA &amp; eplets</button>
         </nav>
@@ -70,7 +68,7 @@
                     <button type="button" class="btn-ghost" onclick="switchView('calculator'); switchCalculatorTab('nomogram');">
                         <span>Open the risk calculator</span>
                     </button>
-                    <button type="button" class="btn-ghost" onclick="scrollToSection('evidence-section')">
+                    <button type="button" class="btn-ghost" onclick="document.getElementById('landing-evidence').open = true; scrollToSection('landing-evidence');">
                         <span>See the evidence</span>
                     </button>
                 </div>
@@ -101,49 +99,11 @@
                 </div>
             </section>
 
-            <!-- Core Pillars / Research Domains -->
-            <section class="content-section" id="domains-section">
-                <div class="section-header-compact">
-                    <div class="group-kicker">What the study measured</div>
-                    <h2 class="section-heading-sm">Three Complementary Biological Domains</h2>
-                    <p class="section-desc">Traditional broad HLA matching provides modest risk discrimination in contemporary immunosuppression. This doctoral pipeline captures covert alloreactivity across three distinct mechanisms.</p>
-                </div>
-
-                <div class="grid-cols-3">
-                    <!-- Card 1 -->
-                    <div class="surface-card">
-                        <div class="card-header-bar">
-                            <h3 class="card-title" style="font-size: 19px;">Flow Cytometric Crossmatch</h3>
-                            <button class="arrow-btn" onclick="switchView('calculator')" aria-label="Open">↗</button>
-                        </div>
-                        <p class="card-body-text">Sub-CDC cellular crossmatching detects low-level donor-reactive alloantibodies binding peripheral T and B lymphocytes. Provides an essential <strong>82.1% Specificity</strong> and <strong>79.6% Negative Predictive Value</strong> rule-out safety gate.</p>
-                        <div class="card-tag">B-MCS & T-MCS Channel Shifts</div>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div class="surface-card">
-                        <div class="card-header-bar">
-                            <h3 class="card-title" style="font-size: 19px;">Non-HLA Checkpoint SNPs</h3>
-                            <button class="arrow-btn" onclick="switchView('calculator')" aria-label="Open">↗</button>
-                        </div>
-                        <p class="card-body-text">Association of <strong>*PD-L1* rs4143815</strong> with rejection (Allelic OR: 1.38, Recessive OR: 2.49, p = 0.00037). Case genotypes depart from Hardy-Weinberg equilibrium (heterozygote deficit, χ² = 68.3), the same signature as the flagged assays, so orthogonal re-genotyping is required before it can be called a risk locus.</p>
-                        <div class="card-tag">Association Observed · QC Pending (CD274)</div>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="surface-card">
-                        <div class="card-header-bar">
-                            <h3 class="card-title" style="font-size: 19px;">Molecular Eplet Repertoire</h3>
-                            <button class="arrow-btn" onclick="switchView('calculator')" aria-label="Open">↗</button>
-                        </div>
-                        <p class="card-body-text">Cataloged <strong>71 Class I & 76 Class II</strong> PGIMER reference immunogenic eplets across 1,435 evaluations. Demonstrates that eplets provide qualitative antibody specificity rather than linear unweighted arithmetic burden.</p>
-                        <div class="card-tag">Dominant Targets: 163LG & 130Q</div>
-                    </div>
-                </div>
-            </section>
-
             <!-- Evidence Audit Matrix Section -->
-            <section class="content-section" id="evidence-section" style="margin-top: var(--section-gap);">
+            <details class="ux-details landing-evidence" id="landing-evidence">
+                <summary>Evidence behind the tools — study results and scientific verdicts <span class="ux-muted">reference</span></summary>
+                <div class="ux-details-body">
+<section class="content-section" id="evidence-section" style="margin-top: var(--section-gap);">
                 <div class="section-header-compact">
                     <div class="group-kicker">Evidence behind the tools</div>
                     <h2 class="section-heading-sm">Audited Evidence & Scientific Verdicts</h2>
@@ -224,6 +184,8 @@
                     </div>
                 </div>
             </section>
+                </div>
+            </details>
 
             <!-- Pre-Transplant Calculator Launch Banner Card -->
             <section class="launch-banner-card">
@@ -249,9 +211,9 @@
                 <div class="footer-col">
                     <h4>Doctoral Registry</h4>
                     <ul class="footer-links">
-                        <li><a href="javascript:void(0)" onclick="switchView('calculator')">Run Risk Calculator</a></li>
-                        <li><a href="javascript:void(0)" onclick="scrollToSection('evidence-section')">Objectives Audit</a></li>
-                        <li><a href="javascript:void(0)" onclick="scrollToSection('domains-section')">Biological Axes</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchView('calculator'); switchCalculatorTab('nomogram');">Risk calculator</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchView('calculator'); switchCalculatorTab('eplet');">HLA &amp; eplet analysis</a></li>
+                        <li><a href="javascript:void(0)" onclick="document.getElementById('landing-evidence').open = true; scrollToSection('landing-evidence');">Study evidence (reference)</a></li>
                         <li><a href="https://github.com/Amitaddi2010/Renal-Allograft-Risk" target="_blank">GitHub Repository ↗</a></li>
                     </ul>
                 </div>
@@ -279,9 +241,13 @@
         <div class="page-wrapper">
             <!-- Dashboard Sub-Header -->
             <div class="dashboard-top-bar">
-                <button type="button" class="back-link-btn" onclick="switchView('landing')">
-                    <span>← Back to overview</span>
-                </button>
+                <nav class="db-crumb" aria-label="Breadcrumb">
+                    <button type="button" class="back-link-btn" onclick="switchView('landing')">Overview</button>
+                    <span class="db-crumb-sep">/</span>
+                    <span class="db-crumb-current">Dashboard</span>
+                    <span class="db-crumb-sep">/</span>
+                    <span class="db-crumb-current" id="module-crumb">Risk calculator</span>
+                </nav>
                 <div class="dash-meta-badge">
                     <span class="active-pill"></span>
                     <span>Risk model trained on 443 PGIMER transplant recipients</span>
@@ -301,6 +267,13 @@
 
             <!-- TAB PANE 1: QUANTITATIVE RISK NOMOGRAM -->
             <div id="pane-nomogram" class="calc-tab-pane">
+                <div class="module-header">
+                    <div>
+                        <h1 class="module-title">Rejection risk calculator</h1>
+                        <p class="module-desc">Estimated one-year probability of biopsy-proven acute rejection from donor, HLA mismatch and flow-crossmatch values, with the observed risk band from the PGIMER cohort.</p>
+                    </div>
+                    <button type="button" class="btn-ghost btn-sm" onclick="switchCalculatorTab('eplet')">Compute HLA values from typing →</button>
+                </div>
                 <!-- Main Terminal Grid -->
                 <div class="terminal-grid" id="nomogram">
                     <!-- Left Surface Card: Inputs -->
@@ -573,6 +546,13 @@
 
             <!-- TAB PANE 2: INTEGRATED HLA MISMATCH & EPLET ENGINE (HLAMatchmaker v3.1 tables + IE.xlsx) -->
             <div id="pane-eplet" class="calc-tab-pane hidden-tab">
+                <div class="module-header">
+                    <div>
+                        <h1 class="module-title">HLA mismatch &amp; eplet analysis</h1>
+                        <p class="module-desc">Donor and recipient typing → antigen- and allele-level mismatches → eplet mismatch load → immunogenic eplets (IE catalogue) → 3D view, computed in the browser from the HLAMatchmaker 3.1 tables.</p>
+                    </div>
+                    <button type="button" class="btn-ghost btn-sm" onclick="switchCalculatorTab('nomogram')">Open the risk calculator →</button>
+                </div>
                 <div class="terminal-grid hla-grid">
                     <!-- Left Surface Card: Typing Input -->
                     <section class="surface-card">
@@ -783,6 +763,6 @@
     <script src="hla_ui.js?v=20260908f"></script>
     <script src="hla_eplet_residues.js?v=20260908d"></script>
     <script src="hla_3d.js?v=20260908f"></script>
-    <script src="app.js?v=20260908e"></script>
+    <script src="app.js?v=20260908f"></script>
 </body>
 </html>

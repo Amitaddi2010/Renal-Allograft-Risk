@@ -551,6 +551,10 @@ function syncNavActive(tab) {
     const hla = document.getElementById('nav-btn-eplet-adv');
     if (calc) calc.classList.toggle('active', tab === 'nomogram');
     if (hla) hla.classList.toggle('active', tab === 'eplet');
+    const crumb = document.getElementById('module-crumb');
+    if (crumb) crumb.textContent = tab === 'eplet' ? 'HLA & eplets' : 'Risk calculator';
+    const landing = document.getElementById('nav-btn-landing');
+    if (landing) landing.classList.remove('active');
 }
 
 function updateAdvisoryEplets() {

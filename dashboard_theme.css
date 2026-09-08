@@ -85,6 +85,19 @@ body { background: var(--color-liquid-abyss); color: var(--db-text-2); }
     .hamburger-btn span { background: #fff; }
 }
 
+/* ---- dashboard modules ------------------------------------------------------- */
+.module-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; margin: 4px 0 22px; }
+.module-title { font-family: var(--font-matter); font-size: 26px; font-weight: 500; letter-spacing: -0.4px; color: var(--db-text); margin: 0 0 6px; line-height: 1.2; }
+.module-desc { color: var(--db-muted); font-size: 14px; line-height: 1.5; margin: 0; max-width: 820px; }
+.db-crumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--db-muted); }
+.db-crumb .back-link-btn { padding: 0; font-size: 13px; }
+.db-crumb-sep { color: #cbd5e1; }
+.db-crumb-current:last-child { color: var(--db-text); font-weight: 500; }
+@media (min-width: 861px) { .calc-tab-bar { display: none; } }   /* the sidebar switches modules on desktop */
+.landing-evidence { margin-top: var(--section-gap); }
+.landing-evidence .content-section { margin-top: 8px; }
+.landing-evidence > summary { font-size: 15px; }
+
 /* ---- top bar / breadcrumb ------------------------------------------------- */
 .dashboard-top-bar { border-bottom: 1px solid var(--db-border); padding: 18px 0; margin-bottom: 20px; }
 .back-link-btn { color: var(--db-accent); }
