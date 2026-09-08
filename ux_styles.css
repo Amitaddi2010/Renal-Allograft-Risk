@@ -94,7 +94,8 @@
 .ux-more-actions button:hover { color: #bbc7c6; }
 
 /* Landing hero with the 3D helix — abyssal terminal (theme-independent: always dark teal) */
-.hero-3d { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; color: #edfffe;
+.hero-3d { position: relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; overflow: hidden; color: #edfffe;
+    box-sizing: border-box; padding-top: 80px; padding-bottom: 32px;
     background: radial-gradient(1100px 650px at 74% 48%, #014a44 0%, #012624 45%, #011d1c 85%); }
 .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
 .hero-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
@@ -116,12 +117,12 @@
 @keyframes heroBeam { 0%, 100% { left: 52%; opacity: 0.18; } 50% { left: 68%; opacity: 0.32; } }
 @media (prefers-reduced-motion: reduce) { .hero-blob, .hero-grid, .hero-beam { animation: none !important; } }
 body.motion-off .hero-blob, body.motion-off .hero-grid, body.motion-off .hero-beam { animation: none !important; }
-.hero-3d-content { position: relative; z-index: 2; max-width: min(640px, 48vw); padding: 8vh 0 8vh 8vw; }
-.hero-brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-matter); font-weight: 500; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #bbc7c6; margin-bottom: 28px; }
+.hero-3d-content { position: relative; z-index: 2; max-width: min(640px, 48vw); padding: clamp(14px, 2vh, 32px) 0 clamp(28px, 4vh, 48px) clamp(24px, 7vw, 84px); }
+.hero-brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-matter); font-weight: 500; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #bbc7c6; margin-bottom: clamp(16px, 2.4vh, 26px); }
 .hero-brand-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbfffc; box-shadow: 0 0 12px #cbfffc; }
-.hero-3d-title { font-family: var(--font-matter); font-size: clamp(38px, 5.2vw, 76px); font-weight: 500; line-height: 1.05; letter-spacing: -0.04em; margin: 0 0 24px; color: #fff; max-width: 580px; }
-.hero-3d-sub { font-family: var(--font-matter); font-size: clamp(14.5px, 1.15vw, 17px); line-height: 1.55; color: #bbc7c6; margin: 0 0 34px; max-width: 520px; }
-.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+.hero-3d-title { font-family: var(--font-matter); font-size: clamp(34px, 4.8vw, 72px); font-weight: 500; line-height: 1.05; letter-spacing: -0.04em; margin: 0 0 clamp(16px, 2vh, 22px); color: #fff; max-width: 580px; }
+.hero-3d-sub { font-family: var(--font-matter); font-size: clamp(14px, 1.1vw, 17px); line-height: 1.5; color: #bbc7c6; margin: 0 0 clamp(20px, 2.8vh, 32px); max-width: 520px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: clamp(18px, 2.4vh, 26px); }
 .btn-lg { padding: 16px 28px !important; font-size: 13px !important; border-radius: 6px !important; }
 .hero-3d .btn-aurora { background: var(--gradient-aurora); color: #222; box-shadow: none; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-matter); font-weight: 500; }
 .hero-3d .btn-aurora:hover { filter: brightness(1.04); transform: none; }
@@ -129,14 +130,15 @@ body.motion-off .hero-blob, body.motion-off .hero-grid, body.motion-off .hero-be
 .hero-ghost:hover { border-color: #cbfffc !important; color: #fff !important; }
 .hero-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #bbc7c6; }
 .hero-sep { color: rgba(203,255,252,0.5); }
-.hero-foot { position: absolute; left: 8vw; right: 8vw; bottom: 22px; z-index: 2; font-size: 11px; letter-spacing: 0.04em; color: #707777; }
+.hero-foot { position: absolute; left: 8vw; right: 8vw; bottom: clamp(12px, 2vh, 22px); z-index: 2; font-size: 11px; letter-spacing: 0.04em; color: #707777; }
 body.is-landing { padding-left: 0 !important; }
 @media (max-width: 860px) {
-    .hero-3d-content { max-width: 100%; padding: 10vh 6vw 4vh; }
+    .hero-3d { padding-top: 76px; }
+    .hero-3d-content { max-width: 100%; padding: 16px 6vw 40px; }
 }
 @media (max-width: 640px) {
     .hero-3d { align-items: flex-start; }
-    .hero-3d-content { padding: 10vh 6vw 34vh; }
+    .hero-3d-content { padding: 16px 6vw 34vh; }
     .hero-3d-title { letter-spacing: -0.03em; }
     .hero-foot { left: 6vw; right: 6vw; font-size: 10px; }
     .calc-tab-btn .tab-badge-advisory { display: none; }

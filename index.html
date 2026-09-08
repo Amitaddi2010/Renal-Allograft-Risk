@@ -7,11 +7,11 @@
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
     <link rel="stylesheet" href="styles.css?v=20260910b">
     <link rel="stylesheet" href="hla_styles.css?v=20260910d">
-    <link rel="stylesheet" href="ux_styles.css?v=20260912">
-    <link rel="stylesheet" href="dashboard_theme.css?v=20260910b">
+    <link rel="stylesheet" href="ux_styles.css?v=20260912c">
+    <link rel="stylesheet" href="dashboard_theme.css?v=20260911d">
     <link rel="stylesheet" id="theme-glass" href="dashboard_glass.css?v=20260910" disabled>
-    <link rel="stylesheet" href="motion.css?v=20260911">
-    <link rel="stylesheet" href="responsive.css?v=20260911">
+    <link rel="stylesheet" href="motion.css?v=20260911b">
+    <link rel="stylesheet" href="responsive.css?v=20260911b">
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
@@ -30,6 +30,7 @@
             <button type="button" class="landing-nav-btn" onclick="scrollToSection('landing-features')">Capabilities</button>
             <button type="button" class="landing-nav-btn" onclick="scrollToSection('landing-sandbox')">Live Sandbox</button>
             <button type="button" class="landing-nav-btn" onclick="scrollToSection('landing-evidence-section')">Clinical Evidence</button>
+            <button type="button" class="landing-nav-btn" onclick="scrollToSection('landing-about')">About</button>
         </nav>
         <div class="landing-header-actions">
             <button type="button" class="btn-aurora btn-sm" onclick="switchView('calculator'); switchCalculatorTab('home');">
@@ -348,7 +349,72 @@
                 </div>
             </section>
 
-            <!-- 5. Landing Footer -->
+            <!-- 5. About: the people behind the research and the software -->
+            <section class="landing-section" id="landing-about">
+                <div class="landing-section-header">
+                    <div class="group-kicker">About</div>
+                    <h2 class="landing-section-title">The People Behind the Terminal</h2>
+                    <p class="landing-section-sub">A doctoral study in transplant immunology, and the software built to put its models into clinical hands.</p>
+                </div>
+
+                <div class="about-grid">
+                    <article class="about-card tilt-card">
+                        <div class="about-photo-frame">
+                            <img class="about-photo" src="images/heera-singh.jpg?v=20260911" alt="Portrait of Heera Singh" width="560" height="700" loading="lazy" decoding="async">
+                        </div>
+                        <div class="about-role">Doctoral research</div>
+                        <h3 class="about-name">Heera Singh</h3>
+                        <p class="about-title">PhD candidate · Department of Immunopathology<br>PGIMER Chandigarh</p>
+                    </article>
+
+                    <article class="about-card tilt-card">
+                        <div class="about-photo-frame">
+                            <img class="about-photo" src="images/amit-raj-saraswat.jpg?v=20260911" alt="Portrait of Amit Raj Saraswat" width="560" height="700" loading="lazy" decoding="async">
+                        </div>
+                        <div class="about-role">Design &amp; development</div>
+                        <h3 class="about-name">Amit Raj Saraswat</h3>
+                        <p class="about-title">Senior Scientist · Department of Orthopaedics<br>PGIMER Chandigarh</p>
+                        <a class="about-link" href="https://amitrajsaraswat.space/" target="_blank" rel="noopener noreferrer">amitrajsaraswat.space <span aria-hidden="true">↗</span></a>
+                    </article>
+
+                    <article class="about-card tilt-card">
+                        <div class="about-photo-frame">
+                            <img class="about-photo" src="images/dr-siddhartha-sharma.jpg?v=20260911" alt="Portrait of Dr Siddhartha Sharma" width="560" height="700" loading="lazy" decoding="async">
+                        </div>
+                        <div class="about-role">Guidance &amp; supervision</div>
+                        <h3 class="about-name">Dr Siddhartha Sharma</h3>
+                        <p class="about-title">Department of Orthopaedics<br>PGIMER Chandigarh</p>
+                    </article>
+                </div>
+
+                <p class="about-credit">Designed and developed by <strong>Amit Raj Saraswat</strong>, Senior Scientist, Department of Orthopaedics, PGIMER Chandigarh, under the guidance of <strong>Dr Siddhartha Sharma</strong>.</p>
+
+                <div class="about-metrics-label">Developer research profile · Amit Raj Saraswat <span class="about-metrics-note">(personal record, not an output of this study)</span></div>
+                <div class="about-metrics">
+                    <div class="metric-card">
+                        <div class="metric-card-val">8</div>
+                        <div class="metric-card-lbl">H-Index</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-val">63</div>
+                        <div class="metric-card-lbl">Research Works</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-val">1</div>
+                        <div class="metric-card-lbl">Patent Published</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-val">4</div>
+                        <div class="metric-card-lbl">Patents Filed</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-val">1</div>
+                        <div class="metric-card-lbl">Copyright Published</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Landing Footer -->
             <footer class="landing-footer">
                 <div class="landing-footer-brand">
                     <strong style="color: var(--ab-text);">RAMRT // PGIMER Immunopathology</strong>
@@ -358,6 +424,7 @@
                     <button type="button" onclick="switchView('calculator'); switchCalculatorTab('home');">Dashboard</button>
                     <button type="button" onclick="switchView('calculator'); switchCalculatorTab('nomogram');">Risk Calculator</button>
                     <button type="button" onclick="switchView('calculator'); switchCalculatorTab('eplet');">HLA &amp; Eplets</button>
+                    <button type="button" onclick="scrollToSection('landing-about')">About</button>
                     <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ Back to Top</button>
                 </div>
             </footer>
@@ -1101,7 +1168,7 @@
     <script src="hla_eplet_residues.js?v=20260908d"></script>
     <script src="hla_3d.js?v=20260910b"></script>
     <script src="dashboard_home.js?v=20260908"></script>
-    <script src="dna_hero.js?v=20260912"></script>
+    <script src="dna_hero.js?v=20260912b"></script>
     <script src="app.js?v=20260910c"></script>
     <script src="motion.js?v=20260911"></script>
 </body>

@@ -670,3 +670,10 @@ body.motion-off *, body.motion-off *::before, body.motion-off *::after {
 }
 body.motion-off .hero-bg, body.motion-off .hero-canvas, body.motion-off .tilt-card { transform: none !important; }
 
+
+/* the About portraits return to their own colour on hover; guarded so the state
+   cannot stick on a touch screen after a tap */
+@media (hover: hover) {
+    .about-card:hover .about-photo { filter: grayscale(0.15) contrast(1.02); }
+    .about-card:hover .about-photo-frame::before { opacity: 0.2; }
+}

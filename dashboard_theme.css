@@ -323,3 +323,52 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
     .surface-card, .ux-details, .protocol-panel { background: #fff; box-shadow: none; }
 }
 
+
+/* .group-kicker is a flex container, so text-align on the centred section header
+   never reached it and every landing kicker sat left of its own heading */
+.landing-section-header .group-kicker { justify-content: center; }
+
+/* ---- About section: the people behind the research and the software ------------ */
+.about-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 32px; }
+.about-card {
+    background: var(--ab-kelp); border: 1px solid var(--ab-line); border-radius: var(--radius-cards);
+    padding: 22px 22px 26px; text-align: center; display: flex; flex-direction: column;
+}
+.about-photo-frame {
+    position: relative; overflow: hidden; border-radius: var(--radius-cards);
+    aspect-ratio: 4 / 5; margin-bottom: 18px; background: var(--ab-deep);
+}
+.about-photo {
+    width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; display: block;
+    /* not fully desaturated: a little of the real skin tone has to survive, or faces
+       turn flat cyan once the teal overlay lands on them */
+    filter: grayscale(0.72) contrast(1.04) brightness(1.03); transition: filter 0.45s ease;
+}
+/* teal cast: hue from this overlay, luminance from the photo, held well under full
+   strength so the three different backgrounds agree without the people looking dyed */
+.about-photo-frame::before {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: var(--ab-teal); mix-blend-mode: color; opacity: 0.5;
+    transition: opacity 0.45s ease;
+}
+/* radial vignette keeps the light on the face and sinks whatever the original
+   background happened to be — a red staircase, a studio split, a grey wall */
+.about-photo-frame::after {
+    content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background:
+        radial-gradient(ellipse 78% 62% at 50% 34%, rgba(1,29,28,0) 42%, rgba(1,29,28,0.62) 100%),
+        linear-gradient(180deg, rgba(1,29,28,0) 52%, rgba(1,29,28,0.8) 100%);
+}
+.about-role { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ab-aqua); margin-bottom: 6px; }
+.about-name { font-family: var(--font-matter); font-size: 19px; font-weight: 500; color: var(--ab-text); margin: 0 0 6px; line-height: 1.25; }
+.about-title { font-size: 13px; line-height: 1.5; color: var(--ab-silver); margin: 0; }
+.about-credit { text-align: center; max-width: 780px; margin: 30px auto 0; font-size: 14.5px; line-height: 1.65; color: var(--ab-silver); }
+.about-credit strong { color: var(--ab-text); font-weight: 500; }
+.about-metrics-label {
+    text-align: center; margin: 34px 0 12px; font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--ab-silver);
+}
+.about-metrics-note { text-transform: none; letter-spacing: 0.02em; color: var(--ab-slate); font-size: 11px; }
+.about-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.about-metrics .metric-card { padding: 18px 14px; text-align: center; align-items: center; }
+.about-metrics .metric-card-val { font-size: 30px; }

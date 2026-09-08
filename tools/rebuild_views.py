@@ -65,7 +65,7 @@ LANDING = '''<div id="landing-view" class="view-container active-view">
 # LANDING_GUARD: the live landing may carry sections this template does not know about
 # (metric ribbon, feature cards, live sandbox). Replacing it would delete them, so only
 # rebuild when nothing beyond the hero is present. Update LANDING here if you extend it.
-_extra = [c for c in ('metric-card', 'sandbox-grid', 'landing-features-grid') if c in s]
+_extra = [c for c in ('metric-card', 'sandbox-grid', 'landing-features-grid', 'about-card') if c in s]
 if _extra:
     print('landing left untouched; it carries sections outside this template: ' + ', '.join(_extra))
 else:
