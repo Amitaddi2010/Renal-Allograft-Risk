@@ -197,12 +197,21 @@
                             <div class="action-cluster" style="margin-top: 6px;">
                                 <button type="button" class="btn-aurora" id="hla3d-load" onclick="HLA3D.show()" disabled><span>Load 3D view</span><span>↗</span></button>
                                 <button type="button" class="btn-ghost" id="hla3d-spin" onclick="HLA3D.toggleSpin()">Rotate</button>
+                                <button type="button" class="btn-ghost" id="hla3d-canvas-theme" onclick="HLA3D.toggleCanvasTheme()">☀️ Light canvas</button>
+                                <button type="button" class="btn-ghost" id="hla3d-labels" data-on="1" onclick="HLA3D.toggleLabels()">Hide labels</button>
                                 <button type="button" class="btn-ghost" id="hla3d-surface" data-on="0" onclick="HLA3D.toggleSurface()">Show surface</button>
                                 <button type="button" class="btn-ghost" onclick="HLA3D.resetView()">Reset view</button>
                             </div>
                             <div id="hla3d-msg" class="hla-warn hla-warn-info" style="margin-top: 10px;">Choose a donor allele and press <em>Load 3D view</em>.</div>
                             <div id="hla3d-viewer" class="hla3d-viewer" hidden></div>
-                            <p class="hla-legend" style="margin-top: 10px;"><span class="hla-chip hla-chip-ie">immunogenic eplet</span> <span class="hla-chip hla-chip-abv">antibody-verified</span> <span class="hla-chip hla-chip-plain">other mismatched eplet</span></p>
+                            <p class="hla-legend" style="margin-top: 10px;">
+                                <span class="hla-chip hla-chip-ie">★ immunogenic eplet</span>
+                                <span class="hla-chip hla-chip-abv">✓ antibody-verified</span>
+                                <span class="hla-chip hla-chip-plain">other mismatched eplet</span>
+                                <span class="hla-chip" style="border-color: #00c9b7; color: #00c9b7; font-weight: 500;">target allele chain</span>
+                                <span class="hla-chip" style="border-color: #718096; color: #cbd5e1;">partner chain</span>
+                                <span class="hla-chip" style="border-color: #fbbf24; color: #fbbf24;">bound peptide</span>
+                            </p>
                         </div>
                     </details>
 

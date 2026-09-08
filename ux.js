@@ -127,6 +127,9 @@
         $('ux-gauge-caption').textContent = isNaN(p) ? '' :
             'Predicted 1-year probability of biopsy-proven rejection: ' + (p * 100).toFixed(1) + '% (band Q' + q + ' of 5). ' +
             'Bands split the 443 study patients into five equal groups by predicted risk; the percentage under each band is how many of them actually had a rejection.';
+        if (window.Motion && typeof Motion.updateSvgGauge === 'function') {
+            Motion.updateSvgGauge('dashboard-risk-gauge', p, q);
+        }
     }
 
     window.UX = { openGlossary: openGlossary, closeGlossary: closeGlossary, setMotion: setMotion, afterRisk: afterRisk, applyTheme: applyTheme, currentTheme: currentTheme, GLOSSARY: GLOSSARY };

@@ -241,7 +241,9 @@ function calculateRisk() {
     }
     protocolList.innerHTML = recommendations.map(item => `<li>${item}</li>`).join('');
     if (window.UX && typeof UX.afterRisk === 'function') UX.afterRisk();
+    if (window.Motion && typeof Motion.updateSvgGauge === 'function') Motion.updateSvgGauge('dashboard-risk-gauge', predProb, quintile);
 }
+
 
 function resetDefaults() {
     document.getElementById('donor-age').value = 46;
@@ -621,13 +623,28 @@ function syncNavActive(tab) {
 function renderRiskDrivers(items) {
     const el = document.getElementById('risk-drivers');
     if (!el) return;
+    const descriptions = {
+        'Donor age': 'Age relative to cohort mean 46.4 yrs. Older donor age steadily amplifies rejection risk (+0.28/SD).',
+        'Sibling donor': 'Full-sibling HLA identity or haplotype sharing imparts strong immunological protection (OR = 0.44).',
+        'Deceased donor': 'Deceased vs living donor factor in the locked ElasticNet model.',
+        'Standard induction (basiliximab)': 'Standard IL-2RA induction (+0.70 relative to intensified lymphocyte-depleting ATG).',
+        'HLA-DRB1 mismatch': 'Primary Class II molecular risk driver; highest per-locus hazard (OR = 2.54).',
+        'HLA-A mismatch': 'Class I HLA-A antigen disparity (OR = 1.57).',
+        'HLA-B mismatch': 'Class I HLA-B antigen disparity (OR = 1.65).',
+        'HLA-DQB1 mismatch': 'Class II HLA-DQB1 antigen disparity (OR = 1.45).',
+        'Total mismatches (A+B+DR)': 'Model regularization term counterbalancing per-locus coefficients.',
+        'T-cell crossmatch shift': 'Flow cytometry T-cell median channel shift (donor-reactive antibodies, OR = 1.43).',
+        'B-cell crossmatch shift': 'Flow cytometry B-cell median channel shift (donor-reactive antibodies, OR = 1.12).'
+    };
     const maxAbs = Math.max(0.05, Math.max.apply(null, items.map(function (i) { return Math.abs(i.c); })));
     const sorted = items.slice().sort(function (a, b) { return Math.abs(b.c) - Math.abs(a.c); });
     el.innerHTML = sorted.map(function (i) {
         const up = i.c > 0.0005, down = i.c < -0.0005;
         const w = Math.round(Math.abs(i.c) / maxAbs * 100);
-        return '<div class="driver-row">' +
-            '<div class="driver-label">' + i.label + '</div>' +
+        const desc = descriptions[i.label] || 'Predictor contribution to log-odds.';
+        const tagText = up ? 'Risk Elevator' : (down ? 'Protective' : 'Neutral');
+        return '<div class="driver-row" title="' + desc + '">' +
+            '<div class="driver-label">' + i.label + ' <span class="driver-tag ' + (up ? 'up' : (down ? 'down' : 'flat')) + '">' + tagText + '</span></div>' +
             '<div class="driver-bar"><div class="driver-fill ' + (up ? 'up' : (down ? 'down' : 'flat')) + '" style="width:' + w + '%"></div></div>' +
             '<div class="driver-val ' + (up ? 'up' : (down ? 'down' : 'flat')) + '">' + (up ? '+' : '') + i.c.toFixed(2) + '</div></div>';
     }).join('');

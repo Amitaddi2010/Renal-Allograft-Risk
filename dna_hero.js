@@ -81,13 +81,14 @@
             ctx.clearRect(0, 0, w, h);
             if (!opts.ambient) drawDust();
             const n = opts.points, turns = opts.turns;
-            const portrait = !opts.ambient && h > w * 1.1;        // phones: smaller helix in the lower part, under the text
-            const cx = w * (opts.ambient ? 0.55 : portrait ? 0.5 : 0.58), cy = h * (portrait ? 0.84 : 0.5);
-            const span = portrait ? w * 1.9 : w * (opts.ambient ? 1.5 : 1.35);
-            const R = portrait ? w * 0.17 : h * (opts.ambient ? 0.22 : 0.26);
-            const tilt = opts.ambient ? 0.35 : portrait ? 0.5 : 0.62;   // rotation about the vertical axis: the helix recedes to one side
+            const portrait = !opts.ambient && (h > w * 1.05 || w < 920);        // narrow viewports / mobile / tablet: lower part under text
+            const cx = w * (opts.ambient ? 0.55 : portrait ? 0.5 : 0.77);
+            const cy = h * (portrait ? 0.82 : 0.50);
+            const span = portrait ? w * 1.6 : opts.ambient ? w * 1.5 : Math.min(w * 0.52, Math.max(h * 1.05, 460));
+            const R = portrait ? w * 0.16 : h * (opts.ambient ? 0.22 : 0.25);
+            const tilt = opts.ambient ? 0.35 : portrait ? 0.5 : 0.50;   // rotation about the vertical axis: the helix recedes to one side
             const fov = w * 0.75;
-            const base = portrait ? w * 0.026 : h * (opts.ambient ? 0.02 : 0.03);
+            const base = portrait ? w * 0.024 : h * (opts.ambient ? 0.02 : 0.027);
             const pts = [];
             for (let i = 0; i < n; i++) {
                 const u = i / (n - 1);

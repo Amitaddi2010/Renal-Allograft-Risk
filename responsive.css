@@ -1,0 +1,269 @@
+/* ==========================================================================
+   RESPONSIVE LAYER — loaded last, so it settles device-specific behaviour
+   for every earlier stylesheet.
+
+   Breakpoints: 360 (small phone) · 640 (phone) · 860 (tablet portrait)
+                1100 (small laptop / tablet landscape) · 1800 (large desktop)
+   Plus capability queries: pointer:coarse (touch), hover:none (no hover),
+   and short landscape viewports.
+   ========================================================================== */
+
+/* ---- 1 · fluid page gutters ---------------------------------------------- */
+.page-wrapper { padding-left: clamp(14px, 3.2vw, 40px); padding-right: clamp(14px, 3.2vw, 40px); }
+@media (max-width: 640px) { .page-wrapper { padding-bottom: 32px; } }
+
+/* A safety net against future sideways scroll. `clip` is used rather than `hidden`
+   because `hidden` turns the element into a scroll container, which breaks the
+   position:sticky panels in the risk module. */
+html, body { max-width: 100%; }
+body { overflow-x: clip; }
+@supports not (overflow: clip) { body { overflow-x: hidden; } }
+img, svg, canvas, video { max-width: 100%; }
+
+/* ---- 2 · viewport height that survives mobile browser chrome -------------- */
+/* 100vh ignores the collapsing address bar on phones; svh is the small-viewport unit. */
+@supports (height: 100svh) {
+    .hero-3d { min-height: 100svh; }
+    @media (min-width: 861px) { .ramrt-nav { height: 100svh; max-height: 100svh; } }
+}
+
+/* ---- 3 · summary strip: five columns only when there is room -------------- */
+.db-sum-value { font-size: clamp(21px, 2.1vw, 32px); overflow-wrap: anywhere; }
+.db-sum-value small { display: inline-block; white-space: nowrap; }
+.db-sum-label { overflow-wrap: anywhere; hyphens: auto; }
+@media (min-width: 861px) and (max-width: 1249px) {
+    /* the note needs a line of its own before the stat columns get crushed */
+    .db-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .db-sum-note { grid-column: 1 / -1; border-top: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08)); }
+    .db-sum-item:nth-child(4) { border-right: none; }
+}
+@media (max-width: 400px) {
+    .db-summary { grid-template-columns: 1fr; }
+    .db-sum-item { border-right: none; border-bottom: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08)); }
+}
+
+/* ---- 4 · landing header: section links only where they fit ---------------- */
+@media (max-width: 1099px) {
+    .landing-nav-btn { font-size: 11.5px; padding: 8px 9px; }
+    .landing-nav-links { gap: 2px; }
+}
+@media (max-width: 860px) {
+    /* the sections are still reachable by scrolling; the brand and the CTA matter more */
+    .landing-nav-links { display: none; }
+    .landing-header { justify-content: space-between; gap: 12px; }
+    .landing-header .brand-wordmark { font-size: 10.5px; }
+}
+@media (max-width: 420px) {
+    .landing-header { height: 56px; padding: 0 14px; }
+    .landing-header .brand-wordmark { font-size: 9.5px; letter-spacing: 0.08em; }
+    .landing-header .btn-aurora { padding: 9px 12px !important; font-size: 10.5px !important; }
+    .landing-header .btn-aurora span:last-child { display: none; }   /* drop the arrow, keep the label */
+}
+
+/* the hero must clear the fixed header on every screen */
+@media (max-width: 860px) { .hero-3d-content { padding-top: max(12vh, 88px); } }
+
+/* ---- 5 · short landscape viewports (phone turned sideways) ---------------- */
+@media (orientation: landscape) and (max-height: 560px) {
+    /* the hero is a flex row, so the footer has to stay out of the flow;
+       stacking the column keeps it below the copy instead of beside it */
+    .hero-3d { min-height: auto; padding: 76px 0 44px; flex-direction: column; justify-content: center; align-items: stretch; }
+    .hero-3d-content { padding-top: 0; padding-bottom: 0; }
+    .hero-3d-title { font-size: clamp(24px, 4vw, 34px); margin-bottom: 12px; }
+    .hero-3d-sub { font-size: 13px; line-height: 1.45; margin-bottom: 16px; max-width: 62ch; }
+    .hero-brand { margin-bottom: 12px; }
+    .hero-actions { margin-bottom: 12px; }
+    .hero-meta { font-size: 9.5px; }
+    .hero-foot { position: absolute; bottom: 10px; font-size: 9.5px; }
+    .ux-modal-card { max-height: 92vh; }
+}
+
+/* ---- 6 · touch devices ---------------------------------------------------- */
+@media (pointer: coarse) {
+    /* a finger needs about 44 px; several controls were nearer 31 px */
+    .btn-aurora, .btn-ghost, .btn-sm, .nav-link, .calc-tab-btn, .ux-seg button,
+    .landing-nav-btn, .arrow-btn, .ux-dock button, .ux-link-btn, .preset-chip {
+        min-height: 44px;
+    }
+    .btn-aurora, .btn-ghost { padding-top: 12px !important; padding-bottom: 12px !important; }
+    .arrow-btn { width: 44px; height: 44px; }
+    .ux-dock-toggle { width: 48px !important; height: 48px !important; }
+    .ux-more-actions button { padding: 10px 4px; }
+    .hla-check input { width: 22px; height: 22px; }
+    /* a range slider is hard to grab at 6 px tall */
+    input[type="range"] { height: 32px; }
+    input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; }
+    input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; }
+    summary { padding-top: 12px; padding-bottom: 12px; }
+}
+
+/* iOS Safari zooms the page when a focused field is under 16 px */
+@media (max-width: 860px) {
+    .control-input, .control-select, .hla-textarea, input, select, textarea { font-size: 16px; }
+    .hla-textarea { line-height: 1.45; }
+    .hla-gi { font-size: 16px !important; }
+}
+
+/* ---- 7 · devices without hover: no sticky hover states -------------------- */
+@media (hover: none) {
+    .btn-aurora:hover:not(:disabled)::after { opacity: 0; animation: none; }
+    .btn-aurora:hover:not(:disabled) span:last-child,
+    .arrow-btn:hover { transform: none; }
+    .home-card:hover, .lp-feature:hover { background: var(--ab-kelp, #003734); }
+    .home-card:hover .lp-feature-icon { transform: none; }
+    .hla-arow:hover, .db-sum-item:hover, .hla-tile:hover, .stat-block:hover { background: transparent; }
+    .calc-tab-btn:hover::after { transform: scaleX(0); }
+    .calc-tab-btn.active::after { transform: scaleX(1); }
+    .tilt-card:hover { transform: none !important; }
+}
+
+/* ---- 8 · tables and wide content scroll inside their own box -------------- */
+.matrix-container, .hla-batch-wrap, .hla-gridwrap {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+@media (max-width: 640px) {
+    .hla-batch-table { min-width: 560px; }
+    .hla-gridtable { min-width: 460px; }
+    /* tell the reader the table scrolls rather than leaving them to discover it */
+    .hla-batch-wrap::after, .matrix-container::after { content: none; }
+}
+
+/* ---- 9 · small phones ------------------------------------------------------ */
+@media (max-width: 360px) {
+    .surface-card, .home-card { padding: 20px 16px; }
+    .module-title { font-size: 24px; }
+    .card-title { font-size: 17px; }
+    .hla-batch-summary { grid-template-columns: 1fr; }
+    .hla-toolbar { gap: 8px; }
+    .hla-toolbar .btn-aurora, .hla-toolbar .btn-ghost { width: 100%; justify-content: center; }
+    .ux-dock { right: 6px; bottom: 6px; }
+    .toast-stack { left: 8px; right: 8px; transform: none; max-width: none; }
+    .toast { width: 100%; }
+}
+
+/* ---- 10 · tablet portrait: two columns are usually still better than one --- */
+@media (min-width: 641px) and (max-width: 860px) {
+    .home-grid, .lp-features { grid-template-columns: 1fr 1fr; }
+    .home-status { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .hla-headline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ---- 11 · large desktops --------------------------------------------------- */
+@media (min-width: 1800px) {
+    .page-wrapper { max-width: 1600px; }
+    .db-sum-value { font-size: 34px; }
+}
+
+/* ---- 12 · print ------------------------------------------------------------ */
+@media print {
+    .landing-header, .toast-stack, .skip-link { display: none !important; }
+    .hero-3d { min-height: auto; }
+}
+
+/* ---- 13 · elements that were being clipped by their container -------------- */
+
+/* the input-mode switcher was overrunning the card header between 768 and 1024 */
+.card-header-bar { flex-wrap: wrap; }
+.ux-seg { flex-wrap: wrap; max-width: 100%; }
+@media (max-width: 1100px) {
+    .card-header-bar > div:first-child { flex: 1 1 260px; min-width: 0; }
+    .ux-seg { flex: 0 1 auto; }
+}
+@media (max-width: 420px) {
+    .ux-seg { width: 100%; }
+    .ux-seg button { flex: 1 1 auto; text-align: center; }
+    .ux-seg button + button { border-left: none; border-top: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08)); }
+}
+
+/* a centred tooltip runs off a narrow screen; anchor it to the trigger instead */
+.ux-tooltip-content { max-width: min(240px, calc(100vw - 32px)); }
+@media (max-width: 480px) {
+    /* anchoring to the trigger cannot be kept on screen when the trigger sits near
+       an edge, so on phones the bubble becomes a sheet pinned to the bottom */
+    .ux-tooltip-content {
+        position: fixed; left: 12px; right: 12px; bottom: 12px;
+        top: auto; transform: none; width: auto; max-width: none;
+        padding: 12px 14px; font-size: 13px; z-index: 1300;
+    }
+    .ux-tooltip-trigger:hover .ux-tooltip-content,
+    .ux-tooltip-trigger:focus-within .ux-tooltip-content { transform: none; }
+}
+/* a tooltip that only appears on hover is unreachable by touch or keyboard */
+.ux-tooltip-trigger:focus-within .ux-tooltip-content { opacity: 1; }
+
+/* the landing header CTA was being cut off on a 320 px screen */
+.landing-header { gap: 10px; }
+.landing-header .brand-wrapper { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+.landing-header .brand-wordmark { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.landing-header-actions { flex: 0 0 auto; }
+@media (max-width: 360px) {
+    .landing-header .brand-symbol { display: none; }
+    .landing-header .brand-wordmark { max-width: 42vw; }
+}
+
+/* ---- 14 · entrance animations must never leave content invisible ---------- */
+/* The hero parts use animation-fill-mode:both with staggered delays, so anything
+   that stops the animation from running leaves them at opacity 0. Zeroing the
+   delay as well as the duration means reduced-motion users get the finished
+   layout immediately instead of waiting out the stagger. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-delay: 0s !important; }
+}
+body.motion-off *, body.motion-off *::before, body.motion-off *::after { animation-delay: 0s !important; }
+
+/* ---- 15 · note on the sticky results panel -------------------------------
+   .db-sticky is declared position:sticky at >=861px but never engages: the panel
+   is about 2200 px tall against an 820 px viewport, and a sticky box taller than
+   the viewport cannot pin to the top. Fixing it means making only the summary
+   sticky rather than the whole panel, which is a layout change, not a CSS tweak.
+   Left as-is deliberately; measured, not assumed.
+   ------------------------------------------------------------------------- */
+
+/* ---- 16 · grid tracks must be allowed to shrink -------------------------- */
+/* `1fr` is `minmax(auto, 1fr)`, and the auto minimum is the item's min-content
+   width, so a wide child pushes the track past its container. Measured at 900 px:
+   the eplet results grid ran 98 px beyond the card. `minmax(0, 1fr)` lets the
+   track shrink and the content wrap instead. */
+.hla-two-col, .home-grid, .lp-features, .grid-cols-2,
+.sandbox-grid, .landing-features-grid, .landing-metric-ribbon {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.hla-two-col > *, .home-grid > *, .grid-cols-2 > * { min-width: 0; }
+@media (max-width: 860px) {
+    .hla-two-col, .grid-cols-2 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+    .home-grid, .lp-features, .sandbox-grid, .landing-features-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) { .landing-metric-ribbon { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .landing-metric-ribbon { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 960px) { .landing-features-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- 17 · small-screen leftovers found by measurement --------------------- */
+/* The at-a-glance row keeps its last column on one line, which overran a 320 px
+   screen by 95 px. Let it wrap and drop the fixed track widths. */
+@media (max-width: 520px) {
+    .hla-glance-row { grid-template-columns: 40px 34px minmax(0, 1fr); row-gap: 2px; }
+    .hla-glance-text { white-space: normal; text-align: left; grid-column: 1 / -1; font-size: 11px; }
+    .hla-glance-head > div:nth-child(4) { display: none; }
+}
+/* the header action button pushed the nav past the edge on the narrowest phones */
+@media (max-width: 400px) {
+    .ramrt-nav .nav-action-wrap { display: none !important; }
+    .ramrt-nav { gap: 8px; }
+    .ramrt-nav .brand-wrapper { min-width: 0; overflow: hidden; }
+    .ramrt-nav .brand-wordmark { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60vw; }
+}
+
+/* app.js sets an inline display on this button when entering the dashboard, which
+   overrides the ordinary hide-on-phones rule, so it needs !important to lose. */
+@media (max-width: 400px) {
+    #nav-launch-btn { display: none !important; }
+}
+
+/* the keyboard-shortcut hints do not wrap and ran 29 px past a 320 px screen;
+   they are also meaningless without a physical keyboard */
+.kbd-shortcut-strip { flex-wrap: wrap; }
+@media (max-width: 640px) { .kbd-shortcut-strip { display: none !important; } }
+@media (pointer: coarse) { .kbd-shortcut-strip { display: none !important; } }

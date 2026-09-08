@@ -186,16 +186,315 @@
         el.classList.toggle('is-busy', !!on);
     }
 
+    /* ---------------- 3D Card Hologram & Specular Tilt ---------------- */
+    function init3DTilt() {
+        if (reduced()) return;
+        const cards = document.querySelectorAll('.tilt-card');
+        cards.forEach(function (card) {
+            let raf = null;
+            function onMove(e) {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+                const rotX = ((0.5 - y) * 14).toFixed(2);
+                const rotY = ((x - 0.5) * 14).toFixed(2);
+                if (raf) return;
+                raf = requestAnimationFrame(function () {
+                    card.style.setProperty('--mouse-x', (x * 100).toFixed(1) + '%');
+                    card.style.setProperty('--mouse-y', (y * 100).toFixed(1) + '%');
+                    card.style.transform = 'perspective(1000px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale3d(1.02, 1.02, 1.02)';
+                    raf = null;
+                });
+            }
+            function onLeave() {
+                if (raf) { cancelAnimationFrame(raf); raf = null; }
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            }
+            card.addEventListener('mousemove', onMove);
+            card.addEventListener('mouseleave', onLeave);
+        });
+    }
+
+    /* ---------------- SVG Speedometer Gauge Renderer & Animator ---------------- */
+    function updateSvgGauge(gaugeId, predProb, quintile) {
+        const wrap = typeof gaugeId === 'string' ? $(gaugeId) : gaugeId;
+        if (!wrap) return;
+        const needle = wrap.querySelector('.gauge-needle');
+        const progArc = wrap.querySelector('.gauge-prog-arc');
+        const pctEl = wrap.querySelector('.gauge-pct');
+        const badgeEl = wrap.querySelector('.gauge-band-badge');
+
+        const pct = Math.max(0, Math.min(1, predProb));
+        // Map 0..0.5 (50% risk) to -90deg..+90deg angle
+        const maxExpected = 0.50;
+        const frac = Math.min(1, pct / maxExpected);
+        const angle = -90 + (frac * 180);
+
+        if (needle && !reduced()) {
+            needle.style.transform = 'rotate(' + angle.toFixed(1) + 'deg)';
+        }
+
+        // Color ramp according to quintile (1: Very Low to 5: Extreme)
+        const qColors = ['#00d2c4', '#44e5d8', '#cbfffc', '#fad1ff', '#ff88a5'];
+        const qColor = qColors[(quintile || 3) - 1] || '#cbfffc';
+
+        if (progArc) {
+            // Arc length for r=78 semi-circle is ~245
+            const totalLen = 245;
+            const offset = Math.max(0, totalLen * (1 - frac));
+            progArc.style.strokeDashoffset = offset.toFixed(1);
+            progArc.style.stroke = qColor;
+            progArc.style.filter = 'drop-shadow(0 0 8px ' + qColor + '88)';
+        }
+
+        if (pctEl) {
+            pctEl.textContent = (pct * 100).toFixed(1) + '%';
+        }
+        if (badgeEl) {
+            const qTitles = ['Q1 · Very Low Risk', 'Q2 · Low Risk', 'Q3 · Moderate Risk', 'Q4 · High Risk', 'Q5 · Extreme Risk'];
+            badgeEl.textContent = qTitles[(quintile || 3) - 1] || 'Moderate Risk';
+            badgeEl.style.color = qColor;
+            badgeEl.style.borderColor = qColor + '55';
+            badgeEl.style.background = qColor + '18';
+        }
+    }
+
+    /* ---------------- Interactive Live Risk Sandbox (Landing Page) ---------------- */
+    function calcSandboxRisk() {
+        const ageEl = $('sb-donor-age');
+        const mmEl = $('sb-total-mm');
+        const mcsEl = $('sb-mcs-t');
+        const sourceEl = $('sb-donor-source');
+        if (!ageEl || !mmEl || !mcsEl) return;
+
+        const age = parseFloat(ageEl.value) || 46;
+        const totalMM = parseInt(mmEl.value, 10) || 3;
+        const mcsT = parseFloat(mcsEl.value) || 19;
+        const sourceVal = sourceEl ? sourceEl.value : '0'; // '0': living non-sibling, '1': living sibling, '2': deceased
+
+        // Standardize with cohort constants
+        const zAge = (age - 46.4086) / 9.5739;
+        const zTotalMM = (totalMM - 3.1716) / 1.7463;
+        const zMCST = (mcsT - 19.0308) / 42.8138;
+
+        // Proportional per-locus approximations for totalMM
+        const zMMA = ((totalMM * 0.3) - 0.9255) / 0.6241;
+        const zMMB = ((totalMM * 0.35) - 0.9842) / 0.6064;
+        const zMMDR = ((totalMM * 0.35) - 0.8330) / 0.6438;
+
+        let logOdds = -2.1944 + (0.2773 * zAge) + (-1.6432 * zTotalMM) + (0.4497 * zMMA) + (0.5006 * zMMB) + (0.9327 * zMMDR) + (0.3542 * zMCST);
+        if (sourceVal === '1') logOdds += -0.8236; // sibling protective
+        else if (sourceVal === '2') logOdds += -0.6943; // deceased
+
+        // Standard basiliximab induction
+        logOdds += 0.6993;
+
+        const predProb = 1 / (1 + Math.exp(-logOdds));
+
+        let quintile = 1;
+        if (predProb <= 0.0834) quintile = 1;
+        else if (predProb <= 0.1316) quintile = 2;
+        else if (predProb <= 0.1816) quintile = 3;
+        else if (predProb <= 0.2924) quintile = 4;
+        else quintile = 5;
+
+        // Update slider value labels
+        const ageVal = $('sb-val-age'); if (ageVal) ageVal.textContent = age + ' yrs';
+        const mmVal = $('sb-val-mm'); if (mmVal) mmVal.textContent = totalMM + ' mismatches';
+        const mcsVal = $('sb-val-mcs'); if (mcsVal) mcsVal.textContent = mcsT + ' shift';
+
+        updateSvgGauge('sandbox-gauge', predProb, quintile);
+    }
+
+    function setSandboxPreset(name) {
+        const presets = {
+            sibling: { age: 32, mm: 0, mcs: 10, source: '1' },
+            cohort: { age: 46, mm: 3, mcs: 19, source: '0' },
+            highrisk: { age: 58, mm: 5, mcs: 55, source: '2' }
+        };
+        const p = presets[name];
+        if (!p) return;
+        const ageEl = $('sb-donor-age'); if (ageEl) ageEl.value = p.age;
+        const mmEl = $('sb-total-mm'); if (mmEl) mmEl.value = p.mm;
+        const mcsEl = $('sb-mcs-t'); if (mcsEl) mcsEl.value = p.mcs;
+        const sourceEl = $('sb-donor-source'); if (sourceEl) sourceEl.value = p.source;
+
+        // Active preset pill state
+        document.querySelectorAll('.preset-chip[data-preset]').forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-preset') === name);
+        });
+
+        calcSandboxRisk();
+    }
+
+    function transferSandboxToDashboard() {
+        const ageEl = $('sb-donor-age');
+        const mmEl = $('sb-total-mm');
+        const mcsEl = $('sb-mcs-t');
+        const sourceEl = $('sb-donor-source');
+
+        if (ageEl && $('donor-age')) $('donor-age').value = ageEl.value;
+        if (mcsEl && $('mcs-t')) $('mcs-t').value = mcsEl.value;
+
+        if (sourceEl) {
+            const v = sourceEl.value;
+            if ($('sibling-donor')) $('sibling-donor').value = (v === '1') ? '1' : '0';
+            if ($('donor-source')) $('donor-source').value = (v === '2') ? '1' : '0';
+        }
+
+        if (mmEl) {
+            const total = parseInt(mmEl.value, 10) || 0;
+            const dr = Math.min(2, Math.floor(total / 3) + (total % 3 > 0 ? 1 : 0));
+            const a = Math.min(2, Math.floor((total - dr) / 2));
+            const b = Math.min(2, total - dr - a);
+            if ($('mm-a')) $('mm-a').value = a;
+            if ($('mm-b')) $('mm-b').value = b;
+            if ($('mm-drb1')) $('mm-drb1').value = dr;
+            if (typeof updateTotalMM === 'function') updateTotalMM();
+        }
+
+        if (typeof switchView === 'function') switchView('calculator');
+        if (typeof switchCalculatorTab === 'function') switchCalculatorTab('nomogram');
+        if (typeof calculateRisk === 'function') calculateRisk();
+        toast('Sandbox values transferred to Rejection Risk Calculator');
+    }
+
+    /* ---------------- Dashboard Scenario Presets ---------------- */
+    function applyDashboardScenario(type) {
+        const presets = {
+            ideal: { age: 32, source: 0, sibling: 1, induction: 1, mmA: 0, mmB: 0, mmDR: 0, mmDQ: 0, mcsT: 8, mcsB: 24, label: 'Ideal Living Sibling (Q1)' },
+            typical: { age: 46, source: 0, sibling: 0, induction: 1, mmA: 1, mmB: 1, mmDR: 1, mmDQ: 1, mcsT: 19, mcsB: 72, label: 'PGIMER Cohort Average (Q3)' },
+            sensitized: { age: 58, source: 1, sibling: 0, induction: 0, mmA: 2, mmB: 2, mmDR: 2, mmDQ: 1, mcsT: 65, mcsB: 140, label: 'Sensitized Deceased Donor (Q5)' }
+        };
+        const p = presets[type];
+        if (!p) return;
+
+        if ($('donor-age')) $('donor-age').value = p.age;
+        if ($('donor-source')) $('donor-source').value = p.source;
+        if ($('sibling-donor')) $('sibling-donor').value = p.sibling;
+        if ($('standard-induction')) $('standard-induction').value = p.induction;
+        if ($('mm-a')) $('mm-a').value = p.mmA;
+        if ($('mm-b')) $('mm-b').value = p.mmB;
+        if ($('mm-drb1')) $('mm-drb1').value = p.mmDR;
+        if ($('mm-dqb1')) $('mm-dqb1').value = p.mmDQ;
+        if ($('mcs-t')) $('mcs-t').value = p.mcsT;
+        if ($('mcs-b')) $('mcs-b').value = p.mcsB;
+
+        if (typeof updateTotalMM === 'function') updateTotalMM();
+        if (typeof calculateRisk === 'function') calculateRisk();
+        toast('Loaded scenario: ' + p.label);
+    }
+
+    /* ---------------- HLA & Eplets Preset Pairs ---------------- */
+    function loadHlaPresetPair(index) {
+        if (!window.HLAUI) return;
+        const pairs = [
+            {
+                name: 'Sibling Near-Match (Low Eplet Burden)',
+                rec: 'A*02:01, A*24:02, B*40:01, B*51:01, C*03:04, C*14:02, DRB1*15:01, DRB1*15:02, DQB1*06:01, DQB1*06:02',
+                don: 'A*02:01, A*24:02, B*40:01, B*35:01, C*03:04, C*04:01, DRB1*15:01, DRB1*11:01, DQB1*06:01, DQB1*03:01'
+            },
+            {
+                name: 'Heavy Molecular Load',
+                rec: 'A*01:01, A*03:01, B*07:02, B*08:01, C*07:01, C*07:02, DRB1*03:01, DRB1*15:01, DQB1*02:01, DQB1*06:02',
+                don: 'A*24:02, A*33:03, B*44:02, B*58:01, C*03:02, C*06:02, DRB1*04:01, DRB1*07:01, DQB1*03:02, DQB1*02:02'
+            },
+            {
+                name: 'Dominant Targets (163LG & 130Q)',
+                rec: 'A*02:01, A*11:01, B*15:01, B*35:03, C*04:01, C*07:02, DRB1*04:01, DRB1*13:01, DQB1*03:02, DQB1*06:03',
+                don: 'A*01:01, A*24:02, B*57:01, B*58:01, C*06:02, C*12:03, DRB1*07:01, DRB1*15:01, DQB1*02:02, DQB1*06:01'
+            }
+        ];
+        const p = pairs[index];
+        if (!p) return;
+        const recEl = $('hla-recipient');
+        const donEl = $('hla-donor');
+        if (recEl && donEl) {
+            recEl.value = p.rec;
+            donEl.value = p.don;
+            if (typeof HLAUI.setMode === 'function') HLAUI.setMode('paste');
+            if (typeof HLAUI.analyzeSingle === 'function') HLAUI.analyzeSingle();
+            toast('Loaded HLA pair: ' + p.name);
+        }
+    }
+
+    /* ---------------- Interactive Summary Strip Cues ---------------- */
+    function initClickableSummary() {
+        const mmCard = document.querySelector('.db-sum-item:nth-child(1)');
+        const epCard = document.querySelector('.db-sum-item:nth-child(2)');
+        const ieCard = document.querySelector('.db-sum-item:nth-child(3)');
+        const riskCard = document.querySelector('.db-sum-item:nth-child(4)');
+
+        [mmCard, epCard, ieCard].forEach(function (el) {
+            if (!el) return;
+            el.classList.add('is-clickable');
+            el.title = 'Click to open HLA Mismatch & Eplet Analysis';
+            el.addEventListener('click', function () {
+                if (typeof switchCalculatorTab === 'function') switchCalculatorTab('eplet');
+            });
+        });
+        if (riskCard) {
+            riskCard.classList.add('is-clickable');
+            riskCard.title = 'Click to open Rejection Risk Calculator';
+            riskCard.addEventListener('click', function () {
+                if (typeof switchCalculatorTab === 'function') switchCalculatorTab('nomogram');
+            });
+        }
+    }
+
+    /* ---------------- Keyboard Navigation Shortcuts ---------------- */
+    function initKeyboardShortcuts() {
+        document.addEventListener('keydown', function (e) {
+            // Ignore when focused in input, textarea, or select
+            const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.ctrlKey || e.metaKey) return;
+
+            if (e.key === '1') {
+                if (typeof switchView === 'function') switchView('calculator');
+                if (typeof switchCalculatorTab === 'function') switchCalculatorTab('home');
+            } else if (e.key === '2') {
+                if (typeof switchView === 'function') switchView('calculator');
+                if (typeof switchCalculatorTab === 'function') switchCalculatorTab('nomogram');
+            } else if (e.key === '3') {
+                if (typeof switchView === 'function') switchView('calculator');
+                if (typeof switchCalculatorTab === 'function') switchCalculatorTab('eplet');
+            } else if (e.key === '0' || e.key.toLowerCase() === 'h') {
+                if (typeof switchView === 'function') switchView('landing');
+            }
+        });
+    }
+
     function init() {
         skipLink();
         splitTitle();
         heroParallax();
         watchNumbers();
         foldDock();
+        init3DTilt();
+        initClickableSummary();
+        initKeyboardShortcuts();
+
+        // Initial live sandbox update if present
+        if ($('sb-donor-age')) {
+            calcSandboxRisk();
+        }
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 
-    window.Motion = { toast: toast, markPane: markPane, busy: busy, splitTitle: splitTitle, reduced: reduced };
+    window.Motion = {
+        toast: toast,
+        markPane: markPane,
+        busy: busy,
+        splitTitle: splitTitle,
+        reduced: reduced,
+        updateSvgGauge: updateSvgGauge,
+        calcSandboxRisk: calcSandboxRisk,
+        setSandboxPreset: setSandboxPreset,
+        transferSandboxToDashboard: transferSandboxToDashboard,
+        applyDashboardScenario: applyDashboardScenario,
+        loadHlaPresetPair: loadHlaPresetPair
+    };
 })();
+

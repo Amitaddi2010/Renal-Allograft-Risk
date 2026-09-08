@@ -62,7 +62,15 @@ LANDING = '''<div id="landing-view" class="view-container active-view">
     </div>
 
     '''
-s = s[:lv_start] + LANDING + s[lv_end:]
+# LANDING_GUARD: the live landing may carry sections this template does not know about
+# (metric ribbon, feature cards, live sandbox). Replacing it would delete them, so only
+# rebuild when nothing beyond the hero is present. Update LANDING here if you extend it.
+_extra = [c for c in ('metric-card', 'sandbox-grid', 'landing-features-grid') if c in s]
+if _extra:
+    print('landing left untouched; it carries sections outside this template: ' + ', '.join(_extra))
+else:
+    s = s[:lv_start] + LANDING + s[lv_end:]
+
 
 # ---------------------------------------------------------------- dashboard: summary strip after the top bar
 if 'id="db-summary"' not in s:
@@ -222,6 +230,9 @@ if 'dna_hero.js' not in s:
 if s != orig:
     io.open(p, 'w', encoding='utf-8').write(s)
 # ---------------------------------------------------------------- motion & microinteraction layer
+if 'responsive.css' not in s:
+    s = re.sub(r'(<link rel="stylesheet" href="motion\.css[^>]*>)',
+               r'\1' + '\n    <link rel="stylesheet" href="responsive.css?v=20260911">', s, count=1)
 if 'motion.css' not in s:
     s = s.replace('<link rel="stylesheet" id="theme-glass"', '<link rel="stylesheet" href="motion.css?v=20260911">\n    <link rel="stylesheet" id="theme-glass"', 1)
 if 'motion.js' not in s:

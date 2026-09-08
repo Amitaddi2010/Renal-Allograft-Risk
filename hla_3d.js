@@ -53,11 +53,11 @@
         DRB1: 'DRB1*01:01', DRB3: 'DRB1*01:01', DRB4: 'DRB1*01:01', DRB5: 'DRB1*01:01',
         DQB1: 'DQB1*03:02', DQA1: 'DQA1*03:01', DPB1: 'DPB1*02:01', DPA1: 'DPA1*01:03'
     };
-    const COLORS = { ie: '#fde9ff', abver: '#cbfffc', other: '#707777', chain: '#2f5f5a', otherChains: '#13302e' };
+    const COLORS = { ie: '#ff1475', abver: '#00e5ff', other: '#cbd5e1', chain: '#328b83', otherChains: '#122927' };
     const AA = { ALA: 'A', ARG: 'R', ASN: 'N', ASP: 'D', CYS: 'C', GLN: 'Q', GLU: 'E', GLY: 'G', HIS: 'H', ILE: 'I', LEU: 'L', LYS: 'K', MET: 'M', PHE: 'F', PRO: 'P', SER: 'S', THR: 'T', TRP: 'W', TYR: 'Y', VAL: 'V' };
 
     let viewer = null, libPromise = null, bundlePromise = null, manifestPromise = null;
-    let current = null, localPdb = null, spinning = false;
+    let current = null, localPdb = null, spinning = false, showLabels = true;
 
     function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
     function setMsg(html, kind) { const el = $('hla3d-msg'); if (el) { el.className = 'hla-warn hla-warn-' + (kind || 'info'); el.innerHTML = html; } }
@@ -119,14 +119,32 @@
         if (!sel) return;
         loadManifest().then(function (manifest) {
             const entries = donorEntries(res);
+            // Sort entries so alleles with mismatched eplets appear first, prioritizing immunogenic burden
+            entries.sort(function (a, b) {
+                const countA = a.mismatched ? a.mismatched.length : 0;
+                const countB = b.mismatched ? b.mismatched.length : 0;
+                if (countB !== countA) return countB - countA;
+                const ieA = a.mismatched ? a.mismatched.filter(function (e) { return e.ie; }).length : 0;
+                const ieB = b.mismatched ? b.mismatched.filter(function (e) { return e.ie; }).length : 0;
+                return ieB - ieA;
+            });
             const prev = sel.value;
             sel.innerHTML = entries.length
                 ? entries.map(function (e) {
                     const src = manifest[e.allele] ? 'pHLA3D model' : (STRUCTURES[e.allele] ? 'solved structure' : 'locus template');
-                    return '<option value="' + esc(e.allele) + '">' + esc(e.allele) + (e.inferred ? ' (inferred)' : '') + ' · ' + e.mismatched.length + ' mismatched eplet' + (e.mismatched.length === 1 ? '' : 's') + ' · ' + src + '</option>';
+                    const mmCount = e.mismatched ? e.mismatched.length : 0;
+                    const mmLabel = mmCount === 0
+                        ? '0 mismatched eplets (matched with recipient)'
+                        : mmCount + ' mismatched eplet' + (mmCount === 1 ? '' : 's');
+                    return '<option value="' + esc(e.allele) + '">' + esc(e.allele) + (e.inferred ? ' (inferred)' : '') + ' · ' + mmLabel + ' · ' + src + '</option>';
                 }).join('')
                 : '<option value="">No donor allele with an eplet comparison yet</option>';
-            if (prev && entries.some(function (e) { return e.allele === prev; })) sel.value = prev;
+            if (prev && entries.some(function (e) { return e.allele === prev; })) {
+                sel.value = prev;
+            } else if (entries.length) {
+                const best = entries.find(function (e) { return e.mismatched && e.mismatched.length > 0; }) || entries[0];
+                sel.value = best.allele;
+            }
             const btn = $('hla3d-load'); if (btn) btn.disabled = !entries.length;
             const cnt = $('hla-count-3d'); if (cnt) cnt.textContent = entries.length ? entries.length + ' donor alleles' : '0';
             if (viewer && entries.length && sel.value) render(sel.value);
@@ -174,23 +192,64 @@
         loadLibrary().then(function () { return render(sel.value); }).catch(function (e) { setMsg(esc(e.message), 'error'); });
     }
 
+    let canvasTheme = 'dark'; // 'dark' | 'light'
+    function toggleCanvasTheme() {
+        canvasTheme = canvasTheme === 'dark' ? 'light' : 'dark';
+        const b = $('hla3d-canvas-theme');
+        if (b) {
+            b.textContent = canvasTheme === 'dark' ? '☀️ Light canvas' : '🌙 Dark canvas';
+        }
+        const host = $('hla3d-viewer');
+        if (host) {
+            host.style.background = canvasTheme === 'dark' ? '#0a0f1d' : '#f8fafc';
+        }
+        if (viewer && current) {
+            const sel = $('hla3d-allele');
+            if (sel && sel.value) render(sel.value);
+        }
+    }
+
     function render(allele) {
         const entry = donorEntries(current).filter(function (e) { return e.allele === allele; })[0];
         if (!entry) return Promise.resolve();
         const host = $('hla3d-viewer');
         host.hidden = false;
-        const light = (window.UX && UX.currentTheme && UX.currentTheme() === 'glass');
-        if (!viewer) viewer = $3Dmol.createViewer(host, { backgroundColor: light ? '#edfffe' : '#011d1c' });
-        else viewer.setBackgroundColor(light ? '#edfffe' : '#011d1c');
-        COLORS.chain = light ? '#5b8a86' : '#2f5f5a';
-        COLORS.otherChains = light ? '#bbc7c6' : '#13302e';
+        const isLight = (window.UX && UX.currentTheme && UX.currentTheme() === 'glass') || (canvasTheme === 'light');
+        const bgColor = isLight ? '#f8fafc' : '#0a0f1d';
+        if (!viewer) viewer = $3Dmol.createViewer(host, { backgroundColor: bgColor, antialias: true });
+        else viewer.setBackgroundColor(bgColor);
+
+        if (isLight) {
+            COLORS.chain = '#0d9488';          // Deep sea-teal for donor target chain
+            COLORS.partnerChain = '#94a3b8';   // Clear cool slate silver for partner chain (DRA / beta-2m)
+            COLORS.peptide = '#d97706';        // Radiant amber gold for bound peptide
+            COLORS.ie = '#e11d48';             // Deep crimson-magenta for immunogenic
+            COLORS.abver = '#0284c7';          // Deep vibrant cyan for ab-verified
+            COLORS.other = '#475569';          // Slate charcoal for other mismatched
+        } else {
+            COLORS.chain = '#00c9b7';          // Luminous electric sea-teal
+            COLORS.partnerChain = '#718096';   // Clean platinum slate (bright, completely visible, never black!)
+            COLORS.peptide = '#fbbf24';        // Radiant warm gold
+            COLORS.ie = '#ff007f';             // Luminous neon hot magenta
+            COLORS.abver = '#00f0ff';          // Electric high-voltage cyan
+            COLORS.other = '#f1f5f9';          // Bright polished pearl silver
+        }
+
         return resolveStructure(entry).then(function (struct) {
             viewer.removeAllModels(); viewer.removeAllLabels(); viewer.removeAllSurfaces();
             const done = function (model) {
                 if (!model) { setMsg('Structure could not be loaded (no internet connection to files.rcsb.org; load a local PDB file instead).', 'error'); return; }
                 const info = chainInfo(model);
                 let chain = struct.chain;
-                if (!chain || !info.counts[chain] || info.counts[chain] < 150) chain = Object.keys(info.counts).sort(function (a, b) { return info.counts[b] - info.counts[a]; })[0];
+                if (!chain || !info.counts[chain] || info.counts[chain] < 100) {
+                    if (['DRB1', 'DRB3', 'DRB4', 'DRB5', 'DQB1', 'DPB1'].indexOf(entry.locus) !== -1 && info.counts['B']) {
+                        chain = 'B';
+                    } else if (info.counts['A']) {
+                        chain = 'A';
+                    } else {
+                        chain = Object.keys(info.counts).sort(function (a, b) { return info.counts[b] - info.counts[a]; })[0];
+                    }
+                }
                 const byCat = { ie: { anchors: [], patch: [] }, abver: { anchors: [], patch: [] }, other: { anchors: [], patch: [] } };
                 const labelled = {};
                 let checked = 0, agree = 0, anchorOnly = 0;
@@ -206,15 +265,91 @@
                     const want = letterOf(e.name);
                     if (found && want) { checked++; if (AA[found] === want) agree++; }
                 });
-                viewer.setStyle({}, { cartoon: { color: COLORS.otherChains, opacity: 0.55 } });
-                viewer.setStyle({ chain: chain }, { cartoon: { color: COLORS.chain } });
+
+                // Clear previous styles and style every polypeptide chain according to its biological role
+                viewer.setStyle({}, {});
+                Object.keys(info.counts).forEach(function (ch) {
+                    const count = info.counts[ch];
+                    if (ch === chain) {
+                        // Primary donor allele chain carrying the eplet mismatches
+                        viewer.setStyle({ chain: ch }, {
+                            cartoon: {
+                                color: COLORS.chain,
+                                arrows: true,
+                                thickness: 0.48,
+                                opacity: 0.96
+                            }
+                        });
+                    } else if (count < 35) {
+                        // Antigenic peptide nestled in the binding cleft
+                        viewer.setStyle({ chain: ch }, {
+                            cartoon: {
+                                color: COLORS.peptide,
+                                thickness: 0.38,
+                                opacity: 0.95
+                            }
+                        });
+                    } else {
+                        // Heterodimer partner chain (e.g. DRA alpha chain for DRB1, or beta-2m for Class I)
+                        viewer.setStyle({ chain: ch }, {
+                            cartoon: {
+                                color: COLORS.partnerChain,
+                                arrows: true,
+                                thickness: 0.44,
+                                opacity: 0.88
+                            }
+                        });
+                    }
+                });
+
+                // Mismatched eplet patches on the target allele
                 ['other', 'abver', 'ie'].forEach(function (cat) {
-                    if (byCat[cat].patch.length) viewer.addStyle({ chain: chain, resi: byCat[cat].patch }, { sphere: { radius: 1.1, color: COLORS[cat], opacity: 0.85 } });
-                    if (byCat[cat].anchors.length) viewer.addStyle({ chain: chain, resi: byCat[cat].anchors }, { sphere: { radius: 1.8, color: COLORS[cat] }, stick: { radius: 0.25, color: COLORS[cat] } });
+                    if (byCat[cat].patch.length) {
+                        viewer.addStyle(
+                            { chain: chain, resi: byCat[cat].patch },
+                            { sphere: { radius: 1.35, color: COLORS[cat], opacity: 0.98 } }
+                        );
+                    }
+                    if (byCat[cat].anchors.length) {
+                        viewer.addStyle(
+                            { chain: chain, resi: byCat[cat].anchors },
+                            {
+                                sphere: { radius: 2.1, color: COLORS[cat], opacity: 1.0 },
+                                stick: { radius: 0.35, color: COLORS[cat] }
+                            }
+                        );
+                    }
                 });
-                Object.keys(labelled).forEach(function (p) {
-                    viewer.addLabel(labelled[p].names.join(' / '), { fontSize: 11, fontColor: '#012624', backgroundColor: COLORS[labelled[p].cat], backgroundOpacity: 0.9, borderThickness: 0, inFront: true }, { chain: chain, resi: +p, atom: 'CA' });
-                });
+
+                // High-visibility floating HUD labels with category color border
+                if (showLabels) {
+                    Object.keys(labelled).forEach(function (p) {
+                        const item = labelled[p];
+                        const cat = item.cat;
+                        const names = item.names;
+                        const labelText = names.length <= 2 ? names.join(' · ') : names[0] + ' (+' + (names.length - 1) + ')';
+                        const isIE = cat === 'ie';
+                        const isAbver = cat === 'abver';
+                        const labelBg = isLight
+                            ? (isIE ? 'rgba(255, 228, 239, 0.95)' : (isAbver ? 'rgba(224, 247, 250, 0.95)' : 'rgba(241, 245, 249, 0.95)'))
+                            : (isIE ? 'rgba(38, 3, 20, 0.94)' : (isAbver ? 'rgba(2, 30, 36, 0.94)' : 'rgba(15, 23, 42, 0.94)'));
+                        const labelBorder = COLORS[cat];
+                        const labelColor = isLight
+                            ? (isIE ? '#be123c' : (isAbver ? '#0e7490' : '#1e293b'))
+                            : (isIE ? '#ff7bb3' : (isAbver ? '#80f2ff' : '#f8fafc'));
+                        viewer.addLabel(labelText, {
+                            fontSize: 11,
+                            font: 'sans-serif',
+                            fontColor: labelColor,
+                            backgroundColor: labelBg,
+                            backgroundOpacity: 0.95,
+                            borderColor: labelBorder,
+                            borderThickness: 1.5,
+                            inFront: true
+                        }, { chain: chain, resi: +p, atom: 'CA' });
+                    });
+                }
+
                 viewer.zoomTo({ chain: chain });
                 viewer.render();
                 if (spinning) viewer.spin('y', 0.4);
@@ -223,8 +358,17 @@
                 const numbering = checked ? (agree === checked ? 'Numbering check passed: the residue at every anchor position matches the eplet name (' + agree + '/' + checked + ').'
                     : '<strong>Numbering check: ' + agree + ' of ' + checked + ' anchor residues match the eplet names</strong>' + (agree < checked / 2 ? ' — this structure is probably numbered differently from HLAMatchmaker, or it is a template of another allele; positions may be shifted.' : ' (differences are expected on a template of another allele).')) : '';
                 const kind = checked && agree < checked / 2 ? 'warn' : 'ok';
+                const highlightText = total === 0
+                    ? '<strong>0 mismatched eplets (matched with recipient).</strong> Select a donor allele with mismatched eplets from the dropdown to view highlighted eplet patches.'
+                    : 'Highlighted ' + (nIE + nAb + nOt) + ' of ' + total + ' mismatched eplets — ' + nIE + ' immunogenic (pink), ' + nAb + ' antibody-verified (cyan), ' + nOt + ' other (grey); large spheres are anchor residues, small spheres the other residues of each eplet patch' + (anchorOnly ? ' (' + anchorOnly + ' shown as anchor only)' : '') + '.';
+                
+                const chainLegend = '<strong>Target allele:</strong> Chain ' + esc(chain) + ' (' + info.counts[chain] + ' residues, sea-teal).' +
+                    (Object.keys(info.counts).length > 1 ? ' <strong>Complex:</strong> ' + Object.keys(info.counts).filter(function(c){return c !== chain;}).map(function(c){
+                        return 'Chain ' + esc(c) + ' (' + info.counts[c] + ' residues, ' + (info.counts[c] < 35 ? 'peptide' : 'partner chain') + ')';
+                    }).join(', ') + '.' : '');
+
                 setMsg('<strong>' + esc(entry.allele) + '</strong> shown on ' + esc(struct.label) + (struct.template ? ' — <strong>template of the same locus</strong>, not the donor allele itself (download a pHLA3D model for the exact allele with tools/fetch_structures.py, or load a PDB file above).' : '.') +
-                    ' Chain ' + esc(chain) + ' (' + info.counts[chain] + ' residues; source: ' + esc(struct.source) + '). Highlighted ' + (nIE + nAb + nOt) + ' of ' + total + ' mismatched eplets — ' + nIE + ' immunogenic (pink), ' + nAb + ' antibody-verified (cyan), ' + nOt + ' other (grey); large spheres are anchor residues, small spheres the other residues of each eplet patch' + (anchorOnly ? ' (' + anchorOnly + ' shown as anchor only)' : '') + '. ' + numbering, kind);
+                    '<br>' + chainLegend + '<br>' + highlightText + (numbering ? ' ' + numbering : ''), kind);
             };
             if (struct.text) done(viewer.addModel(struct.text, 'pdb'));
             else $3Dmol.download('pdb:' + struct.pdb, viewer, {}, function (m) { done(m); });
@@ -247,11 +391,32 @@
 
     function toggleSpin() { spinning = !spinning; if (viewer) viewer.spin(spinning ? 'y' : false, 0.4); const b = $('hla3d-spin'); if (b) b.textContent = spinning ? 'Stop rotation' : 'Rotate'; }
     function resetView() { if (viewer) { viewer.zoomTo(); viewer.render(); } }
+    function toggleLabels() {
+        showLabels = !showLabels;
+        const b = $('hla3d-labels');
+        if (b) {
+            b.dataset.on = showLabels ? '1' : '0';
+            b.textContent = showLabels ? 'Hide labels' : 'Show labels';
+        }
+        if (viewer && current) {
+            const sel = $('hla3d-allele');
+            if (sel && sel.value) render(sel.value);
+        }
+    }
     function toggleSurface() {
         if (!viewer) return;
         const b = $('hla3d-surface');
-        if (b.dataset.on === '1') { viewer.removeAllSurfaces(); b.dataset.on = '0'; b.textContent = 'Show surface'; }
-        else { viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.35, color: '#00827c' }, {}); b.dataset.on = '1'; b.textContent = 'Hide surface'; }
+        if (b.dataset.on === '1') {
+            viewer.removeAllSurfaces();
+            b.dataset.on = '0';
+            b.textContent = 'Show surface';
+        } else {
+            const isLight = (window.UX && UX.currentTheme && UX.currentTheme() === 'glass') || (canvasTheme === 'light');
+            const surfColor = isLight ? '#0d9488' : '#38bdf8';
+            viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.22, color: surfColor }, {});
+            b.dataset.on = '1';
+            b.textContent = 'Hide surface';
+        }
         viewer.render();
     }
     function loadLocalFile(input) {
@@ -263,5 +428,5 @@
     }
     function clearLocalFile() { localPdb = null; const i = $('hla3d-file'); if (i) i.value = ''; setMsg('Built-in structures will be used.', 'info'); }
 
-    window.HLA3D = { update: update, show: show, showFirstWithMismatches: showFirstWithMismatches, toggleSpin: toggleSpin, resetView: resetView, toggleSurface: toggleSurface, loadLocalFile: loadLocalFile, clearLocalFile: clearLocalFile, STRUCTURES: STRUCTURES, TEMPLATES: TEMPLATES };
+    window.HLA3D = { update: update, show: show, showFirstWithMismatches: showFirstWithMismatches, toggleSpin: toggleSpin, resetView: resetView, toggleLabels: toggleLabels, toggleCanvasTheme: toggleCanvasTheme, toggleSurface: toggleSurface, loadLocalFile: loadLocalFile, clearLocalFile: clearLocalFile, STRUCTURES: STRUCTURES, TEMPLATES: TEMPLATES };
 })();

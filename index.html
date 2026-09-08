@@ -7,15 +7,36 @@
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
     <link rel="stylesheet" href="styles.css?v=20260910b">
     <link rel="stylesheet" href="hla_styles.css?v=20260910d">
-    <link rel="stylesheet" href="ux_styles.css?v=20260910b">
+    <link rel="stylesheet" href="ux_styles.css?v=20260912">
     <link rel="stylesheet" href="dashboard_theme.css?v=20260910b">
     <link rel="stylesheet" id="theme-glass" href="dashboard_glass.css?v=20260910" disabled>
     <link rel="stylesheet" href="motion.css?v=20260911">
+    <link rel="stylesheet" href="responsive.css?v=20260911">
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
     <canvas id="particle-canvas"></canvas>
     <canvas id="dna-ambient" class="dna-ambient" aria-hidden="true"></canvas>
+
+    <!-- Landing Page Floating Navigation Header -->
+    <header class="landing-header" id="landing-header">
+        <div class="brand-wrapper" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" style="cursor: pointer;">
+            <div class="brand-symbol"></div>
+            <span class="brand-wordmark">RAMRT // IMMUNOPATHOLOGY</span>
+        </div>
+        <nav class="landing-nav-links">
+            <button type="button" class="landing-nav-btn" onclick="scrollToSection('hero')">Overview</button>
+            <button type="button" class="landing-nav-btn" onclick="scrollToSection('landing-metrics')">Cohort Proof</button>
+            <button type="button" class="landing-nav-btn" onclick="scrollToSection('landing-features')">Capabilities</button>
+            <button type="button" class="landing-nav-btn" onclick="scrollToSection('landing-sandbox')">Live Sandbox</button>
+            <button type="button" class="landing-nav-btn" onclick="scrollToSection('landing-evidence-section')">Clinical Evidence</button>
+        </nav>
+        <div class="landing-header-actions">
+            <button type="button" class="btn-aurora btn-sm" onclick="switchView('calculator'); switchCalculatorTab('home');">
+                <span>Launch Terminal</span><span>↗</span>
+            </button>
+        </div>
+    </header>
 
     <!-- Mobile Navigation Overlay -->
     <div class="mobile-nav-overlay" id="nav-overlay" onclick="closeNav()"></div>
@@ -63,18 +84,286 @@
             </div>
             <canvas id="dna-canvas" class="hero-canvas" aria-hidden="true"></canvas>
             <div class="hero-3d-content">
-                <div class="hero-brand"><span class="hero-brand-dot"></span> RAMRT · PGIMER Immunopathology</div>
+                <div class="hero-brand">
+                    <span class="hero-brand-dot"></span> RAMRT · PGIMER Immunopathology
+                    <span class="active-pill" style="margin-left: 8px;"></span>
+                    <span style="color: var(--ab-aqua, #cbfffc); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;">Audited N=443 Cohort</span>
+                </div>
                 <h1 class="hero-3d-title">Donor–recipient immunological assessment.</h1>
                 <p class="hero-3d-sub">HLA mismatch and immunogenic eplet analysis straight from typing, and a one-year rejection-risk estimate built on 443 PGIMER transplant recipients. Everything runs in your browser; no patient data leaves the computer.</p>
                 <div class="hero-actions">
                     <button type="button" class="btn-aurora btn-lg" onclick="switchView('calculator'); switchCalculatorTab('home');"><span>Open dashboard</span><span>↗</span></button>
                     <button type="button" class="btn-ghost btn-lg hero-ghost" onclick="switchView('calculator'); switchCalculatorTab('eplet'); HLAUI.loadExample();"><span>Try the example pair</span></button>
+                    <button type="button" class="btn-ghost btn-lg hero-ghost" onclick="scrollToSection('landing-sandbox');"><span>Try live sandbox ↓</span></button>
                 </div>
-                <div class="hero-meta"><span>HLA mismatch &amp; eplets</span><span class="hero-sep">·</span><span>Rejection risk calculator</span><span class="hero-sep">·</span><span>3D eplet view</span></div>
+                <div class="hero-meta"><span>HLA mismatch &amp; eplets</span><span class="hero-sep">·</span><span>Rejection risk calculator</span><span class="hero-sep">·</span><span>3D eplet view</span><span class="hero-sep">·</span><span>100% In-Browser Privacy</span></div>
+                <div class="scroll-cue" onclick="scrollToSection('landing-metrics')">
+                    <span>Explore precision architecture</span>
+                    <span class="scroll-cue-arrow">↓</span>
+                </div>
             </div>
             <div class="hero-foot">Doctoral research tool · Department of Immunopathology, PGIMER Chandigarh · Research use only</div>
         </section>
+
+        <!-- LANDING CONTENT SECTIONS -->
+        <div class="landing-content-wrap">
+            <!-- 1. Cohort Evidence & Performance Counters -->
+            <section class="landing-section" id="landing-metrics">
+                <div class="landing-section-header">
+                    <div class="group-kicker">Clinical ground truth</div>
+                    <h2 class="landing-section-title">Audited Clinical Evidence at Scale</h2>
+                    <p class="landing-section-sub">Trained, internally validated, and out-of-fold calibrated against biopsy-proven allograft rejection at PGIMER Chandigarh.</p>
+                </div>
+                <div class="landing-metric-ribbon">
+                    <div class="metric-card tilt-card">
+                        <div class="metric-card-val">443</div>
+                        <div class="metric-card-lbl">Transplant Recipients</div>
+                        <div class="metric-card-sub">Complete Tier-3 multimodal cohort with adjudicated rejection outcomes.</div>
+                    </div>
+                    <div class="metric-card tilt-card">
+                        <div class="metric-card-val">0.693</div>
+                        <div class="metric-card-lbl">Nomogram ROC-AUC</div>
+                        <div class="metric-card-sub">+0.102 over clinical data alone (DeLong p = 0.00074; 6.4× risk gradient).</div>
+                    </div>
+                    <div class="metric-card tilt-card">
+                        <div class="metric-card-val">147</div>
+                        <div class="metric-card-lbl">PGIMER Immunogenic Eplets</div>
+                        <div class="metric-card-sub">71 Class I &amp; 76 Class II cataloged antibody targets (163LG &amp; 130Q dominant).</div>
+                    </div>
+                    <div class="metric-card tilt-card">
+                        <div class="metric-card-val">100%</div>
+                        <div class="metric-card-lbl">Client-Side Privacy</div>
+                        <div class="metric-card-sub">Zero network transmission; all calculations execute securely in this browser.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Capability Hologram Cards -->
+            <section class="landing-section" id="landing-features">
+                <div class="landing-section-header">
+                    <div class="group-kicker">Precision Immunological Terminal</div>
+                    <h2 class="landing-section-title">Three Integrated Assessment Pillars</h2>
+                    <p class="landing-section-sub">Seamless synthesis from genomic typing to molecular epitopes and clinical risk prediction.</p>
+                </div>
+                <div class="landing-features-grid">
+                    <div class="feature-card tilt-card">
+                        <div>
+                            <div class="feature-card-icon">⬡</div>
+                            <h3 class="feature-card-title">Molecular HLA &amp; Eplet Engine</h3>
+                            <p class="feature-card-desc">Translates two-field typing into allele-level mismatches, surface eplet loads, and immunogenic epitopes from HLAMatchmaker 3.1 tables and PGIMER IE.xlsx.</p>
+                            <div class="feature-tag-list">
+                                <span class="feature-mini-tag">A, B, C, DRB1/3/4/5</span>
+                                <span class="feature-mini-tag">DQA1, DQB1, DPA1, DPB1</span>
+                                <span class="feature-mini-tag">Intra- &amp; Interlocus</span>
+                            </div>
+                        </div>
+                        <div class="action-cluster" style="margin-top: 14px;">
+                            <button type="button" class="btn-ghost btn-sm" onclick="switchView('calculator'); switchCalculatorTab('eplet');">Open HLA Engine →</button>
+                        </div>
+                    </div>
+
+                    <div class="feature-card tilt-card">
+                        <div>
+                            <div class="feature-card-icon">◔</div>
+                            <h3 class="feature-card-title">Calibrated Rejection Nomogram</h3>
+                            <p class="feature-card-desc">Audited 11-feature ElasticNet model integrating donor age, source, sibling status, induction, per-locus HLA mismatches, and flow cytometry crossmatch shifts.</p>
+                            <div class="feature-tag-list">
+                                <span class="feature-mini-tag">1-Year Probability</span>
+                                <span class="feature-mini-tag">Quintile Stratification</span>
+                                <span class="feature-mini-tag">Hosmer-Lemeshow p=0.51</span>
+                            </div>
+                        </div>
+                        <div class="action-cluster" style="margin-top: 14px;">
+                            <button type="button" class="btn-ghost btn-sm" onclick="switchView('calculator'); switchCalculatorTab('nomogram');">Open Calculator →</button>
+                        </div>
+                    </div>
+
+                    <div class="feature-card tilt-card">
+                        <div>
+                            <div class="feature-card-icon">⌬</div>
+                            <h3 class="feature-card-title">3D Donor Molecular Cartography</h3>
+                            <p class="feature-card-desc">Renders homologous 3D crystal structures and pHLA3D models in real time, mapping immunogenic and antibody-verified patches directly on the HLA heavy chain.</p>
+                            <div class="feature-tag-list">
+                                <span class="feature-mini-tag">pHLA3D Homology</span>
+                                <span class="feature-mini-tag">RCSB PDB Crystal</span>
+                                <span class="feature-mini-tag">Interactive Surface</span>
+                            </div>
+                        </div>
+                        <div class="action-cluster" style="margin-top: 14px;">
+                            <button type="button" class="btn-ghost btn-sm" onclick="switchView('calculator'); switchCalculatorTab('eplet'); scrollToSection('hla3d-section');">View 3D Cartography →</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Interactive Live Risk Sandbox -->
+            <section class="landing-section" id="landing-sandbox">
+                <div class="landing-section-header">
+                    <div class="group-kicker">Interactive Demonstration</div>
+                    <h2 class="landing-section-title">Test the Rejection Nomogram Live</h2>
+                    <p class="landing-section-sub">Experiment with key clinical predictors and watch the out-of-fold calibrated risk speedometer respond instantaneously.</p>
+                </div>
+                <div class="sandbox-card tilt-card">
+                    <div class="preset-bar">
+                        <span style="font-size: 11.5px; color: var(--ab-silver); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px;">Quick Scenarios:</span>
+                        <button type="button" class="preset-chip" data-preset="sibling" onclick="Motion.setSandboxPreset('sibling')">🌟 Ideal Sibling Match</button>
+                        <button type="button" class="preset-chip active" data-preset="cohort" onclick="Motion.setSandboxPreset('cohort')">📋 Typical Cohort Patient</button>
+                        <button type="button" class="preset-chip" data-preset="highrisk" onclick="Motion.setSandboxPreset('highrisk')">⚠️ High-Risk Deceased Donor</button>
+                    </div>
+                    <div class="sandbox-grid">
+                        <div class="sandbox-control-group">
+                            <div class="sandbox-slider-row">
+                                <div class="sandbox-slider-head">
+                                    <span>Donor Age</span>
+                                    <span id="sb-val-age" class="sandbox-slider-val">46 yrs</span>
+                                </div>
+                                <input type="range" id="sb-donor-age" class="sandbox-range" min="18" max="75" value="46" oninput="Motion.calcSandboxRisk()">
+                            </div>
+                            <div class="sandbox-slider-row">
+                                <div class="sandbox-slider-head">
+                                    <span>Total Antigen Mismatches (A + B + DR)</span>
+                                    <span id="sb-val-mm" class="sandbox-slider-val">3 mismatches</span>
+                                </div>
+                                <input type="range" id="sb-total-mm" class="sandbox-range" min="0" max="6" value="3" oninput="Motion.calcSandboxRisk()">
+                            </div>
+                            <div class="sandbox-slider-row">
+                                <div class="sandbox-slider-head">
+                                    <span>T-cell Crossmatch Shift (T-MCS)</span>
+                                    <span id="sb-val-mcs" class="sandbox-slider-val">19 shift</span>
+                                </div>
+                                <input type="range" id="sb-mcs-t" class="sandbox-range" min="0" max="150" value="19" oninput="Motion.calcSandboxRisk()">
+                            </div>
+                            <div class="control-field" style="margin-top: 4px;">
+                                <label for="sb-donor-source" class="control-label" style="font-size: 12px;">Donor Relationship &amp; Type</label>
+                                <select id="sb-donor-source" class="control-select" onchange="Motion.calcSandboxRisk()">
+                                    <option value="0">Living Unrelated / Parent</option>
+                                    <option value="1">Living Full Sibling (Protective)</option>
+                                    <option value="2">Deceased Donor</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="radial-meter-box" id="sandbox-gauge">
+                            <div class="gauge-svg-wrap">
+                                <svg class="gauge-svg" viewBox="0 0 200 110">
+                                    <path class="gauge-bg-arc" d="M 22 95 A 78 78 0 0 1 178 95" />
+                                    <path class="gauge-prog-arc" d="M 22 95 A 78 78 0 0 1 178 95" stroke-dasharray="245" stroke-dashoffset="160" />
+                                    <line class="gauge-needle" x1="100" y1="95" x2="100" y2="30" stroke="#edfffe" stroke-width="3" stroke-linecap="round" />
+                                    <circle cx="100" cy="95" r="5" fill="#cbfffc" />
+                                </svg>
+                            </div>
+                            <div class="gauge-center-readout">
+                                <div class="gauge-pct">15.4%</div>
+                                <div class="gauge-band-badge">Q3 · Moderate Risk</div>
+                            </div>
+                            <div style="margin-top: 18px; width: 100%;">
+                                <button type="button" class="btn-aurora" style="width: 100%; justify-content: center;" onclick="Motion.transferSandboxToDashboard()">
+                                    <span>Transfer to Full Terminal</span><span>↗</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Audited Evidence & Scientific Verdicts -->
+            <section class="landing-section" id="landing-evidence-section">
+                <div class="landing-section-header">
+                    <div class="group-kicker">Audited PhD Research Focus</div>
+                    <h2 class="landing-section-title">Scientific Verdicts &amp; Synopsis Evidence</h2>
+                    <p class="landing-section-sub">Every hypothesis from the doctoral synopsis evaluated against biopsy-proven clinical ground truth under three standard scientific verdicts.</p>
+                </div>
+                <div class="surface-card tilt-card" style="padding: var(--spacing-28);">
+                    <div class="matrix-container">
+                        <table class="table-matrix evidence-table">
+                            <thead>
+                                <tr>
+                                    <th>Objective #</th>
+                                    <th>Research Focus</th>
+                                    <th>Evaluated Cohort</th>
+                                    <th>Scientific Verdict</th>
+                                    <th>Key Audited Evidence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Obj 1a</strong></td>
+                                    <td>Allele-level HLA Mismatches</td>
+                                    <td>N = 619 / 577</td>
+                                    <td><span class="status-tag tag-null">Tested / Null</span></td>
+                                    <td>DRB1 nominal p = 0.0463 fails Bonferroni/FDR correction (p/q = 0.278). Total mismatch non-significant.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Obj 1b/1c</strong></td>
+                                    <td>Pre-Tx DSA Repertoire &amp; MFI</td>
+                                    <td>N = 104 / 60</td>
+                                    <td><span class="status-tag tag-null">Tested / Null</span></td>
+                                    <td>DSA MFI does not discriminate rejection (AUC = 0.363). Missingness confirmed MCAR (p = 0.8013).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Obj 1d</strong></td>
+                                    <td>3M dnDSA vs. 1Y Outcome</td>
+                                    <td>N = 87 / 82</td>
+                                    <td><span class="status-tag tag-inconclusive">Inconclusive</span></td>
+                                    <td>Underpowered due to strict clinical TDM (only N = 1 exposed case; Firth OR = 1.99, p = 0.7683).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Obj 2</strong></td>
+                                    <td>*PD-L1* rs4143815 Polymorphism</td>
+                                    <td>N = 1,586 / 215</td>
+                                    <td><span class="status-tag tag-inconclusive">Provisional</span></td>
+                                    <td>Association observed (Allelic OR = 1.38, Recessive OR = 2.49, p = 0.00037), but controls departure from HWE requires re-genotyping.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Obj 2</strong></td>
+                                    <td>*CTLA4* rs231775 Polymorphism</td>
+                                    <td>N = 684 / 192</td>
+                                    <td><span class="status-tag tag-null">Tested / Null</span></td>
+                                    <td>Non-significant across all models (OR = 1.21, p = 0.1466). Confirmed in HWE (p = 0.2886).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Obj 2×HLA</strong></td>
+                                    <td>Gene–HLA Epistatic Synergy</td>
+                                    <td>N = 49 Triply Linked</td>
+                                    <td><span class="status-tag tag-null">Tested / Null</span></td>
+                                    <td>Null under gold-standard biopsy adjudication (main OR = 3.03, p = 0.134; interaction β = -0.632, p = 0.244).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Obj 3</strong></td>
+                                    <td>Class I/II Eplet Repertoire</td>
+                                    <td>N = 1,435 Eplets</td>
+                                    <td><span class="status-tag tag-confirmed">Cataloged</span></td>
+                                    <td>Identified 71 Class I &amp; 76 Class II PGIMER immunogenic eplets (163LG &amp; 130Q dominant targets).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Obj 4</strong></td>
+                                    <td>Multimodal Risk Nomogram</td>
+                                    <td>N = 443 Complete</td>
+                                    <td><span class="status-tag tag-confirmed">Confirmed</span></td>
+                                    <td>ROC-AUC 0.6926 (+0.1018 over clinical alone, DeLong p = 0.00074). 6.4× monotonic gradient (5.6% → 36.0%).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Landing Footer -->
+            <footer class="landing-footer">
+                <div class="landing-footer-brand">
+                    <strong style="color: var(--ab-text);">RAMRT // PGIMER Immunopathology</strong>
+                    <span>Doctoral Research Terminal · Department of Immunopathology, PGIMER Chandigarh</span>
+                </div>
+                <div class="landing-footer-links">
+                    <button type="button" onclick="switchView('calculator'); switchCalculatorTab('home');">Dashboard</button>
+                    <button type="button" onclick="switchView('calculator'); switchCalculatorTab('nomogram');">Risk Calculator</button>
+                    <button type="button" onclick="switchView('calculator'); switchCalculatorTab('eplet');">HLA &amp; Eplets</button>
+                    <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">↑ Back to Top</button>
+                </div>
+            </footer>
+        </div>
     </div>
+
 
     <!-- ==========================================================================
          VIEW 2: CALCULATOR DASHBOARD
@@ -264,16 +553,29 @@
                     </div>
                     <div id="nomogram-fill-note" class="ux-status ux-status-ok" hidden></div>
                     <form id="calculator-form" onsubmit="event.preventDefault(); calculateRisk();">
+                        <!-- Quick Scenario Presets -->
+                        <div class="scenario-preset-bar">
+                            <span class="scenario-preset-label">Quick Scenarios:</span>
+                            <button type="button" class="preset-chip" onclick="Motion.applyDashboardScenario('ideal')">🌟 Ideal Sibling (Q1)</button>
+                            <button type="button" class="preset-chip" onclick="Motion.applyDashboardScenario('typical')">📋 Typical Cohort (Q3)</button>
+                            <button type="button" class="preset-chip" onclick="Motion.applyDashboardScenario('sensitized')">⚠️ Sensitized Deceased (Q5)</button>
+                        </div>
                         <div class="instrument-group">
                             <div class="group-kicker">1 · Donor and treatment</div>
                             <div class="grid-cols-2">
                                 <div class="control-field">
-                                    <label for="donor-age" class="control-label">Donor Age (Years)</label>
+                                    <label for="donor-age" class="control-label">
+                                        Donor Age (Years)
+                                        <span class="ux-tooltip-trigger" tabindex="0">?<span class="ux-tooltip-content">Cohort mean is 46.4 yrs. Older donor age steadily amplifies rejection hazard (+0.28/SD).</span></span>
+                                    </label>
                                     <input type="number" id="donor-age" class="control-input" min="18" max="75" value="46" oninput="calculateRisk()" required>
                                     <span class="control-caption">Older donors carry higher risk (about 5% more per year; cohort mean 46 years).</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="donor-source" class="control-label">Donor Source</label>
+                                    <label for="donor-source" class="control-label">
+                                        Donor Source
+                                        <span class="ux-tooltip-trigger" tabindex="0">?<span class="ux-tooltip-content">Living vs deceased donor allograft.</span></span>
+                                    </label>
                                     <select id="donor-source" class="control-select" onchange="calculateRisk()">
                                         <option value="0">Living donor</option>
                                         <option value="1">Deceased donor</option>
@@ -281,7 +583,10 @@
                                     <span class="control-caption">Living or deceased donor.</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="sibling-donor" class="control-label">Sibling Donor?</label>
+                                    <label for="sibling-donor" class="control-label">
+                                        Sibling Donor?
+                                        <span class="ux-tooltip-trigger" tabindex="0">?<span class="ux-tooltip-content">Full siblings share immunological haplotype, lowering rejection risk (OR = 0.44).</span></span>
+                                    </label>
                                     <select id="sibling-donor" class="control-select" onchange="calculateRisk()">
                                         <option value="0">No (parent, spouse, other or unrelated)</option>
                                         <option value="1">Yes, full sibling</option>
@@ -289,7 +594,10 @@
                                     <span class="control-caption">Full-sibling donors had lower rejection risk in this cohort.</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="standard-induction" class="control-label">Induction Regimen</label>
+                                    <label for="standard-induction" class="control-label">
+                                        Induction Regimen
+                                        <span class="ux-tooltip-trigger" tabindex="0">?<span class="ux-tooltip-content">Standard basiliximab (IL-2RA) vs intensified lymphocyte-depleting rabbit ATG.</span></span>
+                                    </label>
                                     <select id="standard-induction" class="control-select" onchange="calculateRisk()">
                                         <option value="1">Standard: basiliximab (IL-2 receptor antagonist)</option>
                                         <option value="0">Intensified: anti-thymocyte globulin (ATG)</option>
@@ -355,12 +663,18 @@
                             <div class="group-kicker">3 · Pre-transplant flow crossmatch</div>
                             <div class="grid-cols-2">
                                 <div class="control-field">
-                                    <label for="mcs-t" class="control-label">T-cell median channel shift</label>
+                                    <label for="mcs-t" class="control-label">
+                                        T-cell median channel shift
+                                        <span class="ux-tooltip-trigger" tabindex="0">?<span class="ux-tooltip-content">Flow crossmatch T-cell shift measuring anti-donor class I DSA (cohort mean: 19).</span></span>
+                                    </label>
                                     <input type="number" id="mcs-t" class="control-input" step="1" min="0" max="300" value="12" oninput="calculateRisk()" required>
                                     <span class="control-caption">From the flow cytometry crossmatch report (cohort mean 19).</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="mcs-b" class="control-label">B-cell median channel shift</label>
+                                    <label for="mcs-b" class="control-label">
+                                        B-cell median channel shift
+                                        <span class="ux-tooltip-trigger" tabindex="0">?<span class="ux-tooltip-content">Flow crossmatch B-cell shift measuring anti-donor class I and class II DSA (cohort mean: 72).</span></span>
+                                    </label>
                                     <input type="number" id="mcs-b" class="control-input" step="1" min="0" max="400" value="48" oninput="calculateRisk()" required>
                                     <span class="control-caption">From the flow cytometry crossmatch report (cohort mean 72).</span>
                                 </div>
@@ -426,6 +740,14 @@
                         <button class="arrow-btn" type="button" onclick="window.print()" title="Print summary">↗</button>
                     </div>
                     <div class="result-hero">
+                        <div id="dashboard-risk-gauge" class="gauge-svg-wrap">
+                            <svg class="gauge-svg" viewBox="0 0 200 110">
+                                <path class="gauge-bg-arc" d="M 22 95 A 78 78 0 0 1 178 95" />
+                                <path class="gauge-prog-arc" d="M 22 95 A 78 78 0 0 1 178 95" stroke-dasharray="245" stroke-dashoffset="160" />
+                                <line class="gauge-needle" x1="100" y1="95" x2="100" y2="30" stroke="#edfffe" stroke-width="3" stroke-linecap="round" />
+                                <circle cx="100" cy="95" r="5" fill="#cbfffc" />
+                            </svg>
+                        </div>
                         <div class="risk-display-num" id="risk-percent">15.4%</div>
                         <div class="risk-meta-stack">
                             <div class="quintile-indicator" id="quintile-title">Quintile 3 — Moderate Risk</div>
@@ -546,6 +868,14 @@
                             <button type="button" id="hla-mode-grid-btn" onclick="HLAUI.setMode('grid')">Enter by locus</button>
                             <button type="button" id="hla-mode-batch-btn" onclick="HLAUI.setMode('batch')">Batch</button>
                         </div>
+                    </div>
+
+                    <!-- Quick Preset Pairs -->
+                    <div class="scenario-preset-bar" style="margin-bottom: 16px;">
+                        <span class="scenario-preset-label">Preset Pairs:</span>
+                        <button type="button" class="preset-chip" onclick="Motion.loadHlaPresetPair(0)">🧬 Sibling Low-Mismatch</button>
+                        <button type="button" class="preset-chip" onclick="Motion.loadHlaPresetPair(1)">🧬 Heavy Molecular Load</button>
+                        <button type="button" class="preset-chip" onclick="Motion.loadHlaPresetPair(2)">🧬 Dominant Targets (163LG &amp; 130Q)</button>
                     </div>
 
                     <div id="hla-mode-paste">
@@ -723,12 +1053,21 @@
                             <div class="action-cluster" style="margin-top: 6px;">
                                 <button type="button" class="btn-aurora" id="hla3d-load" onclick="HLA3D.show()" disabled><span>Load 3D view</span><span>↗</span></button>
                                 <button type="button" class="btn-ghost" id="hla3d-spin" onclick="HLA3D.toggleSpin()">Rotate</button>
+                                <button type="button" class="btn-ghost" id="hla3d-canvas-theme" onclick="HLA3D.toggleCanvasTheme()">☀️ Light canvas</button>
+                                <button type="button" class="btn-ghost" id="hla3d-labels" data-on="1" onclick="HLA3D.toggleLabels()">Hide labels</button>
                                 <button type="button" class="btn-ghost" id="hla3d-surface" data-on="0" onclick="HLA3D.toggleSurface()">Show surface</button>
                                 <button type="button" class="btn-ghost" onclick="HLA3D.resetView()">Reset view</button>
                             </div>
                             <div id="hla3d-msg" class="hla-warn hla-warn-info" style="margin-top: 10px;">Choose a donor allele and press <em>Load 3D view</em>.</div>
                             <div id="hla3d-viewer" class="hla3d-viewer" hidden></div>
-                            <p class="hla-legend" style="margin-top: 10px;"><span class="hla-chip hla-chip-ie">immunogenic eplet</span> <span class="hla-chip hla-chip-abv">antibody-verified</span> <span class="hla-chip hla-chip-plain">other mismatched eplet</span></p>
+                            <p class="hla-legend" style="margin-top: 10px;">
+                                <span class="hla-chip hla-chip-ie">★ immunogenic eplet</span>
+                                <span class="hla-chip hla-chip-abv">✓ antibody-verified</span>
+                                <span class="hla-chip hla-chip-plain">other mismatched eplet</span>
+                                <span class="hla-chip" style="border-color: #00c9b7; color: #00c9b7; font-weight: 500;">target allele chain</span>
+                                <span class="hla-chip" style="border-color: #718096; color: #cbd5e1;">partner chain</span>
+                                <span class="hla-chip" style="border-color: #fbbf24; color: #fbbf24;">bound peptide</span>
+                            </p>
                         </div>
                     </details>
 
@@ -742,6 +1081,15 @@
                     </details>
                 </section>
             </div><!-- /#pane-eplet -->
+
+            <!-- Quick Navigation & Keyboard Shortcut Strip -->
+            <div class="kbd-shortcut-strip">
+                <span style="color: var(--ab-aqua, #cbfffc); font-weight: 500;">Keyboard Shortcuts:</span>
+                <span><kbd class="kbd-key">1</kbd> Dashboard</span>
+                <span><kbd class="kbd-key">2</kbd> Risk Nomogram</span>
+                <span><kbd class="kbd-key">3</kbd> HLA &amp; Eplets</span>
+                <span><kbd class="kbd-key">0</kbd> Overview</span>
+            </div>
         </div>
     </div>
 
@@ -753,7 +1101,7 @@
     <script src="hla_eplet_residues.js?v=20260908d"></script>
     <script src="hla_3d.js?v=20260910b"></script>
     <script src="dashboard_home.js?v=20260908"></script>
-    <script src="dna_hero.js?v=20260910"></script>
+    <script src="dna_hero.js?v=20260912"></script>
     <script src="app.js?v=20260910c"></script>
     <script src="motion.js?v=20260911"></script>
 </body>

@@ -44,20 +44,27 @@ h1, h2, h3, .card-title, .module-title { font-weight: 500; }
 @media (min-width: 861px) {
     body:not(.is-landing) { padding-left: 240px; }
     .ramrt-nav {
-        position: fixed; top: 0; left: 0; bottom: 0; width: 240px; height: 100vh;
+        position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+        height: 100vh; max-height: 100vh;
+        box-sizing: border-box;
         flex-direction: column; align-items: stretch; justify-content: flex-start;
-        padding: 26px 20px; gap: 28px;
+        padding: clamp(14px, 2.2vh, 22px) 18px;
+        gap: clamp(10px, 1.8vh, 20px);
         background: var(--ab-deep); backdrop-filter: none; -webkit-backdrop-filter: none;
         border-right: 1px solid var(--ab-line); box-shadow: none;
+        overflow-y: auto; overflow-x: hidden;
+        z-index: 1000;
     }
-    .brand-wrapper { padding: 0 6px; white-space: normal; align-items: flex-start; }
+    .ramrt-nav::-webkit-scrollbar { width: 4px; }
+    .ramrt-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+    .brand-wrapper { padding: 0 6px; white-space: normal; align-items: flex-start; flex-shrink: 0; }
     .brand-wordmark { font-size: 11px; line-height: 1.4; white-space: normal; letter-spacing: 0.12em; }
-    .nav-links { flex-direction: column; align-items: stretch; gap: 2px; }
-    .nav-links::before { content: 'Navigation'; display: block; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ab-slate); padding: 0 12px 10px; }
-    .nav-link { text-align: left; padding: 11px 12px; border-radius: var(--radius-small); letter-spacing: 0.12em; text-transform: uppercase; font-size: 12px; font-weight: 500; color: var(--ab-silver); }
+    .nav-links { flex-direction: column; align-items: stretch; gap: 2px; flex-shrink: 0; }
+    .nav-links::before { content: 'Navigation'; display: block; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ab-slate); padding: 0 12px 8px; }
+    .nav-link { text-align: left; padding: 10px 12px; border-radius: var(--radius-small); letter-spacing: 0.12em; text-transform: uppercase; font-size: 12px; font-weight: 500; color: var(--ab-silver); }
     .nav-link:hover { background: var(--ab-kelp); color: var(--ab-text); }
     .nav-link.active { background: var(--ab-kelp); color: var(--ab-text); box-shadow: none; }
-    .nav-action-wrap { margin-top: auto; }
+    .nav-action-wrap { margin-top: auto; padding-top: 10px; padding-bottom: 8px; flex-shrink: 0; }
     .nav-action-wrap .btn-aurora { width: 100%; justify-content: center; }
     .hamburger-btn { display: none !important; }
 }
@@ -218,15 +225,101 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 .hla-bar-ie { background: var(--ab-pink); }
 .hla-dot.on { background: var(--ab-pink); border-color: var(--ab-pink); }
 .hla-chip { border-radius: var(--radius-small); }
-.hla-warn { border-radius: var(--radius-small); background: var(--ab-deep); }
 .hla-result-id { color: var(--ab-aqua); }
-.hla3d-viewer { border-radius: var(--radius-cards); border-color: var(--ab-line-2); background: var(--ab-deep); }
+.hla3d-viewer { border-radius: var(--radius-cards); border-color: var(--ab-line-2); background: #0a0f1d; box-shadow: inset 0 0 40px rgba(0,0,0,0.5); }
 .hla3d-viewer canvas { border-radius: var(--radius-cards); }
 .hla-selftest-summary { background: var(--ab-deep); border-radius: var(--radius-small); }
+
+/* ---- Landing page full sections & layout ---------------------------------------------- */
+.landing-content-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px clamp(20px, 4vw, 40px) 100px;
+    position: relative;
+    z-index: 2;
+}
+.landing-section {
+    margin-top: 96px;
+    scroll-margin-top: 84px;
+}
+.landing-section-header {
+    text-align: center;
+    max-width: 740px;
+    margin: 0 auto 32px;
+}
+.landing-section-title {
+    font-family: var(--font-matter);
+    font-size: clamp(26px, 3vw, 38px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--ab-text);
+    margin: 8px 0 10px;
+    line-height: 1.2;
+}
+.landing-section-sub {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ab-silver);
+    margin: 0 auto;
+}
+.landing-footer {
+    border-top: 1px solid var(--ab-line);
+    margin-top: 100px;
+    padding: 36px 0 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 12.5px;
+    color: var(--ab-silver);
+}
+.landing-footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.landing-footer-links {
+    display: flex;
+    gap: 16px;
+}
+.landing-footer-links button {
+    background: transparent;
+    border: none;
+    color: var(--ab-silver);
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.landing-footer-links button:hover {
+    color: var(--ab-aqua);
+}
+
+/* ---- Dashboard Scenario Presets Bar --------------------------------------------------- */
+.scenario-preset-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: var(--ab-deep);
+    border-radius: var(--radius-small);
+    border: 1px solid var(--ab-line);
+}
+.scenario-preset-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ab-silver);
+    margin-right: 4px;
+}
 
 /* ---- print ---------------------------------------------------------------------------- */
 @media print {
     body { padding-left: 0; background: #fff; color: #000; }
-    .ramrt-nav, .dna-ambient, .ux-dock { display: none; }
+    .ramrt-nav, .landing-header, .dna-ambient, .ux-dock { display: none; }
     .surface-card, .ux-details, .protocol-panel { background: #fff; box-shadow: none; }
 }
+

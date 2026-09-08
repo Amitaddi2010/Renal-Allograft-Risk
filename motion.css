@@ -187,19 +187,486 @@ button:focus:not(:focus-visible), summary:focus:not(:focus-visible) { outline: n
 button[disabled] { cursor: not-allowed; opacity: 0.55; }
 
 /* numbers that are counting up should not reflow the layout mid-count */
-.db-sum-value, .hla-head-value, .risk-display-num, .hla-batch-stat-v { font-variant-numeric: tabular-nums; }
+.db-sum-value, .hla-head-value, .risk-display-num, .hla-batch-stat-v, .sandbox-stat-num { font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
-   8 · REDUCED MOTION — honour the OS setting and the in-app toggle
+   8 · 3D CARD HOLOGRAM & SPECULAR TILT MICROINTERACTIONS
+   ========================================================================== */
+.tilt-card {
+    position: relative;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.22s cubic-bezier(0.22, 0.75, 0.28, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+    will-change: transform;
+    overflow: hidden;
+}
+.tilt-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(circle 280px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(203, 255, 252, 0.14), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 1;
+}
+.tilt-card:hover::before {
+    opacity: 1;
+}
+.tilt-card:hover {
+    border-color: rgba(203, 255, 252, 0.38) !important;
+    box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.45), 0 0 24px -6px rgba(0, 210, 196, 0.18);
+}
+.tilt-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* ==========================================================================
+   9 · LANDING PAGE INTERACTIVE COMPONENTS & SCROLL CUES
+   ========================================================================== */
+/* Floating Landing Header */
+.landing-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    height: 64px; padding: 0 clamp(20px, 4vw, 48px);
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(0, 31, 29, 0.82);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+body:not(.is-landing) .landing-header { display: none !important; }
+.landing-nav-links {
+    display: flex; align-items: center; gap: 8px;
+}
+.landing-nav-btn {
+    background: transparent; border: none; color: var(--ab-silver, #b6c4c3);
+    font-size: 12.5px; font-weight: 500; letter-spacing: 0.06em;
+    padding: 8px 14px; border-radius: 6px; cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+.landing-nav-btn:hover {
+    color: var(--ab-aqua, #cbfffc); background: rgba(203, 255, 252, 0.06);
+}
+.landing-header-actions {
+    display: flex; align-items: center; gap: 12px;
+}
+
+/* Scroll cue indicator */
+@keyframes bounceDown {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(8px); }
+    60% { transform: translateY(4px); }
+}
+.scroll-cue {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 6px;
+    margin-top: 24px; color: var(--ab-silver, #b6c4c3); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+    opacity: 0.8; transition: opacity 0.2s ease, color 0.2s ease;
+}
+.scroll-cue:hover { opacity: 1; color: var(--ab-aqua, #cbfffc); }
+.scroll-cue-arrow {
+    font-size: 14px; animation: bounceDown 2.2s infinite;
+}
+
+/* Landing metrics counter ribbon */
+.landing-metric-ribbon {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 48px auto 0;
+    max-width: 1120px;
+    width: 100%;
+}
+@media (max-width: 900px) {
+    .landing-metric-ribbon { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+    .landing-metric-ribbon { grid-template-columns: 1fr; }
+}
+.metric-card {
+    background: var(--ab-kelp, #003734);
+    border: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08));
+    border-radius: 12px;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.metric-card-val {
+    font-family: var(--font-matter, sans-serif);
+    font-size: 34px;
+    font-weight: 500;
+    color: var(--ab-phosphor, #fde9ff);
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+.metric-card-lbl {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ab-aqua, #cbfffc);
+}
+.metric-card-sub {
+    font-size: 12px;
+    color: var(--ab-silver, #b6c4c3);
+    line-height: 1.4;
+}
+
+/* Landing capabilities grid */
+.landing-features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 32px;
+}
+@media (max-width: 960px) {
+    .landing-features-grid { grid-template-columns: 1fr; }
+}
+.feature-card {
+    background: var(--ab-kelp, #003734);
+    border: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08));
+    border-radius: 14px;
+    padding: 30px 26px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+}
+.feature-card-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(203, 255, 252, 0.08); border: 1px solid rgba(203, 255, 252, 0.2);
+    font-size: 20px; color: var(--ab-aqua, #cbfffc);
+}
+.feature-card-title {
+    font-size: 18px; font-weight: 500; color: var(--ab-text, #ffffff); margin: 12px 0 6px;
+}
+.feature-card-desc {
+    font-size: 13.5px; line-height: 1.55; color: var(--ab-silver, #b6c4c3); margin: 0;
+}
+.feature-tag-list {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+}
+.feature-mini-tag {
+    font-size: 11px; padding: 3px 8px; border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05); color: var(--ab-mist, #edfffe);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   10 · INTERACTIVE QUICK-RISK SANDBOX & SLIDERS
+   ========================================================================== */
+.sandbox-card {
+    background: var(--ab-deep, #002624);
+    border: 1px solid var(--ab-line-2, rgba(203, 255, 252, 0.22));
+    border-radius: 16px;
+    padding: clamp(24px, 3.5vw, 40px);
+    margin-top: 36px;
+    box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.5);
+}
+.sandbox-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 36px;
+    align-items: center;
+}
+@media (max-width: 900px) {
+    .sandbox-grid { grid-template-columns: 1fr; }
+}
+
+/* Custom interactive sliders */
+.sandbox-control-group {
+    display: flex; flex-direction: column; gap: 18px;
+}
+.sandbox-slider-row {
+    display: flex; flex-direction: column; gap: 6px;
+}
+.sandbox-slider-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12.5px; color: var(--ab-mist, #edfffe);
+}
+.sandbox-slider-val {
+    font-family: var(--font-matter, sans-serif); font-size: 15px; font-weight: 500;
+    color: var(--ab-aqua, #cbfffc);
+}
+.sandbox-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--ab-canvas, #001f1d);
+    border-radius: 3px;
+    outline: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+.sandbox-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--ab-aqua, #cbfffc);
+    box-shadow: 0 0 10px rgba(203, 255, 252, 0.6);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.sandbox-range:hover::-webkit-slider-thumb, .sandbox-range:active::-webkit-slider-thumb {
+    transform: scale(1.2);
+    box-shadow: 0 0 16px rgba(203, 255, 252, 0.85);
+}
+
+/* Preset pills */
+.preset-bar {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+}
+.preset-chip {
+    background: var(--ab-kelp, #003734);
+    color: var(--ab-mist, #edfffe);
+    border: 1px solid var(--ab-line, rgba(255, 255, 255, 0.12));
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s var(--ease-out);
+}
+.preset-chip:hover {
+    background: var(--ab-kelp-2, #01463f);
+    border-color: var(--ab-aqua, #cbfffc);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+.preset-chip.active {
+    background: rgba(203, 255, 252, 0.15);
+    border-color: var(--ab-aqua, #cbfffc);
+    color: var(--ab-aqua, #cbfffc);
+    box-shadow: 0 0 12px rgba(0, 210, 196, 0.25);
+}
+
+/* ==========================================================================
+   11 · DYNAMIC SVG SPEEDOMETER GAUGE & RADIAL RISK METER
+   ========================================================================== */
+.radial-meter-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--ab-canvas, #001f1d);
+    border: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08));
+    border-radius: 14px;
+    padding: 24px 20px;
+    position: relative;
+    overflow: hidden;
+}
+.gauge-svg-wrap {
+    width: 220px;
+    height: 125px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+.gauge-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+.gauge-bg-arc {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 12;
+    stroke-linecap: round;
+}
+.gauge-prog-arc {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke: var(--ab-aqua, #cbfffc);
+    filter: drop-shadow(0 0 6px rgba(203, 255, 252, 0.6));
+    transition: stroke-dashoffset 0.6s var(--ease-out), stroke 0.4s ease;
+}
+.gauge-needle {
+    transform-origin: 100px 95px;
+    transition: transform 0.65s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.gauge-center-readout {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.gauge-pct {
+    font-family: var(--font-matter, sans-serif);
+    font-size: 34px;
+    font-weight: 500;
+    color: var(--ab-phosphor, #fde9ff);
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+.gauge-band-badge {
+    margin-top: 8px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    background: rgba(0, 210, 196, 0.15);
+    color: var(--ab-aqua, #cbfffc);
+    border: 1px solid rgba(0, 210, 196, 0.3);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ==========================================================================
+   12 · DASHBOARD USABILITY ENHANCEMENTS & MICROINTERACTIONS
+   ========================================================================== */
+/* Clickable Summary Strip Tiles */
+.db-sum-item.is-clickable {
+    cursor: pointer;
+    transition: background 0.2s var(--ease-soft), transform 0.2s var(--ease-out);
+    position: relative;
+}
+.db-sum-item.is-clickable:hover {
+    background: rgba(203, 255, 252, 0.06);
+}
+.db-sum-item.is-clickable::after {
+    content: '↗';
+    position: absolute;
+    top: 14px; right: 14px;
+    font-size: 11px;
+    color: var(--ab-slate, #6e8482);
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.db-sum-item.is-clickable:hover::after {
+    opacity: 1;
+    transform: translate(2px, -2px);
+    color: var(--ab-aqua, #cbfffc);
+}
+
+/* Enhanced Risk Drivers */
+.driver-row-enhanced {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 12.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.15s ease;
+}
+.driver-row-enhanced:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+.driver-lbl {
+    flex: 1;
+    color: var(--ab-mist, #edfffe);
+}
+.driver-bar-track {
+    width: 140px;
+    height: 6px;
+    background: var(--ab-canvas, #001f1d);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+.driver-bar-fill-pos {
+    background: linear-gradient(90deg, #ff94b2, #ff6b8b);
+    border-radius: 3px;
+    height: 100%;
+}
+.driver-bar-fill-neg {
+    background: linear-gradient(90deg, #00d2c4, #6ef2e7);
+    border-radius: 3px;
+    height: 100%;
+}
+.driver-val-badge {
+    min-width: 48px;
+    text-align: right;
+    font-family: var(--font-matter, sans-serif);
+    font-size: 11.5px;
+    font-weight: 500;
+}
+.driver-val-badge.pos { color: #ff94b2; }
+.driver-val-badge.neg { color: #00d2c4; }
+
+/* Clinical Micro-Tooltip */
+.ux-tooltip-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: rgba(203, 255, 252, 0.12);
+    color: var(--ab-aqua, #cbfffc);
+    font-size: 10px;
+    font-weight: bold;
+    cursor: help;
+    margin-left: 5px;
+    position: relative;
+}
+.ux-tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--ab-deep, #002624);
+    border: 1px solid var(--ab-line-2, rgba(203, 255, 252, 0.22));
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--ab-mist, #edfffe);
+    font-size: 11.5px;
+    line-height: 1.4;
+    width: max-content;
+    max-width: 240px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 500;
+    font-weight: normal;
+    text-transform: none;
+}
+.ux-tooltip-trigger:hover .ux-tooltip-content {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Keyboard shortcut chip */
+.kbd-shortcut-strip {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 11.5px;
+    color: var(--ab-slate, #6e8482);
+    padding: 8px 0;
+    margin-top: 14px;
+}
+.kbd-key {
+    background: var(--ab-deep, #002624);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--ab-silver, #b6c4c3);
+}
+
+/* ==========================================================================
+   13 · REDUCED MOTION — honour the OS setting and the in-app toggle
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
         transition-duration: 0.001ms !important; scroll-behavior: auto !important;
     }
-    .hero-bg, .hero-canvas { transform: none !important; }
+    .hero-bg, .hero-canvas, .tilt-card { transform: none !important; }
 }
 body.motion-off *, body.motion-off *::before, body.motion-off *::after {
     animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
 }
-body.motion-off .hero-bg, body.motion-off .hero-canvas { transform: none !important; }
+body.motion-off .hero-bg, body.motion-off .hero-canvas, body.motion-off .tilt-card { transform: none !important; }
+
