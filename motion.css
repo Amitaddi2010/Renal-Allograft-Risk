@@ -1,0 +1,205 @@
+/* ==========================================================================
+   MOTION & MICROINTERACTIONS
+   Landing-page entrance choreography, hover/press feedback, focus rings,
+   toasts and the collapsible help dock. Palette and shape vocabulary follow
+   the Auros system (teal scale, 6/16 px radii, no elevation shadows).
+   Everything here is disabled under prefers-reduced-motion and under the
+   app's own motion toggle (body.motion-off).
+   ========================================================================== */
+
+/* ---- shared easing / timing ---------------------------------------------- */
+:root {
+    --ease-out: cubic-bezier(0.22, 0.75, 0.28, 1);
+    --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-fast: 0.16s;
+    --dur-med: 0.28s;
+    --dur-slow: 0.7s;
+}
+
+/* ==========================================================================
+   1 · LANDING HERO — entrance choreography
+   ========================================================================== */
+@keyframes riseIn { from { opacity: 0; transform: translate3d(0, 20px, 0); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes wordIn { from { opacity: 0; transform: translate3d(0, 0.5em, 0); } to { opacity: 1; transform: none; } }
+@keyframes canvasIn { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: none; } }
+@keyframes dotPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(203, 255, 252, 0.55); }
+    70% { box-shadow: 0 0 0 9px rgba(203, 255, 252, 0); }
+}
+@keyframes sheen { from { background-position: -180% 0; } to { background-position: 180% 0; } }
+
+body.is-landing .hero-brand { animation: riseIn var(--dur-slow) var(--ease-out) 0.05s both; }
+body.is-landing .hero-3d-sub { animation: riseIn var(--dur-slow) var(--ease-out) 0.42s both; }
+body.is-landing .hero-actions { animation: riseIn var(--dur-slow) var(--ease-out) 0.54s both; }
+body.is-landing .hero-meta { animation: riseIn var(--dur-slow) var(--ease-out) 0.66s both; }
+body.is-landing .hero-foot { animation: fadeIn 1s var(--ease-out) 0.9s both; }
+body.is-landing .hero-canvas { animation: canvasIn 1.4s var(--ease-out) 0.15s both; }
+body.is-landing .hero-bg { animation: fadeIn 1.6s var(--ease-out) both; }
+
+/* the title is split into words by motion.js; the fallback is a plain rise */
+.hero-3d-title { animation: riseIn var(--dur-slow) var(--ease-out) 0.18s both; }
+.hero-3d-title.is-split { animation: none; }
+.hero-word { display: inline-block; animation: wordIn 0.75s var(--ease-out) both; }
+
+.hero-brand-dot { animation: dotPulse 3s ease-out 1.2s infinite; }
+
+/* the hero background layers drift slightly with the pointer (set by motion.js) */
+.hero-bg, .hero-canvas { will-change: transform; }
+.hero-bg { transform: translate3d(calc(var(--par-x, 0) * 14px), calc(var(--par-y, 0) * 14px), 0); transition: transform 0.5s var(--ease-soft); }
+.hero-canvas { transform: translate3d(calc(var(--par-x, 0) * -8px), calc(var(--par-y, 0) * -8px), 0); transition: transform 0.6s var(--ease-soft); }
+
+/* ==========================================================================
+   2 · BUTTONS, LINKS, NAV — hover and press feedback
+   ========================================================================== */
+.btn-aurora, .btn-ghost, .arrow-btn, .nav-link, .calc-tab-btn, .ux-seg button, .ux-dock button, .ux-link-btn {
+    transition: background var(--dur-fast) var(--ease-soft), color var(--dur-fast) var(--ease-soft),
+                border-color var(--dur-fast) var(--ease-soft), transform var(--dur-fast) var(--ease-out),
+                filter var(--dur-fast) var(--ease-soft), opacity var(--dur-fast) var(--ease-soft);
+}
+.btn-aurora:active, .btn-ghost:active, .arrow-btn:active, .ux-dock button:active { transform: translateY(1px) scale(0.985); }
+
+/* the trailing arrow leans out on hover */
+.btn-aurora span:last-child, .arrow-btn { transition: transform var(--dur-med) var(--ease-out); }
+.btn-aurora:hover:not(:disabled) span:last-child { transform: translate(3px, -3px); }
+.arrow-btn:hover { transform: translate(2px, -2px); }
+
+/* a single light sweep across the primary button on hover */
+.btn-aurora { position: relative; overflow: hidden; }
+.btn-aurora::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: linear-gradient(100deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
+    background-size: 220% 100%;
+}
+.btn-aurora:hover:not(:disabled)::after { opacity: 1; animation: sheen 0.75s var(--ease-soft) 1; }
+
+/* ghost buttons brighten their border rather than lifting */
+.btn-ghost:hover:not(:disabled) { border-color: var(--ab-aqua, #cbfffc); }
+
+/* sidebar links grow an accent bar */
+@media (min-width: 861px) {
+    .nav-link { position: relative; }
+    .nav-link::before {
+        content: ''; position: absolute; left: 0; top: 50%; width: 2px; height: 0; transform: translateY(-50%);
+        background: var(--ab-aqua, #cbfffc); border-radius: 6px; transition: height var(--dur-med) var(--ease-out);
+    }
+    .nav-link:hover::before { height: 42%; }
+    .nav-link.active::before { height: 62%; }
+}
+
+/* module tabs slide their underline */
+.calc-tab-btn { position: relative; }
+.calc-tab-btn::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
+    background: var(--ab-aqua, #cbfffc); transform: scaleX(0); transform-origin: left;
+    transition: transform var(--dur-med) var(--ease-out);
+}
+.calc-tab-btn:hover::after { transform: scaleX(0.4); }
+.calc-tab-btn.active::after { transform: scaleX(1); }
+
+/* ==========================================================================
+   3 · CARDS AND PANES
+   ========================================================================== */
+.home-card, .lp-feature, .stat-block, .hla-head, .hla-tile, .db-sum-item {
+    transition: background var(--dur-med) var(--ease-soft), border-color var(--dur-med) var(--ease-soft);
+}
+.home-card:hover, .lp-feature:hover { background: var(--ab-kelp-2, #01463f); }
+.db-sum-item:hover { background: rgba(255, 255, 255, 0.03); }
+.hla-tile:hover, .stat-block:hover { background: rgba(255, 255, 255, 0.03); }
+.home-card-head .lp-feature-icon { transition: transform var(--dur-med) var(--ease-out), color var(--dur-fast) var(--ease-soft); }
+.home-card:hover .lp-feature-icon { transform: scale(1.08) rotate(-6deg); }
+
+/* switching module shows the new pane rising into place */
+@keyframes paneIn { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+.calc-tab-pane.pane-enter { animation: paneIn 0.36s var(--ease-out) both; }
+
+/* table rows respond to the pointer */
+.table-matrix tbody tr, .hla-arow { transition: background var(--dur-fast) var(--ease-soft); }
+.hla-arow:hover { background: rgba(255, 255, 255, 0.03); }
+
+/* ==========================================================================
+   4 · FOCUS RINGS — keyboard users must always see where they are
+   ========================================================================== */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--ab-aqua, #cbfffc);
+    outline-offset: 2px;
+    border-radius: var(--radius-small, 6px);
+}
+.control-input:focus-visible, .hla-textarea:focus-visible, .control-select:focus-visible { outline-offset: 0; }
+/* a pointer click should not leave a ring behind */
+button:focus:not(:focus-visible), summary:focus:not(:focus-visible) { outline: none; }
+
+/* skip link for keyboard and screen-reader users */
+.skip-link {
+    position: fixed; top: 8px; left: 8px; z-index: 2000; transform: translateY(-200%);
+    background: var(--ab-kelp, #003734); color: var(--ab-mist, #edfffe); padding: 10px 16px;
+    border-radius: var(--radius-small, 6px); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: transform var(--dur-med) var(--ease-out);
+}
+.skip-link:focus { transform: none; }
+
+/* ==========================================================================
+   5 · TOASTS — confirmation for actions that otherwise look silent
+   ========================================================================== */
+.toast-stack {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    z-index: 1200; display: flex; flex-direction: column; gap: 8px; align-items: center;
+    pointer-events: none; max-width: min(92vw, 520px);
+}
+@keyframes toastIn { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translate3d(0, 8px, 0); } }
+.toast {
+    background: var(--ab-kelp, #003734); color: var(--ab-mist, #edfffe);
+    border: 1px solid var(--ab-line-2, rgba(203, 255, 252, 0.22)); border-radius: var(--radius-small, 6px);
+    padding: 11px 18px; font-size: 13px; line-height: 1.4; display: flex; align-items: center; gap: 10px;
+    animation: toastIn 0.3s var(--ease-out) both;
+}
+.toast.is-leaving { animation: toastOut 0.25s var(--ease-soft) both; }
+.toast-mark { color: var(--ab-aqua, #cbfffc); font-size: 14px; }
+.toast-warn .toast-mark { color: var(--color-lavender-phosphor, #fde9ff); }
+
+/* ==========================================================================
+   6 · HELP DOCK — collapses to one button so it stops covering the page
+   ========================================================================== */
+.ux-dock { transition: opacity var(--dur-med) var(--ease-soft); }
+.ux-dock-toggle {
+    order: -1; align-self: flex-end;
+    width: 38px; height: 38px; padding: 0 !important; display: flex; align-items: center; justify-content: center;
+    font-size: 15px !important; line-height: 1;
+}
+.ux-dock.is-collapsed button:not(.ux-dock-toggle) { display: none; }
+.ux-dock:not(.is-collapsed) { background: transparent; }
+.ux-dock button:not(.ux-dock-toggle) { animation: riseIn 0.28s var(--ease-out) both; }
+.ux-dock button:not(.ux-dock-toggle):nth-of-type(2) { animation-delay: 0.04s; }
+.ux-dock button:not(.ux-dock-toggle):nth-of-type(3) { animation-delay: 0.08s; }
+
+/* ==========================================================================
+   7 · PENDING / BUSY STATE
+   ========================================================================== */
+@keyframes barSlide { from { transform: translateX(-100%); } to { transform: translateX(400%); } }
+.is-busy { position: relative; }
+.is-busy::before {
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; overflow: hidden;
+    background: linear-gradient(90deg, transparent, var(--ab-aqua, #cbfffc), transparent);
+    width: 25%; animation: barSlide 1s linear infinite; border-radius: 6px;
+}
+button[disabled] { cursor: not-allowed; opacity: 0.55; }
+
+/* numbers that are counting up should not reflow the layout mid-count */
+.db-sum-value, .hla-head-value, .risk-display-num, .hla-batch-stat-v { font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   8 · REDUCED MOTION — honour the OS setting and the in-app toggle
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+    }
+    .hero-bg, .hero-canvas { transform: none !important; }
+}
+body.motion-off *, body.motion-off *::before, body.motion-off *::after {
+    animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+}
+body.motion-off .hero-bg, body.motion-off .hero-canvas { transform: none !important; }

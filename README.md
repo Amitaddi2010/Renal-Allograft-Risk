@@ -145,6 +145,24 @@ Deep links: `#hla-batch` opens the empty batch tab, `#hla-batch-example` loads a
 
 **Note on comparability with the registry calculator.** This app computes eplet loads from the HLAMatchmaker 3.1 workbooks supplied with the thesis, not from the HLA Eplet Registry release used at epregistry.com.br. The two sources curate eplets differently, so absolute counts are not expected to match one for one; rankings and relative loads are the comparable quantities. Loci missing from a typing are skipped, so pairs typed for fewer loci carry lower loads and must not be compared with fully typed pairs.
 
+## ✨ Motion and microinteractions
+
+`motion.css` and `motion.js` add the interaction layer. **Landing page**: the hero title is split into words for a staggered reveal, the brand line, subtitle, buttons and meta rise in sequence, the helix fades up from a slight zoom, the status dot pulses, and the background layers drift with the pointer (parallax). The primary button carries a single light sweep on hover and its arrow leans outward; ghost buttons brighten their border.
+
+**Dashboard usability**:
+
+| Change | Why |
+|---|---|
+| Help dock collapses to one small button | The three stacked buttons covered content in the bottom-right corner |
+| Focus rings on every interactive element | The app previously had almost no visible keyboard focus state |
+| Skip-to-content link | Keyboard and screen-reader users can bypass the sidebar |
+| Toasts for actions | *Save to recent*, *Copy report*, CSV export and batch runs gave little or no confirmation |
+| Statistics count up when they change | Makes a recomputed number obvious instead of silently swapping |
+| Sidebar accent bar, tab underline, card and row hover states | Makes the current position and clickable targets clear |
+| Panes rise into place when switching module | Signals that the view changed |
+
+All of it is suppressed by the operating system's reduced-motion setting and by the in-app motion toggle; values with markup (such as `3/6`) are never touched by the counter. Note that headless screenshots always render the reduced-motion state, so the animation has to be judged in a real browser.
+
 ## 📂 Repository Structure
 
 ```

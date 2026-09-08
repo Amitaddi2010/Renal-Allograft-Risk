@@ -5,6 +5,7 @@
     (grouped inputs, sticky results with the "what drives this estimate" panel), HLA pane from tools/pane_hla.html
     (run tools/splice_pane.py afterwards). Idempotent. Run from the clinical_risk_calculator folder.
 """
+import re
 import io, os, re
 HERE = os.path.dirname(os.path.abspath(__file__))
 p = os.path.join(HERE, '..', 'index.html')
@@ -220,4 +221,10 @@ if 'dna_hero.js' not in s:
 
 if s != orig:
     io.open(p, 'w', encoding='utf-8').write(s)
+# ---------------------------------------------------------------- motion & microinteraction layer
+if 'motion.css' not in s:
+    s = s.replace('<link rel="stylesheet" id="theme-glass"', '<link rel="stylesheet" href="motion.css?v=20260911">\n    <link rel="stylesheet" id="theme-glass"', 1)
+if 'motion.js' not in s:
+    s = re.sub(r'(<script src="app\.js[^"]*"></script>)', r'\1\n    <script src="motion.js?v=20260911"></script>', s, count=1)
+
 print('views rebuilt; hero:', s.count('id="dna-canvas"'), 'home pane:', s.count('id="pane-home"'), 'summary strip:', s.count('id="db-summary"'), 'drivers:', s.count('id="risk-drivers"'), 'evidence in home:', 'landing-evidence' in s.split('id="pane-home"')[1] if 'id="pane-home"' in s else False)

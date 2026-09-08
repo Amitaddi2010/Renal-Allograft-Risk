@@ -602,6 +602,7 @@ function switchCalculatorTab(tabName) {
         if (window.location.hash !== '#risk') window.location.hash = 'risk';
         syncNavActive('nomogram');
     }
+    if (window.Motion) Motion.markPane(document.querySelector('.calc-tab-pane:not(.hidden-tab)'));
 }
 
 // Sidebar / nav highlighting follows the open calculator tab

@@ -219,6 +219,10 @@
         lastBatch = rows;
         renderBatch(rows);
         $('hla-batch-csv-btn').disabled = false;
+        const bad = rows.filter(function (r) { return r.error; }).length;
+        flash(rows.length + ' pair' + (rows.length > 1 ? 's' : '') + ' calculated' +
+              (bad ? ' · ' + bad + ' row' + (bad > 1 ? 's' : '') + ' had an allele that could not be read' : ''),
+              bad ? 'warn' : 'ok');
     }
 
     function num(v) { return (v === null || v === undefined) ? '<span class="hla-na">n/a</span>' : String(v); }
@@ -531,7 +535,8 @@
         setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
         flash('CSV file downloaded');
     }
-    function flash(msg) {
+    function flash(msg, kind) {
+        if (window.Motion) Motion.toast(msg, kind);          // visible wherever the user is looking
         const el = $('hla-flash');
         if (!el) return;
         el.textContent = msg; el.classList.add('visible');
