@@ -27,10 +27,12 @@
     function storedMotionOff() { try { return localStorage.getItem('ramrt-motion') === 'off'; } catch (e) { return false; } }
     function systemReduced() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
     window.__ramrtStopAnim = storedMotionOff() || systemReduced();
+    if (window.__ramrtStopAnim && document.body) document.body.classList.add('motion-off');
 
     function setMotion(on) {
         try { localStorage.setItem('ramrt-motion', on ? 'on' : 'off'); } catch (e) { /* ignore */ }
         window.__ramrtStopAnim = !on;
+        document.body.classList.toggle('motion-off', !on);
         if (on && typeof initParticleSphere === 'function' && !window.__ramrtAnimRunning) initParticleSphere();
         updateMotionBtn();
     }

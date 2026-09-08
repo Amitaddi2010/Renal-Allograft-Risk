@@ -38,6 +38,13 @@ cv_start = s.index('<div id="calculator-view"')
 lv_end = s.rfind('<!-- ====', lv_start, cv_start)
 LANDING = '''<div id="landing-view" class="view-container active-view">
         <section class="hero-3d" id="hero">
+            <div class="hero-bg" aria-hidden="true">
+                <div class="hero-blob hero-blob-1"></div>
+                <div class="hero-blob hero-blob-2"></div>
+                <div class="hero-blob hero-blob-3"></div>
+                <div class="hero-grid"></div>
+                <div class="hero-beam"></div>
+            </div>
             <canvas id="dna-canvas" class="hero-canvas" aria-hidden="true"></canvas>
             <div class="hero-3d-content">
                 <div class="hero-brand"><span class="hero-brand-dot"></span> RAMRT · PGIMER Immunopathology</div>
