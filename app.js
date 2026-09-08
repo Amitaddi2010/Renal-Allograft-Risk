@@ -202,6 +202,8 @@ function calculateRisk() {
 
     // Update Result Hero Display
     document.getElementById('risk-percent').textContent = percentStr;
+    const sumRisk = document.getElementById('sum-risk');
+    if (sumRisk) sumRisk.innerHTML = percentStr + '<small>' + qInfo.title.split('—')[0].trim() + '</small>';
     document.getElementById('quintile-title').textContent = qInfo.title;
     document.getElementById('quintile-subtext').textContent = qInfo.desc;
 
@@ -480,9 +482,27 @@ function initMolecularDiagram() {
 /* ==========================================================================
    VIEW SWITCHING & NAVIGATION CONTROLLER (Landing Page <-> Calculator Dashboard)
    ========================================================================== */
+// 3D DNA helix: full hero on the landing page, faint ambient behind the dashboard
+let __dnaHero = null, __dnaAmbient = null;
+function updateDnaScenes(viewName) {
+    if (!window.DNA) return;
+    const heroCanvas = document.getElementById('dna-canvas');
+    const ambient = document.getElementById('dna-ambient');
+    if (viewName === 'landing') {
+        if (__dnaAmbient) { __dnaAmbient.stop(); __dnaAmbient = null; }
+        if (heroCanvas && !__dnaHero) __dnaHero = DNA.start(heroCanvas, { ambient: false });
+    } else {
+        if (__dnaHero) { __dnaHero.stop(); __dnaHero = null; }
+        const dashboardTheme = !(window.UX && UX.currentTheme && UX.currentTheme() === 'terminal');
+        if (ambient && !__dnaAmbient && dashboardTheme) __dnaAmbient = DNA.start(ambient, { ambient: true, speed: 0.35 });
+    }
+}
+
 function switchView(viewName) {
     const landingView = document.getElementById('landing-view');
     const calcView = document.getElementById('calculator-view');
+    document.body.classList.toggle('is-landing', viewName !== 'calculator');
+    setTimeout(function () { updateDnaScenes(viewName === 'calculator' ? 'calculator' : 'landing'); }, 0);
     const navLanding = document.getElementById('nav-btn-landing');
     const navCalc = document.getElementById('nav-btn-calc');
     const navLaunchBtn = document.getElementById('nav-launch-btn');

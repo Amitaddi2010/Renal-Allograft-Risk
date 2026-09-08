@@ -7,12 +7,13 @@
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
     <link rel="stylesheet" href="styles.css?v=20260908_hla">
     <link rel="stylesheet" href="hla_styles.css?v=20260908e">
-    <link rel="stylesheet" href="ux_styles.css?v=20260908f">
-    <link rel="stylesheet" id="theme-dashboard" href="dashboard_theme.css?v=20260908d">
+    <link rel="stylesheet" href="ux_styles.css?v=20260909c">
+    <link rel="stylesheet" id="theme-dashboard" href="dashboard_theme.css?v=20260909">
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
     <canvas id="particle-canvas"></canvas>
+    <canvas id="dna-ambient" class="dna-ambient" aria-hidden="true"></canvas>
 
     <!-- Mobile Navigation Overlay -->
     <div class="mobile-nav-overlay" id="nav-overlay" onclick="closeNav()"></div>
@@ -28,7 +29,7 @@
             <button type="button" class="nav-link" id="nav-btn-home" onclick="switchView('calculator'); switchCalculatorTab('home'); closeNav();">Dashboard</button>
             <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">Risk calculator</button>
             <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">HLA &amp; eplets</button>
-            <button type="button" class="nav-link nav-link-secondary active" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">← Back to site</button>
+            <button type="button" class="nav-link nav-link-secondary" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">← Back to site</button>
         </nav>
 
         <div class="nav-action-wrap">
@@ -50,74 +51,103 @@
          VIEW 1: LANDING PAGE
          ========================================================================== -->
     <div id="landing-view" class="view-container active-view">
+        <section class="hero-3d" id="hero">
+            <canvas id="dna-canvas" class="hero-canvas" aria-hidden="true"></canvas>
+            <div class="hero-3d-content">
+                <div class="hero-brand"><span class="hero-brand-dot"></span> RAMRT · PGIMER Immunopathology</div>
+                <h1 class="hero-3d-title">Donor–recipient immunological assessment.</h1>
+                <p class="hero-3d-sub">HLA mismatch and immunogenic eplet analysis straight from typing, and a one-year rejection-risk estimate built on 443 PGIMER transplant recipients. Everything runs in your browser; no patient data leaves the computer.</p>
+                <div class="hero-actions">
+                    <button type="button" class="btn-aurora btn-lg" onclick="switchView('calculator'); switchCalculatorTab('home');"><span>Open dashboard</span><span>↗</span></button>
+                    <button type="button" class="btn-ghost btn-lg hero-ghost" onclick="switchView('calculator'); switchCalculatorTab('eplet'); HLAUI.loadExample();"><span>Try the example pair</span></button>
+                </div>
+                <div class="hero-meta"><span>HLA mismatch &amp; eplets</span><span class="hero-sep">·</span><span>Rejection risk calculator</span><span class="hero-sep">·</span><span>3D eplet view</span></div>
+            </div>
+            <div class="hero-foot">Doctoral research tool · Department of Immunopathology, PGIMER Chandigarh · Research use only</div>
+        </section>
+    </div>
+
+    <!-- ==========================================================================
+         VIEW 2: CALCULATOR DASHBOARD
+         ========================================================================== -->
+    <div id="calculator-view" class="view-container">
         <div class="page-wrapper">
-            <section class="hero-section lp-hero">
-                <div class="section-eyebrow">
-                    <span>PGIMER Chandigarh • Department of Immunopathology</span>
-                    <span>/</span>
-                    <span>Doctoral research tools</span>
+            <!-- Dashboard Sub-Header -->
+            <div class="dashboard-top-bar">
+                <nav class="db-crumb" aria-label="Breadcrumb">
+                    <button type="button" class="back-link-btn" onclick="switchView('landing')">Overview</button>
+                    <span class="db-crumb-sep">/</span>
+                    <span class="db-crumb-current">Dashboard</span>
+                    <span class="db-crumb-sep">/</span>
+                    <span class="db-crumb-current" id="module-crumb">Risk calculator</span>
+                </nav>
+                <div class="dash-meta-badge">
+                    <span class="active-pill"></span>
+                    <span>Risk model trained on 443 PGIMER transplant recipients</span>
                 </div>
-                <h1 class="hero-title">Donor–recipient immunological assessment, in one place.</h1>
-                <p class="hero-subtext">Two calculators from the PGIMER kidney-transplant study: an HLA mismatch and eplet analysis that works straight from donor and recipient typing, and a one-year rejection-risk estimate built on 443 transplant recipients. Everything runs in the browser; no patient data leaves the computer.</p>
-                <div class="action-cluster">
-                    <button type="button" class="btn-aurora" onclick="switchView('calculator'); switchCalculatorTab('home');">
-                        <span>Open dashboard</span><span>↗</span>
-                    </button>
-                    <button type="button" class="btn-ghost" onclick="scrollToSection('how-it-works')"><span>How it works</span></button>
-                </div>
-            </section>
+            </div>
 
-            <section class="lp-features" id="features">
-                <div class="lp-feature">
-                    <div class="lp-feature-icon">⬡</div>
-                    <h3>HLA mismatch &amp; eplet analysis</h3>
-                    <p>Paste or type both HLA typings and get the full mismatch picture immediately.</p>
-                    <ul>
-                        <li>Antigen- and allele-level mismatches per locus, with the alleles that differ</li>
-                        <li>Eplet mismatch load from the HLAMatchmaker 3.1 tables (class I and II)</li>
-                        <li>Immunogenic eplets from the PGIMER IE catalogue, total vs immunogenic load</li>
-                        <li>DRB3/4/5 and DQA1 inference, validation of every entry, self-test</li>
-                        <li>3D view of the mismatched eplets on the donor molecule</li>
-                        <li>Text and CSV export; one click sends the counts to the risk calculator</li>
-                    </ul>
-                    <button type="button" class="btn-aurora btn-sm" onclick="switchView('calculator'); switchCalculatorTab('eplet');"><span>Open HLA &amp; eplets</span><span>↗</span></button>
-                </div>
-                <div class="lp-feature">
-                    <div class="lp-feature-icon">◔</div>
-                    <h3>Rejection risk calculator</h3>
-                    <p>Combine donor, HLA and flow-crossmatch values into a calibrated one-year estimate.</p>
-                    <ul>
-                        <li>Probability of biopsy-proven acute rejection within one year</li>
-                        <li>Risk band with the rejection rate actually observed in that band</li>
-                        <li>"What drives this estimate": each input's contribution, up or down</li>
-                        <li>Suggested actions for the band, following PGIMER practice</li>
-                        <li>HLA values filled in directly from the typing analysis</li>
-                        <li>Save and reopen estimates from the dashboard</li>
-                    </ul>
-                    <button type="button" class="btn-aurora btn-sm" onclick="switchView('calculator'); switchCalculatorTab('nomogram');"><span>Open risk calculator</span><span>↗</span></button>
-                </div>
-            </section>
+            <div class="db-summary" id="db-summary">
+                <div class="db-sum-item"><span class="db-sum-label">Antigen mismatches (A+B+DR)</span><span class="db-sum-value" id="sum-mm">–</span></div>
+                <div class="db-sum-item"><span class="db-sum-label">Mismatched eplets</span><span class="db-sum-value" id="sum-ep">–</span></div>
+                <div class="db-sum-item"><span class="db-sum-label">Immunogenic eplets</span><span class="db-sum-value" id="sum-ie">–</span></div>
+                <div class="db-sum-item"><span class="db-sum-label">Predicted 1-year risk</span><span class="db-sum-value" id="sum-risk">–</span></div>
+                <div class="db-sum-note" id="sum-note">Mismatch and eplet counts appear after an HLA analysis; the risk figure follows the calculator&#39;s current inputs.</div>
+            </div>
 
-            <section class="content-section" id="how-it-works">
-                <div class="section-header-compact">
-                    <div class="group-kicker">How it works</div>
-                    <h2 class="section-heading-sm">Three steps from typing to risk estimate</h2>
-                </div>
-                <div class="ux-steps">
-                    <div class="ux-step"><div class="ux-step-num">1</div><div><div class="ux-step-title">Enter donor and recipient HLA typing</div><div class="ux-step-text">Paste alleles or type them by locus; results appear as you type.</div></div></div>
-                    <div class="ux-step"><div class="ux-step-num">2</div><div><div class="ux-step-title">Review mismatches and immunogenic eplets</div><div class="ux-step-text">Antigen and allele mismatches, eplet loads and IE-catalogue eplets in one dashboard.</div></div></div>
-                    <div class="ux-step"><div class="ux-step-num">3</div><div><div class="ux-step-title">Estimate rejection risk</div><div class="ux-step-text">Send the counts to the risk calculator and add donor age, induction and crossmatch values.</div></div></div>
-                </div>
-            </section>
+            <!-- Calculator Mode Tab Bar -->
+            <div class="calc-tab-bar">
+                <button type="button" class="calc-tab-btn" id="calc-tab-home" onclick="switchCalculatorTab('home')"><span>Dashboard</span></button>
+                <button type="button" class="calc-tab-btn active" id="calc-tab-nomogram" onclick="switchCalculatorTab('nomogram')">
+                    <span>1 · Rejection risk calculator</span>
+                </button>
+                <button type="button" class="calc-tab-btn" id="calc-tab-eplet" onclick="switchCalculatorTab('eplet')">
+                    <span>2 · HLA mismatch &amp; eplet analysis</span>
+                    <span class="tab-badge-advisory">typing → mismatches → immunogenic eplets</span>
+                </button>
+            </div>
 
-            <section class="stats-ribbon">
-                <div class="stat-block"><span class="stat-number">0.6926</span><span class="stat-label">Model accuracy, AUC (95% CI 0.63–0.75)</span></div>
-                <div class="stat-block"><span class="stat-number">+0.1018</span><span class="stat-label">AUC gained from HLA + crossmatch data (p &lt; 0.001)</span></div>
-                <div class="stat-block"><span class="stat-number">6.4×</span><span class="stat-label">Rejection rate, lowest to highest risk band (5.6% → 36.0%)</span></div>
-                <div class="stat-block"><span class="stat-number">N = 2,220</span><span class="stat-label">Transplants in the PGIMER study registry</span></div>
-            </section>
-
-            <details class="ux-details landing-evidence" id="landing-evidence">
+            <!-- DASHBOARD HOME -->
+            <div id="pane-home" class="calc-tab-pane hidden-tab">
+                <div class="module-header">
+                    <div>
+                        <h1 class="module-title">Dashboard</h1>
+                        <p class="module-desc">Choose a tool, or reopen a recent analysis. Recent items are kept only in this browser.</p>
+                    </div>
+                </div>
+                <div class="home-grid">
+                    <section class="surface-card home-card">
+                        <div class="home-card-head"><span class="lp-feature-icon">⬡</span><h2 class="card-title">HLA mismatch &amp; eplet analysis</h2></div>
+                        <p class="card-subtitle">Typing → antigen &amp; allele mismatches → eplet load → immunogenic eplets → 3D view.</p>
+                        <div class="action-cluster">
+                            <button type="button" class="btn-aurora" onclick="switchCalculatorTab('eplet')"><span>Open</span><span>↗</span></button>
+                            <button type="button" class="btn-ghost" onclick="switchCalculatorTab('eplet'); HLAUI.loadExample();">Try the example pair</button>
+                        </div>
+                    </section>
+                    <section class="surface-card home-card">
+                        <div class="home-card-head"><span class="lp-feature-icon">◔</span><h2 class="card-title">Rejection risk calculator</h2></div>
+                        <p class="card-subtitle">Donor, HLA mismatch and crossmatch values → one-year probability, risk band and drivers.</p>
+                        <div class="action-cluster">
+                            <button type="button" class="btn-aurora" onclick="switchCalculatorTab('nomogram')"><span>Open</span><span>↗</span></button>
+                            <button type="button" class="btn-ghost" onclick="switchCalculatorTab('nomogram'); resetDefaults();">Start from typical values</button>
+                        </div>
+                    </section>
+                </div>
+                <div class="home-grid">
+                    <section class="surface-card">
+                        <div class="card-header-bar"><div><h2 class="card-title">Recent HLA analyses</h2><p class="card-subtitle">Saved from the HLA &amp; eplets tool.</p></div></div>
+                        <div id="home-recent-hla"></div>
+                    </section>
+                    <section class="surface-card">
+                        <div class="card-header-bar"><div><h2 class="card-title">Recent risk estimates</h2><p class="card-subtitle">Saved from the risk calculator.</p></div></div>
+                        <div id="home-recent-risk"></div>
+                    </section>
+                </div>
+                <section class="surface-card">
+                    <div class="card-header-bar"><div><h2 class="card-title">Reference data &amp; status</h2><p class="card-subtitle">What the calculators are built on.</p></div></div>
+                    <div id="home-status" class="home-status"></div>
+                </section>
+                <details class="ux-details landing-evidence" id="landing-evidence">
                 <summary>Evidence behind the tools — study results and scientific verdicts <span class="ux-muted">reference</span></summary>
                 <div class="ux-details-body">
 <section class="content-section" id="evidence-section" style="margin-top: var(--section-gap);">
@@ -203,123 +233,6 @@
             </section>
                 </div>
             </details>
-
-            <section class="launch-banner-card">
-                <div>
-                    <span class="group-kicker">Ready to start?</span>
-                    <h2 class="section-heading-sm">Analyse a donor–recipient pair</h2>
-                    <p class="section-desc">Enter the HLA typing of both people to get mismatches and immunogenic eplets, then add donor age, induction and crossmatch values for the one-year rejection-risk estimate.</p>
-                </div>
-                <button type="button" class="btn-aurora" onclick="switchView('calculator'); switchCalculatorTab('home');" style="flex-shrink: 0;">
-                    <span>Open dashboard</span><span>↗</span>
-                </button>
-            </section>
-        </div>
-
-        <footer class="ramrt-footer">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <h3>PGIMER Immunopathology // RAMRT Terminal</h3>
-                    <p>Doctoral dissertation research: <em>Impact of HLA-epitope analysis and non-HLA immune regulatory genes polymorphism on graft outcome in kidney transplantation</em>.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Doctoral Registry</h4>
-                    <ul class="footer-links">
-                        <li><a href="javascript:void(0)" onclick="switchView('calculator'); switchCalculatorTab('nomogram');">Risk calculator</a></li>
-                        <li><a href="javascript:void(0)" onclick="switchView('calculator'); switchCalculatorTab('eplet');">HLA &amp; eplet analysis</a></li>
-                        <li><a href="javascript:void(0)" onclick="document.getElementById('landing-evidence').open = true; scrollToSection('landing-evidence');">Study evidence (reference)</a></li>
-                        <li><a href="https://github.com/Amitaddi2010/Renal-Allograft-Risk" target="_blank">GitHub Repository ↗</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Statistical Validation</h4>
-                    <ul class="footer-links">
-                        <li><span>DeLong Test (p = 0.00074)</span></li>
-                        <li><span>Paired t-Test (p &lt; 10⁻⁶)</span></li>
-                        <li><span>Hosmer-Lemeshow (p = 0.5132)</span></li>
-                        <li><span>25-Fold Nested CV</span></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <span>Candidate: Heera Singh, MSc • Supervisor: Prof. Ranjana Walker Minz, MD</span>
-                <span>Department of Immunopathology, PGIMER Chandigarh • Academic & Research Use Only</span>
-            </div>
-        </footer>
-    </div>
-
-    <!-- ==========================================================================
-         VIEW 2: CALCULATOR DASHBOARD
-         ========================================================================== -->
-    <div id="calculator-view" class="view-container">
-        <div class="page-wrapper">
-            <!-- Dashboard Sub-Header -->
-            <div class="dashboard-top-bar">
-                <nav class="db-crumb" aria-label="Breadcrumb">
-                    <button type="button" class="back-link-btn" onclick="switchView('landing')">Overview</button>
-                    <span class="db-crumb-sep">/</span>
-                    <span class="db-crumb-current">Dashboard</span>
-                    <span class="db-crumb-sep">/</span>
-                    <span class="db-crumb-current" id="module-crumb">Risk calculator</span>
-                </nav>
-                <div class="dash-meta-badge">
-                    <span class="active-pill"></span>
-                    <span>Risk model trained on 443 PGIMER transplant recipients</span>
-                </div>
-            </div>
-
-            <!-- Calculator Mode Tab Bar -->
-            <div class="calc-tab-bar">
-                <button type="button" class="calc-tab-btn" id="calc-tab-home" onclick="switchCalculatorTab('home')"><span>Dashboard</span></button>
-                <button type="button" class="calc-tab-btn active" id="calc-tab-nomogram" onclick="switchCalculatorTab('nomogram')">
-                    <span>1 · Rejection risk calculator</span>
-                </button>
-                <button type="button" class="calc-tab-btn" id="calc-tab-eplet" onclick="switchCalculatorTab('eplet')">
-                    <span>2 · HLA mismatch &amp; eplet analysis</span>
-                    <span class="tab-badge-advisory">typing → mismatches → immunogenic eplets</span>
-                </button>
-            </div>
-
-            <!-- DASHBOARD HOME -->
-            <div id="pane-home" class="calc-tab-pane hidden-tab">
-                <div class="module-header">
-                    <div>
-                        <h1 class="module-title">Dashboard</h1>
-                        <p class="module-desc">Choose a tool, or reopen a recent analysis. Recent items are kept only in this browser.</p>
-                    </div>
-                </div>
-                <div class="home-grid">
-                    <section class="surface-card home-card">
-                        <div class="home-card-head"><span class="lp-feature-icon">⬡</span><h2 class="card-title">HLA mismatch &amp; eplet analysis</h2></div>
-                        <p class="card-subtitle">Typing → antigen &amp; allele mismatches → eplet load → immunogenic eplets → 3D view.</p>
-                        <div class="action-cluster">
-                            <button type="button" class="btn-aurora" onclick="switchCalculatorTab('eplet')"><span>Open</span><span>↗</span></button>
-                            <button type="button" class="btn-ghost" onclick="switchCalculatorTab('eplet'); HLAUI.loadExample();">Try the example pair</button>
-                        </div>
-                    </section>
-                    <section class="surface-card home-card">
-                        <div class="home-card-head"><span class="lp-feature-icon">◔</span><h2 class="card-title">Rejection risk calculator</h2></div>
-                        <p class="card-subtitle">Donor, HLA mismatch and crossmatch values → one-year probability, risk band and drivers.</p>
-                        <div class="action-cluster">
-                            <button type="button" class="btn-aurora" onclick="switchCalculatorTab('nomogram')"><span>Open</span><span>↗</span></button>
-                            <button type="button" class="btn-ghost" onclick="switchCalculatorTab('nomogram'); resetDefaults();">Start from typical values</button>
-                        </div>
-                    </section>
-                </div>
-                <div class="home-grid">
-                    <section class="surface-card">
-                        <div class="card-header-bar"><div><h2 class="card-title">Recent HLA analyses</h2><p class="card-subtitle">Saved from the HLA &amp; eplets tool.</p></div></div>
-                        <div id="home-recent-hla"></div>
-                    </section>
-                    <section class="surface-card">
-                        <div class="card-header-bar"><div><h2 class="card-title">Recent risk estimates</h2><p class="card-subtitle">Saved from the risk calculator.</p></div></div>
-                        <div id="home-recent-risk"></div>
-                    </section>
-                </div>
-                <section class="surface-card">
-                    <div class="card-header-bar"><div><h2 class="card-title">Reference data &amp; status</h2><p class="card-subtitle">What the calculators are built on.</p></div></div>
-                    <div id="home-status" class="home-status"></div>
-                </section>
             </div><!-- /#pane-home -->
 
             <!-- TAB PANE 1: QUANTITATIVE RISK NOMOGRAM -->
@@ -806,10 +719,11 @@
     <script src="hla_engine.js?v=20260908"></script>
     <script src="hla_validation_vectors.js?v=20260908"></script>
     <script src="ux.js?v=20260908b"></script>
-    <script src="hla_ui.js?v=20260908g"></script>
+    <script src="hla_ui.js?v=20260909b"></script>
     <script src="hla_eplet_residues.js?v=20260908d"></script>
     <script src="hla_3d.js?v=20260908f"></script>
     <script src="dashboard_home.js?v=20260908"></script>
-    <script src="app.js?v=20260908g"></script>
+    <script src="dna_hero.js?v=20260909b"></script>
+    <script src="app.js?v=20260909"></script>
 </body>
 </html>

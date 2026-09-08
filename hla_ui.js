@@ -350,6 +350,12 @@
         $('hla-cat-list').innerHTML = cats.length ? cats.join('') : '<span class="hla-na">n/a</span>';
 
         $('hla-result-id').textContent = res.evaluable ? 'Result ID ' + res.signature + ' — identical inputs and options always reproduce this result.' : 'Waiting for input.';
+        // dashboard summary strip
+        const sm = $('sum-mm'), se = $('sum-ep'), si = $('sum-ie'), sn = $('sum-note');
+        if (sm) sm.innerHTML = A.totalABDRAntigen === null ? '–' : A.totalABDRAntigen + '<small>/ 6</small>';
+        if (se) se.textContent = E.overall.evaluated ? String(E.overall.total) : '–';
+        if (si) si.textContent = E.overall.evaluated ? String(E.overall.ie) : '–';
+        if (sn) sn.textContent = res.evaluable ? 'Live values from the current HLA analysis' + (res.signature ? ' (result ID ' + res.signature + ')' : '') + ' and the risk calculator.' : 'Mismatch and eplet counts appear after an HLA analysis; the risk figure follows the calculator\'s current inputs.';
         $('hla-send-btn').disabled = !(A.evaluated.length);
         if (window.HLA3D) HLA3D.update(res);
     }
