@@ -7,7 +7,8 @@
 (function () {
     'use strict';
     function start(canvas, opts) {
-        opts = Object.assign({ ambient: false, points: 84, turns: 2.6, speed: 1 }, opts || {});
+        opts = Object.assign({ ambient: false, points: 84, turns: 2.6, speed: 1, tone: 'abyss' }, opts || {});
+        const abyss = opts.tone !== 'glass';
         const ctx = canvas.getContext('2d');
         const dpr = Math.min(2, window.devicePixelRatio || 1);
         let w = 1, h = 1, raf = null, running = true, t = 0;
@@ -25,7 +26,17 @@
 
         function sphere(x, y, r, depth, alpha) {
             const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
-            if (opts.ambient) {
+            if (abyss && opts.ambient) {                       // faint bioluminescent teal behind the dashboard
+                g.addColorStop(0, 'rgba(237,255,254,' + alpha + ')');
+                g.addColorStop(0.55, 'rgba(203,255,252,' + alpha * 0.8 + ')');
+                g.addColorStop(1, 'rgba(0,130,124,' + alpha * 0.5 + ')');
+            } else if (abyss) {                                // hero: aqua core, teal body, phosphor-pink rim on the nearest orbs
+                const pink = depth > 0.62;
+                g.addColorStop(0, 'rgba(237,255,254,' + alpha + ')');
+                g.addColorStop(0.45, 'rgba(203,255,252,' + alpha * 0.95 + ')');
+                g.addColorStop(0.8, pink ? 'rgba(250,209,255,' + alpha * 0.8 + ')' : 'rgba(0,130,124,' + alpha * 0.9 + ')');
+                g.addColorStop(1, 'rgba(0,130,124,' + alpha * 0.55 + ')');
+            } else if (opts.ambient) {
                 g.addColorStop(0, 'rgba(219,234,254,' + alpha + ')');
                 g.addColorStop(0.55, 'rgba(147,197,253,' + alpha * 0.9 + ')');
                 g.addColorStop(1, 'rgba(59,130,246,' + alpha * 0.55 + ')');
@@ -53,10 +64,10 @@
                 const d = dust[i];
                 const tw = 0.55 + 0.45 * Math.sin(t * 7 + d.ph);                  // twinkle
                 const r = (0.8 + 2.2 * d.z) * dpr, a = (0.12 + 0.5 * d.z) * tw;
-                ctx.fillStyle = 'rgba(191,219,254,' + a.toFixed(3) + ')';
+                ctx.fillStyle = abyss ? ((i % 5 === 0) ? 'rgba(250,209,255,' + a.toFixed(3) + ')' : 'rgba(203,255,252,' + a.toFixed(3) + ')') : 'rgba(191,219,254,' + a.toFixed(3) + ')';
                 ctx.beginPath(); ctx.arc(d.x * w, d.y * h, r, 0, Math.PI * 2); ctx.fill();
                 if (d.z > 0.8) {                                                  // soft halo on the nearest particles
-                    ctx.fillStyle = 'rgba(96,165,250,' + (a * 0.25).toFixed(3) + ')';
+                    ctx.fillStyle = abyss ? 'rgba(0,130,124,' + (a * 0.35).toFixed(3) + ')' : 'rgba(96,165,250,' + (a * 0.25).toFixed(3) + ')';
                     ctx.beginPath(); ctx.arc(d.x * w, d.y * h, r * 3, 0, Math.PI * 2); ctx.fill();
                 }
                 if (!reduce) {
@@ -96,7 +107,8 @@
             const rungs = pts.filter(function (p) { return p.i % 2 === 0; }).sort(function (p, q) { return q.z - p.z; });
             rungs.forEach(function (p) {
                 const depth = Math.max(0.15, Math.min(1, p.a.sc));
-                ctx.strokeStyle = opts.ambient ? 'rgba(147,197,253,' + (0.22 * depth) + ')' : 'rgba(125,183,255,' + (0.55 * depth) + ')';
+                ctx.strokeStyle = abyss ? (opts.ambient ? 'rgba(203,255,252,' + (0.18 * depth) + ')' : 'rgba(203,255,252,' + (0.5 * depth) + ')')
+                                        : (opts.ambient ? 'rgba(147,197,253,' + (0.22 * depth) + ')' : 'rgba(125,183,255,' + (0.55 * depth) + ')');
                 ctx.lineWidth = Math.max(0.6, base * 0.28 * depth);
                 ctx.beginPath(); ctx.moveTo(p.a.X, p.a.Y); ctx.lineTo(p.b.X, p.b.Y); ctx.stroke();
             });

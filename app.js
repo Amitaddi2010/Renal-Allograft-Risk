@@ -323,6 +323,7 @@ function initParticleSphere() {
     const canvas = document.getElementById('particle-canvas');
     if (!canvas) return;
     if (window.__ramrtStopAnim) return;          // reduced-motion preference (see ux.js)
+    if (getComputedStyle(canvas).display === 'none') return;   // hidden by the dashboard themes: the DNA scenes replace it
     window.__ramrtAnimRunning = true;
     const ctx = canvas.getContext('2d');
 
@@ -484,19 +485,27 @@ function initMolecularDiagram() {
    ========================================================================== */
 // 3D DNA helix: full hero on the landing page, faint ambient behind the dashboard
 let __dnaHero = null, __dnaAmbient = null;
+let __dnaView = 'landing';
 function updateDnaScenes(viewName) {
     if (!window.DNA) return;
+    __dnaView = viewName;
     const heroCanvas = document.getElementById('dna-canvas');
     const ambient = document.getElementById('dna-ambient');
+    const tone = (window.UX && UX.currentTheme) ? UX.currentTheme() : 'abyss';
     if (viewName === 'landing') {
         if (__dnaAmbient) { __dnaAmbient.stop(); __dnaAmbient = null; }
-        if (heroCanvas && !__dnaHero) __dnaHero = DNA.start(heroCanvas, { ambient: false });
+        if (heroCanvas && !__dnaHero) __dnaHero = DNA.start(heroCanvas, { ambient: false, tone: tone });
     } else {
         if (__dnaHero) { __dnaHero.stop(); __dnaHero = null; }
-        const dashboardTheme = !(window.UX && UX.currentTheme && UX.currentTheme() === 'terminal');
-        if (ambient && !__dnaAmbient && dashboardTheme) __dnaAmbient = DNA.start(ambient, { ambient: true, speed: 0.35 });
+        if (ambient && !__dnaAmbient) __dnaAmbient = DNA.start(ambient, { ambient: true, speed: 0.35, tone: tone });
     }
 }
+// restart the scenes after a theme or motion change (palette and reduced-motion state are read at start)
+window.refreshDnaScenes = function () {
+    if (__dnaHero) { __dnaHero.stop(); __dnaHero = null; }
+    if (__dnaAmbient) { __dnaAmbient.stop(); __dnaAmbient = null; }
+    updateDnaScenes(__dnaView);
+};
 
 function switchView(viewName) {
     const landingView = document.getElementById('landing-view');

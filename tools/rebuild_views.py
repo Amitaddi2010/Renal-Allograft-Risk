@@ -200,7 +200,7 @@ if 'id="risk-drivers"' not in s:
                     <div class="protocol-panel" id="drivers-panel">
                         <div class="protocol-header">What drives this estimate</div>
                         <div id="risk-drivers" class="drivers"></div>
-                        <p class="hla-ref-info" style="margin: 8px 0 0;">Bars show each input's contribution to the log-odds relative to a typical cohort patient: red raises the risk, green lowers it. The HLA terms should be read together: the model pairs a negative "total mismatches" weight with positive per-locus weights.</p>
+                        <p class="hla-ref-info" style="margin: 8px 0 0;">Bars show each input's contribution to the log-odds relative to a typical cohort patient: a plus value raises the risk, a minus value lowers it. The HLA terms should be read together: the model pairs a negative "total mismatches" weight with positive per-locus weights.</p>
                     </div>
                     <details class="ux-details"><summary>Risk bands observed in the cohort</summary><div class="ux-details-body">''' + TABLE + '''</div></details>
                     <details class="ux-details" open><summary>Suggested actions for this band <span class="ux-muted">PGIMER practice</span></summary><div class="ux-details-body">''' + PROTO + '''</div></details>

@@ -33,36 +33,33 @@
         try { localStorage.setItem('ramrt-motion', on ? 'on' : 'off'); } catch (e) { /* ignore */ }
         window.__ramrtStopAnim = !on;
         document.body.classList.toggle('motion-off', !on);
-        if (on && typeof initParticleSphere === 'function' && !window.__ramrtAnimRunning) initParticleSphere();
         updateMotionBtn();
+        if (typeof window.refreshDnaScenes === 'function') window.refreshDnaScenes();
     }
     function updateMotionBtn() {
         const b = $('ux-motion-btn');
         if (b) b.textContent = window.__ramrtStopAnim ? '▶ Turn background motion on' : '⏸ Turn background motion off';
     }
 
-    /* ---- theme: "dashboard" (light, sidebar) is the default; "terminal" restores the original dark look ---- */
-    function themeLink() { return $('theme-dashboard'); }
-    function currentTheme() { const l = themeLink(); return (l && l.disabled) ? 'terminal' : 'dashboard'; }
+    /* ---- theme: "abyss" (dark teal terminal, default) or "glass" (light frosted look) ---- */
+    function themeLink() { return $('theme-glass'); }
+    function currentTheme() { const l = themeLink(); return (l && !l.disabled) ? 'glass' : 'abyss'; }
     function applyTheme(name) {
+        name = name === 'glass' ? 'glass' : 'abyss';
         const l = themeLink();
-        if (l) l.disabled = (name === 'terminal');
+        if (l) l.disabled = (name !== 'glass');
         document.documentElement.setAttribute('data-theme', name);
         try { localStorage.setItem('ramrt-theme', name); } catch (e) { /* ignore */ }
         const b = $('ux-theme-btn');
-        if (b) b.textContent = name === 'terminal' ? '◐ Dashboard look' : '◑ Terminal look';
-        const mb = $('ux-motion-btn');
-        if (mb) mb.hidden = (name === 'dashboard');          // the animated background belongs to the terminal look only
-        if (name === 'dashboard') window.__ramrtStopAnim = true;
-        else if (!storedMotionOff() && !systemReduced()) setMotion(true);
+        if (b) b.textContent = name === 'glass' ? '◑ Abyss look' : '◐ Light glass look';
+        if (typeof window.refreshDnaScenes === 'function') window.refreshDnaScenes();
     }
     (function initTheme() {
-        let t = 'dashboard';
-        try { t = localStorage.getItem('ramrt-theme') || 'dashboard'; } catch (e) { /* ignore */ }
+        let t = 'abyss';
+        try { t = localStorage.getItem('ramrt-theme') === 'glass' ? 'glass' : 'abyss'; } catch (e) { /* ignore */ }
         const l = themeLink();
-        if (l) l.disabled = (t === 'terminal');
+        if (l) l.disabled = (t !== 'glass');
         document.documentElement.setAttribute('data-theme', t);
-        if (t === 'dashboard') window.__ramrtStopAnim = true;
     })();
 
     function buildDock() {
@@ -70,11 +67,11 @@
         const dock = document.createElement('div');
         dock.id = 'ux-dock'; dock.className = 'ux-dock';
         dock.innerHTML = '<button type="button" id="ux-help-btn" title="Plain-language explanations of the terms used on this page">? Help &amp; glossary</button>' +
-            '<button type="button" id="ux-theme-btn" title="Switch between the dashboard look and the original terminal look"></button>' +
+            '<button type="button" id="ux-theme-btn" title="Switch between the dark abyss look and the light glass look"></button>' +
             '<button type="button" id="ux-motion-btn" title="The animated background can be distracting or slow on some computers"></button>';
         document.body.appendChild(dock);
         $('ux-help-btn').addEventListener('click', openGlossary);
-        $('ux-theme-btn').addEventListener('click', function () { applyTheme(currentTheme() === 'terminal' ? 'dashboard' : 'terminal'); });
+        $('ux-theme-btn').addEventListener('click', function () { applyTheme(currentTheme() === 'glass' ? 'abyss' : 'glass'); });
         $('ux-motion-btn').addEventListener('click', function () { setMotion(!!window.__ramrtStopAnim); });
         updateMotionBtn();
         applyTheme(currentTheme());

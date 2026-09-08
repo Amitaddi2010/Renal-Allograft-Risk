@@ -7,8 +7,9 @@
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
     <link rel="stylesheet" href="styles.css?v=20260908_hla">
     <link rel="stylesheet" href="hla_styles.css?v=20260908e">
-    <link rel="stylesheet" href="ux_styles.css?v=20260909d">
-    <link rel="stylesheet" id="theme-dashboard" href="dashboard_theme.css?v=20260909">
+    <link rel="stylesheet" href="ux_styles.css?v=20260910">
+    <link rel="stylesheet" href="dashboard_theme.css?v=20260910">
+    <link rel="stylesheet" id="theme-glass" href="dashboard_glass.css?v=20260910" disabled>
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
@@ -433,7 +434,7 @@
                     <div class="protocol-panel" id="drivers-panel">
                         <div class="protocol-header">What drives this estimate</div>
                         <div id="risk-drivers" class="drivers"></div>
-                        <p class="hla-ref-info" style="margin: 8px 0 0;">Bars show each input's contribution to the log-odds relative to a typical cohort patient: red raises the risk, green lowers it. The HLA terms should be read together: the model pairs a negative "total mismatches" weight with positive per-locus weights.</p>
+                        <p class="hla-ref-info" style="margin: 8px 0 0;">Bars show each input's contribution to the log-odds relative to a typical cohort patient: a plus value raises the risk, a minus value lowers it. The HLA terms should be read together: the model pairs a negative "total mismatches" weight with positive per-locus weights.</p>
                     </div>
                     <details class="ux-details">
                         <summary>Risk bands observed in the cohort</summary>
@@ -725,12 +726,12 @@
     <script src="hla_reference_data.js?v=20260908"></script>
     <script src="hla_engine.js?v=20260908"></script>
     <script src="hla_validation_vectors.js?v=20260908"></script>
-    <script src="ux.js?v=20260909"></script>
+    <script src="ux.js?v=20260910"></script>
     <script src="hla_ui.js?v=20260909b"></script>
     <script src="hla_eplet_residues.js?v=20260908d"></script>
-    <script src="hla_3d.js?v=20260908f"></script>
+    <script src="hla_3d.js?v=20260910"></script>
     <script src="dashboard_home.js?v=20260908"></script>
-    <script src="dna_hero.js?v=20260909c"></script>
-    <script src="app.js?v=20260909"></script>
+    <script src="dna_hero.js?v=20260910"></script>
+    <script src="app.js?v=20260910"></script>
 </body>
 </html>

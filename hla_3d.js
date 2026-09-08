@@ -179,7 +179,7 @@
         if (!entry) return Promise.resolve();
         const host = $('hla3d-viewer');
         host.hidden = false;
-        const light = (window.UX && UX.currentTheme && UX.currentTheme() === 'dashboard');
+        const light = (window.UX && UX.currentTheme && UX.currentTheme() === 'glass');
         if (!viewer) viewer = $3Dmol.createViewer(host, { backgroundColor: light ? '#f8fafc' : '#011d1c' });
         else viewer.setBackgroundColor(light ? '#f8fafc' : '#011d1c');
         COLORS.chain = light ? '#5b8a86' : '#2f5f5a';
