@@ -479,7 +479,7 @@ function switchView(viewName) {
         if (navLanding) navLanding.classList.remove('active');
         if (navCalc) navCalc.classList.add('active');
         if (navLaunchBtn) {
-            navLaunchBtn.innerHTML = '<span>← VIEW OVERVIEW</span><span>↗</span>';
+            navLaunchBtn.innerHTML = '<span>← Overview</span><span>↗</span>';
             navLaunchBtn.onclick = () => switchView('landing');
             navLaunchBtn.style.display = 'inline-flex';
         }
@@ -494,7 +494,7 @@ function switchView(viewName) {
         if (navCalc) navCalc.classList.remove('active');
         if (navLanding) navLanding.classList.add('active');
         if (navLaunchBtn) {
-            navLaunchBtn.innerHTML = '<span>ENTER CALCULATOR</span><span>↗</span>';
+            navLaunchBtn.innerHTML = '<span>Open calculator</span><span>↗</span>';
             navLaunchBtn.onclick = () => switchView('calculator');
             navLaunchBtn.style.display = 'inline-flex';
         }
@@ -533,6 +533,7 @@ function switchCalculatorTab(tabName) {
         if (paneEplet) paneEplet.classList.remove('hidden-tab');
         if (window.HLAUI) HLAUI.recalculate();
         if (!/^#hla/.test(window.location.hash)) window.location.hash = 'hla';
+        syncNavActive('eplet');
     } else {
         if (tabEplet) tabEplet.classList.remove('active');
         if (tabNomogram) tabNomogram.classList.add('active');
@@ -540,7 +541,16 @@ function switchCalculatorTab(tabName) {
         if (paneNomogram) paneNomogram.classList.remove('hidden-tab');
         calculateRisk();
         if (/^#hla/.test(window.location.hash)) window.location.hash = 'dashboard';
+        syncNavActive('nomogram');
     }
+}
+
+// Sidebar / nav highlighting follows the open calculator tab
+function syncNavActive(tab) {
+    const calc = document.getElementById('nav-btn-calc');
+    const hla = document.getElementById('nav-btn-eplet-adv');
+    if (calc) calc.classList.toggle('active', tab === 'nomogram');
+    if (hla) hla.classList.toggle('active', tab === 'eplet');
 }
 
 function updateAdvisoryEplets() {

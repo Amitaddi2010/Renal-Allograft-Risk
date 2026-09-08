@@ -39,16 +39,43 @@
         if (b) b.textContent = window.__ramrtStopAnim ? '▶ Turn background motion on' : '⏸ Turn background motion off';
     }
 
+    /* ---- theme: "dashboard" (light, sidebar) is the default; "terminal" restores the original dark look ---- */
+    function themeLink() { return $('theme-dashboard'); }
+    function currentTheme() { const l = themeLink(); return (l && l.disabled) ? 'terminal' : 'dashboard'; }
+    function applyTheme(name) {
+        const l = themeLink();
+        if (l) l.disabled = (name === 'terminal');
+        document.documentElement.setAttribute('data-theme', name);
+        try { localStorage.setItem('ramrt-theme', name); } catch (e) { /* ignore */ }
+        const b = $('ux-theme-btn');
+        if (b) b.textContent = name === 'terminal' ? '◐ Dashboard look' : '◑ Terminal look';
+        const mb = $('ux-motion-btn');
+        if (mb) mb.hidden = (name === 'dashboard');          // the animated background belongs to the terminal look only
+        if (name === 'dashboard') window.__ramrtStopAnim = true;
+        else if (!storedMotionOff() && !systemReduced()) setMotion(true);
+    }
+    (function initTheme() {
+        let t = 'dashboard';
+        try { t = localStorage.getItem('ramrt-theme') || 'dashboard'; } catch (e) { /* ignore */ }
+        const l = themeLink();
+        if (l) l.disabled = (t === 'terminal');
+        document.documentElement.setAttribute('data-theme', t);
+        if (t === 'dashboard') window.__ramrtStopAnim = true;
+    })();
+
     function buildDock() {
         if ($('ux-dock')) return;
         const dock = document.createElement('div');
         dock.id = 'ux-dock'; dock.className = 'ux-dock';
         dock.innerHTML = '<button type="button" id="ux-help-btn" title="Plain-language explanations of the terms used on this page">? Help &amp; glossary</button>' +
+            '<button type="button" id="ux-theme-btn" title="Switch between the dashboard look and the original terminal look"></button>' +
             '<button type="button" id="ux-motion-btn" title="The animated background can be distracting or slow on some computers"></button>';
         document.body.appendChild(dock);
         $('ux-help-btn').addEventListener('click', openGlossary);
+        $('ux-theme-btn').addEventListener('click', function () { applyTheme(currentTheme() === 'terminal' ? 'dashboard' : 'terminal'); });
         $('ux-motion-btn').addEventListener('click', function () { setMotion(!!window.__ramrtStopAnim); });
         updateMotionBtn();
+        applyTheme(currentTheme());
     }
 
     function buildGlossary() {
@@ -103,7 +130,7 @@
             'Bands split the 443 study patients into five equal groups by predicted risk; the percentage under each band is how many of them actually had a rejection.';
     }
 
-    window.UX = { openGlossary: openGlossary, closeGlossary: closeGlossary, setMotion: setMotion, afterRisk: afterRisk, GLOSSARY: GLOSSARY };
+    window.UX = { openGlossary: openGlossary, closeGlossary: closeGlossary, setMotion: setMotion, afterRisk: afterRisk, applyTheme: applyTheme, currentTheme: currentTheme, GLOSSARY: GLOSSARY };
     document.addEventListener('DOMContentLoaded', function () {
         buildDock();
         buildGlossary();

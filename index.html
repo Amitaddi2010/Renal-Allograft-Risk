@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles.css?v=20260908_hla">
     <link rel="stylesheet" href="hla_styles.css?v=20260908e">
     <link rel="stylesheet" href="ux_styles.css?v=20260908d">
+    <link rel="stylesheet" id="theme-dashboard" href="dashboard_theme.css?v=20260908b">
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
@@ -24,16 +25,16 @@
         </div>
 
         <nav class="nav-links" id="nav-links">
-            <button type="button" class="nav-link active" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">OVERVIEW</button>
-            <button type="button" class="nav-link" id="nav-btn-evidence" onclick="scrollToSection('evidence-section'); closeNav();">EVIDENCE AUDIT</button>
-            <button type="button" class="nav-link" id="nav-btn-domains" onclick="scrollToSection('domains-section'); closeNav();">IMMUNE DOMAINS</button>
-            <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">RISK CALCULATOR</button>
-            <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">HLA &amp; EPLETS</button>
+            <button type="button" class="nav-link active" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">Overview</button>
+            <button type="button" class="nav-link" id="nav-btn-evidence" onclick="scrollToSection('evidence-section'); closeNav();">Evidence audit</button>
+            <button type="button" class="nav-link" id="nav-btn-domains" onclick="scrollToSection('domains-section'); closeNav();">Immune domains</button>
+            <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">Risk calculator</button>
+            <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">HLA &amp; eplets</button>
         </nav>
 
         <div class="nav-action-wrap">
             <button type="button" class="btn-aurora btn-sm" onclick="switchView('calculator')" id="nav-launch-btn">
-                <span>ENTER CALCULATOR</span>
+                <span>Open calculator</span>
                 <span>↗</span>
             </button>
         </div>
@@ -778,10 +779,10 @@
     <script src="hla_reference_data.js?v=20260908"></script>
     <script src="hla_engine.js?v=20260908"></script>
     <script src="hla_validation_vectors.js?v=20260908"></script>
-    <script src="ux.js?v=20260908"></script>
+    <script src="ux.js?v=20260908b"></script>
     <script src="hla_ui.js?v=20260908f"></script>
     <script src="hla_eplet_residues.js?v=20260908d"></script>
-    <script src="hla_3d.js?v=20260908e"></script>
-    <script src="app.js?v=20260908d"></script>
+    <script src="hla_3d.js?v=20260908f"></script>
+    <script src="app.js?v=20260908e"></script>
 </body>
 </html>
