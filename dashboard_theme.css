@@ -364,11 +364,11 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 .about-title { font-size: 13px; line-height: 1.5; color: var(--ab-silver); margin: 0; }
 .about-credit { text-align: center; max-width: 780px; margin: 30px auto 0; font-size: 14.5px; line-height: 1.65; color: var(--ab-silver); }
 .about-credit strong { color: var(--ab-text); font-weight: 500; }
-.about-metrics-label {
-    text-align: center; margin: 34px 0 12px; font-size: 10px; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--ab-silver);
+.about-link {
+    display: inline-flex; align-items: center; gap: 5px; margin-top: 14px; align-self: center;
+    font-size: 12.5px; color: var(--ab-aqua); text-decoration: none;
+    border-bottom: 1px solid rgba(203, 255, 252, 0.32); padding-bottom: 2px;
+    transition: color 0.2s ease, border-color 0.2s ease;
 }
-.about-metrics-note { text-transform: none; letter-spacing: 0.02em; color: var(--ab-slate); font-size: 11px; }
-.about-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.about-metrics .metric-card { padding: 18px 14px; text-align: center; align-items: center; }
-.about-metrics .metric-card-val { font-size: 30px; }
+.about-link:hover { color: var(--ab-text); border-bottom-color: var(--ab-text); }
+.about-card .about-title { flex: 1 1 auto; }   /* keeps the link on the card's baseline */
