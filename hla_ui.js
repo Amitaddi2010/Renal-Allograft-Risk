@@ -153,11 +153,127 @@
     function setMode(m) {
         mode = m;
         if (m === 'grid') fillGridFromText();
-        $('hla-mode-paste').hidden = (m === 'grid');
+        $('hla-mode-paste').hidden = (m !== 'paste');
         $('hla-mode-grid').hidden = (m !== 'grid');
+        const bat = $('hla-mode-batch'); if (bat) bat.hidden = (m !== 'batch');
         $('hla-mode-paste-btn').classList.toggle('active', m === 'paste');
         $('hla-mode-grid-btn').classList.toggle('active', m === 'grid');
+        const bb = $('hla-mode-batch-btn'); if (bb) bb.classList.toggle('active', m === 'batch');
+        // the single-pair status line, toolbar and results card belong to the one-pair modes
+        ['hla-status', 'hla-results-card', 'hla-single-toolbar', 'hla-flash'].forEach(function (id) {
+            const el = $(id); if (el) el.hidden = (m === 'batch');
+        });
         if (m === 'grid') composeFromGrid('r'), composeFromGrid('d');
+    }
+
+    /* ---------------- batch mode: many patients against one donor, or pre-paired rows ---------------- */
+    let lastBatch = null;
+    const BATCH_MAX = 200;
+
+    function parseBatchLines(text, fallbackDonor) {
+        const out = [];
+        text.split(/\r?\n/).forEach(function (raw, i) {
+            const line = raw.trim();
+            if (!line) return;
+            const parts = line.split('|').map(function (p) { return p.trim(); });
+            let label, patient, donor;
+            if (parts.length >= 3) { label = parts[0]; patient = parts[1]; donor = parts[2]; }
+            else if (parts.length === 2) { label = parts[0]; patient = parts[1]; donor = fallbackDonor; }
+            else { label = 'Row ' + (i + 1); patient = parts[0]; donor = fallbackDonor; }
+            out.push({ label: label, patient: patient, donor: donor });
+        });
+        return out;
+    }
+
+    function runBatch() {
+        const donorText = ($('hla-batch-donor').value || '').trim();
+        const rowsIn = parseBatchLines($('hla-batch-patients').value || '', donorText);
+        const box = $('hla-batch-results'), sum = $('hla-batch-summary');
+        if (!rowsIn.length) {
+            box.innerHTML = '<div class="ux-status ux-status-warn"><span class="ux-status-dot"></span><div>Add at least one patient typing.</div></div>';
+            sum.hidden = true; lastBatch = null; $('hla-batch-csv-btn').disabled = true; return;
+        }
+        if (rowsIn.length > BATCH_MAX) {
+            box.innerHTML = '<div class="ux-status ux-status-err"><span class="ux-status-dot"></span><div>' + rowsIn.length + ' rows given; the limit is ' + BATCH_MAX + '. Split the list and run it in parts.</div></div>';
+            sum.hidden = true; lastBatch = null; $('hla-batch-csv-btn').disabled = true; return;
+        }
+        const rows = rowsIn.map(function (r) {
+            if (!r.donor) return { label: r.label, error: 'no donor typing for this row' };
+            let a;
+            try { a = HLAEngine.analyze(r.patient, r.donor, options()); }
+            catch (e) { return { label: r.label, error: e.message }; }
+            const E = a.eplet, A = a.allele;
+            const errs = (a.warnings || []).filter(function (w) { return w.level === 'error'; });
+            return {
+                label: r.label, patient: r.patient, donor: r.donor,
+                antigenMM: A.totalABDRAntigen, alleleMM: A.totalABDR,
+                epI: E.classI.evaluated ? E.classI.total : null,
+                epII: (E.classIIB.evaluated || E.classIIA.evaluated) ? (E.classIIB.total + E.classIIA.total) : null,
+                epTotal: E.overall.evaluated ? E.overall.total : null,
+                ie: E.overall.evaluated ? E.overall.ie : null,
+                abver: E.overall.evaluated ? E.overall.abver : null,
+                signature: a.signature || '',
+                error: errs.length ? errs.length + ' invalid allele' + (errs.length > 1 ? 's' : '') : null
+            };
+        });
+        lastBatch = rows;
+        renderBatch(rows);
+        $('hla-batch-csv-btn').disabled = false;
+    }
+
+    function num(v) { return (v === null || v === undefined) ? '<span class="hla-na">n/a</span>' : String(v); }
+
+    function renderBatch(rows) {
+        const ok = rows.filter(function (r) { return r.epTotal !== null && r.epTotal !== undefined && !r.error; });
+        const med = function (key) {
+            const v = ok.map(function (r) { return r[key]; }).filter(function (x) { return typeof x === 'number'; }).sort(function (a, b) { return a - b; });
+            return v.length ? v[Math.floor(v.length / 2)] : '–';
+        };
+        const sum = $('hla-batch-summary');
+        sum.hidden = false;
+        sum.innerHTML = '<div class="hla-batch-stat"><span class="hla-batch-stat-v">' + rows.length + '</span><span class="hla-batch-stat-l">Pairs</span></div>' +
+            '<div class="hla-batch-stat"><span class="hla-batch-stat-v">' + med('epTotal') + '</span><span class="hla-batch-stat-l">Median eplet MM</span></div>' +
+            '<div class="hla-batch-stat"><span class="hla-batch-stat-v">' + med('ie') + '</span><span class="hla-batch-stat-l">Median immunogenic</span></div>' +
+            '<div class="hla-batch-stat"><span class="hla-batch-stat-v">' + med('antigenMM') + '</span><span class="hla-batch-stat-l">Median antigen MM</span></div>';
+        const head = '<thead><tr><th>Row</th><th>Antigen MM</th><th>Class I eplets</th><th>Class II eplets</th><th>Total eplets</th><th>Immunogenic</th><th>Ab-verified</th><th>Notes</th></tr></thead>';
+        const body = rows.map(function (r) {
+            if (r.error && r.epTotal === undefined) {
+                return '<tr class="hla-batch-bad"><td>' + esc(r.label) + '</td><td colspan="7">' + esc(r.error) + '</td></tr>';
+            }
+            return '<tr><td>' + esc(r.label) + '</td><td class="hla-num">' + num(r.antigenMM) + '</td><td class="hla-num">' + num(r.epI) +
+                '</td><td class="hla-num">' + num(r.epII) + '</td><td class="hla-num"><strong>' + num(r.epTotal) + '</strong></td><td class="hla-num">' + num(r.ie) +
+                '</td><td class="hla-num">' + num(r.abver) + '</td><td class="hla-batch-note">' + (r.error ? esc(r.error) : '') + '</td></tr>';
+        }).join('');
+        $('hla-batch-results').innerHTML = '<div class="matrix-container hla-batch-wrap"><table class="table-matrix hla-batch-table">' + head + '<tbody>' + body + '</tbody></table></div>' +
+            '<p class="hla-ref-info">Eplet loads are computed from the HLAMatchmaker 3.1 tables bundled with this app, using the same cell-based comparison as the single-pair mode. Loci absent from a typing are skipped, so rows typed for fewer loci carry lower loads and are not comparable with fully typed rows.</p>';
+    }
+
+    function downloadBatchCsv() {
+        if (!lastBatch) return;
+        const cols = ['label', 'antigenMM', 'alleleMM', 'epI', 'epII', 'epTotal', 'ie', 'abver', 'signature', 'error', 'patient', 'donor'];
+        const esc2 = function (v) { const t = (v === null || v === undefined) ? '' : String(v); return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+        const csv = cols.join(',') + '\n' + lastBatch.map(function (r) { return cols.map(function (c) { return esc2(r[c]); }).join(','); }).join('\n') + '\n';
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+        a.download = 'eplet_mismatch_batch.csv';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    function clearBatch() {
+        $('hla-batch-donor').value = ''; $('hla-batch-patients').value = '';
+        $('hla-batch-results').innerHTML = ''; $('hla-batch-summary').hidden = true;
+        lastBatch = null; $('hla-batch-csv-btn').disabled = true;
+    }
+
+    function loadBatchExample() {
+        $('hla-batch-donor').value = EXAMPLE.donor;
+        $('hla-batch-patients').value = [
+            'Patient 1 | ' + EXAMPLE.recipient,
+            'Patient 2 | A*01:01, A*11:01, B*08:01, B*52:01, C*06:02, C*07:01, DRB1*03:01, DRB1*15:01, DQB1*02:01, DQB1*06:01',
+            'Patient 3 | A*02:01, A*24:02, B*35:01, B*44:02, C*04:01, C*05:01, DRB1*04:01, DRB1*11:01, DQB1*03:01, DQB1*03:02',
+            'Paired row | A*01:01, A*02:01, B*08:01, B*44:02, DRB1*03:01, DRB1*04:01, DQB1*02:01, DQB1*03:02 | A*03:01, A*24:02, B*07:02, B*35:01, DRB1*15:01, DRB1*11:01, DQB1*06:02, DQB1*03:01'
+        ].join('\n');
+        runBatch();
     }
 
     /* ---------------- rendering helpers ---------------- */
@@ -479,6 +595,6 @@
             '<div class="matrix-container"><table class="table-matrix hla-table"><thead><tr><th>Result</th><th>Check</th><th>Detail</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></details>';
     }
 
-    window.HLAUI = { init: init, recalculate: recalculate, setMode: setMode, loadExample: loadExample, clearAll: clearAll, copyReport: copyReport, downloadCsv: downloadCsv, sendToNomogram: sendToNomogram, runSelfTest: runSelfTest, saveRecent: function () { saveRecent(false); }, restore: restore, last: function () { return lastResult; } };
+    window.HLAUI = { runBatch: runBatch, downloadBatchCsv: downloadBatchCsv, clearBatch: clearBatch, loadBatchExample: loadBatchExample, init: init, recalculate: recalculate, setMode: setMode, loadExample: loadExample, clearAll: clearAll, copyReport: copyReport, downloadCsv: downloadCsv, sendToNomogram: sendToNomogram, runSelfTest: runSelfTest, saveRecent: function () { saveRecent(false); }, restore: restore, last: function () { return lastResult; } };
     document.addEventListener('DOMContentLoaded', init);
 })();

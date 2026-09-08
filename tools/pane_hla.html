@@ -18,6 +18,7 @@
                         <div class="ux-seg" role="tablist" aria-label="Input mode">
                             <button type="button" id="hla-mode-paste-btn" class="active" onclick="HLAUI.setMode('paste')">Paste typing</button>
                             <button type="button" id="hla-mode-grid-btn" onclick="HLAUI.setMode('grid')">Enter by locus</button>
+                            <button type="button" id="hla-mode-batch-btn" onclick="HLAUI.setMode('batch')">Batch</button>
                         </div>
                     </div>
 
@@ -49,9 +50,29 @@
                         </div>
                     </div>
 
+                    <div id="hla-mode-batch" hidden>
+                        <div class="instrument-group">
+                            <div class="group-kicker">Donor / immunizer <span class="ux-muted">used for every row that does not carry its own donor</span></div>
+                            <textarea id="hla-batch-donor" class="control-input hla-textarea" rows="2" spellcheck="false" placeholder="e.g. A*02:01, A*24:02, B*35:01, B*44:02, DRB1*04:01, DRB1*11:01, DQB1*03:01, DQB1*03:02"></textarea>
+                        </div>
+                        <div class="instrument-group">
+                            <div class="group-kicker">Patients <span class="ux-muted">one typing per line, up to 200</span></div>
+                            <textarea id="hla-batch-patients" class="control-input hla-textarea" rows="8" spellcheck="false" placeholder="One HLA typing per line. To pair each patient with a different donor, write:&#10;label | patient typing | donor typing"></textarea>
+                            <span class="control-caption">Three layouts are accepted per line: <strong>patient typing</strong> on its own (compared with the donor box above), <strong>label | patient typing</strong>, or <strong>label | patient typing | donor typing</strong> for pre-paired data. Everything is computed in this browser.</span>
+                        </div>
+                        <div class="hla-toolbar">
+                            <button type="button" class="btn-aurora" onclick="HLAUI.runBatch()"><span>Calculate</span><span>↗</span></button>
+                            <button type="button" class="btn-ghost" onclick="HLAUI.downloadBatchCsv()" id="hla-batch-csv-btn" disabled>Download CSV</button>
+                            <button type="button" class="btn-ghost" onclick="HLAUI.clearBatch()">Clear</button>
+                            <button type="button" class="btn-ghost" onclick="HLAUI.loadBatchExample()">Load an example batch</button>
+                        </div>
+                        <div id="hla-batch-summary" class="hla-batch-summary" hidden></div>
+                        <div id="hla-batch-results"></div>
+                    </div>
+
                     <div id="hla-status" class="ux-status ux-status-idle"><span class="ux-status-dot"></span><div>Enter typing for both people, or load the example, to see results.</div></div>
 
-                    <div class="hla-toolbar">
+                    <div class="hla-toolbar" id="hla-single-toolbar">
                         <button type="button" class="btn-aurora" onclick="HLAUI.sendToNomogram()" id="hla-send-btn"><span>Send to risk calculator</span><span>↗</span></button>
                         <button type="button" class="btn-ghost" onclick="HLAUI.saveRecent()">Save to recent</button>
                         <button type="button" class="btn-ghost" onclick="HLAUI.clearAll()">Clear</button>
@@ -102,7 +123,7 @@
                 </section>
 
                 <!-- STEP 2: RESULTS -->
-                <section class="surface-card">
+                <section class="surface-card" id="hla-results-card">
                     <div class="card-header-bar">
                         <div>
                             <h2 class="card-title">2 · Results</h2>

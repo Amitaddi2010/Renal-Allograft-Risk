@@ -125,6 +125,24 @@ The `.xlsb` sources are kept in `reference_sources/` but excluded from git becau
 
 ---
 
+### Batch eplet mismatch (many pairs at once)
+
+The **Batch** tab of the HLA module mirrors the workflow of the public HLA Eplet Registry calculator (epregistry.com.br): a donor/immunizer typing plus a list of patients, one typing per line, with a **Calculate** button and a results table (antigen mismatches, class I / class II / total eplet load, immunogenic and antibody-verified counts) and a CSV download. Up to 200 rows per run, all computed in the browser.
+
+Three line layouts are accepted:
+
+| Line | Meaning |
+|------|---------|
+| `A*01:01, A*02:01, B*08:01, ...` | one patient, compared with the donor box |
+| `label \| patient typing` | as above, with a row label |
+| `label \| patient typing \| donor typing` | a pre-paired row; the donor box is ignored |
+
+Deep links: `#hla-batch` opens the empty batch tab, `#hla-batch-example` loads a worked example.
+
+`node tools/batch_eplet.js <pairs.json> <out.csv>` runs the same computation headlessly for a whole dataset.
+
+**Note on comparability with the registry calculator.** This app computes eplet loads from the HLAMatchmaker 3.1 workbooks supplied with the thesis, not from the HLA Eplet Registry release used at epregistry.com.br. The two sources curate eplets differently, so absolute counts are not expected to match one for one; rankings and relative loads are the comparable quantities. Loci missing from a typing are skipped, so pairs typed for fewer loci carry lower loads and must not be compared with fully typed pairs.
+
 ## 📂 Repository Structure
 
 ```

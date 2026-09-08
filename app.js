@@ -698,14 +698,18 @@ function updateAdvisoryEplets() {
     }
 }
 
-// Deep links: #landing, #dashboard (risk calculator), #hla (HLA & eplet analysis), #hla-example (with the example pair)
+// Deep links: #landing, #dashboard, #risk, #hla, #hla-example, #hla-grid-example, #hla-3d-example, #hla-batch, #hla-batch-example
 function routeFromHash() {
     const h = window.location.hash;
-    if (h === '#hla' || h === '#hla-example' || h === '#hla-grid-example' || h === '#hla-3d-example') {
+    if (h === '#hla' || h === '#hla-example' || h === '#hla-grid-example' || h === '#hla-3d-example' || h === '#hla-batch' || h === '#hla-batch-example') {
         switchView('calculator');
         switchCalculatorTab('eplet');
-        if (h !== '#hla' && window.HLAUI) HLAUI.loadExample();
+        if (h !== '#hla' && h !== '#hla-batch' && h !== '#hla-batch-example' && window.HLAUI) HLAUI.loadExample();
         if (h === '#hla-grid-example' && window.HLAUI) HLAUI.setMode('grid');
+        if ((h === '#hla-batch' || h === '#hla-batch-example') && window.HLAUI) {
+            HLAUI.setMode('batch');
+            if (h === '#hla-batch-example') HLAUI.loadBatchExample();
+        }
         if (h === '#hla-3d-example' && window.HLA3D) setTimeout(function () { HLA3D.showFirstWithMismatches(); }, 50);
     } else if (h === '#risk') {
         switchView('calculator');
