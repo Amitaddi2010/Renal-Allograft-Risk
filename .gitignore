@@ -19,3 +19,6 @@ docs/
 
 # Large HLAMatchmaker source workbooks (87 MB; the generated hla_reference_data.js is used by the app)
 reference_sources/*.xlsb
+
+# Raw structure files (regenerate with tools/fetch_structures.py); the trimmed bundle hla_structures_data.js is tracked
+structures/

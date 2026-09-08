@@ -1,85 +1,108 @@
 /*
- * hla_3d.js — 3D view of mismatched eplets on the donor HLA molecule (proof of concept, pHLA3D-style).
+ * hla_3d.js — 3D view of mismatched eplets on the donor HLA molecule (pHLA3D-style).
  *
- * How it works
- *   1. The mismatch engine already gives, per donor allele, the mismatched eplet names. An eplet name encodes its
- *      anchor residue position in the mature protein (62QE -> position 62; rq70RR/K -> position 70), so the
- *      positions can be highlighted on any structure of that molecule.
- *   2. A structure is fetched for the allele: an experimentally solved RCSB PDB entry when one exists for that
- *      allele, otherwise a template structure of the same locus (clearly labelled), or a PDB file supplied by the
- *      user (for example a homology model downloaded from pHLA3D, https://www.phla3d.com.br/, research-use licence).
- *   3. 3Dmol.js (loaded on demand from cdnjs) renders the molecule as a cartoon and marks the eplet anchor
- *      residues as spheres: pink = in the IE.xlsx immunogenic catalogue, cyan = antibody-verified in
- *      HLAMatchmaker, grey = other mismatched eplet. Residues within 3.5 A of an anchor are tinted, which is
- *      HLAMatchmaker's working definition of an eplet patch.
- *
- * Limitations of this prototype: residue numbering is assumed to follow the mature-protein numbering used by
- * HLAMatchmaker (true for the listed entries); a template of the same locus is not the donor allele itself;
- * internet access is required for the viewer library and RCSB structures unless a local PDB file is loaded.
+ * Structure sources, in order of preference:
+ *   1. a local pHLA3D homology model of the exact allele (structures/phla3d/, listed in manifest.json; only
+ *      reachable when the app is served over http, e.g. python -m http.server) or a PDB file the user loads;
+ *   2. the offline bundle hla_structures_data.js (trimmed RCSB entries for 23 common alleles, loaded on demand);
+ *   3. RCSB online download; otherwise a template of the same locus (clearly labelled).
+ * Viewer: 3Dmol.js from vendor/3Dmol-min.js (offline), falling back to cdnjs.
+ * Eplet patches: hla_eplet_residues.js gives, for every eplet, the residue positions derived from the
+ * HLAMatchmaker sequence tables and template structures (tools/build_eplet_residues.py); the anchor residue is
+ * drawn as a large sphere, the other residues of the patch as smaller spheres. Colours: pink = in the IE.xlsx
+ * immunogenic catalogue, cyan = antibody-verified in HLAMatchmaker, grey = other mismatched eplet.
+ * Numbering check: the residue found at each anchor position is compared with the residue letter in the eplet
+ * name; disagreements are counted and reported, so a wrongly numbered structure is noticed immediately.
  */
 (function () {
     'use strict';
     const $ = function (id) { return document.getElementById(id); };
-    const LIB_URL = 'https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.5.5/3Dmol-min.js';
+    const LIB_LOCAL = 'vendor/3Dmol-min.js';
+    const LIB_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.5.5/3Dmol-min.js';
+    const BUNDLE = 'hla_structures_data.js';
+    const PHLA_MANIFEST = 'structures/phla3d/manifest.json';
 
     // Verified RCSB entries (titles checked 2026-09-08). chain: chain carrying the eplet-bearing polypeptide.
     const STRUCTURES = {
-        'A*02:01': { pdb: '1AKJ', chain: 'A', label: 'HLA-A*02:01 heavy chain (with CD8, RCSB 1AKJ)' },
+        'A*02:01': { pdb: '1AKJ', chain: 'A', label: 'HLA-A*02:01 heavy chain (RCSB 1AKJ)' },
         'A*24:02': { pdb: '2BCK', chain: 'A', label: 'HLA-A*24:02 (RCSB 2BCK)' },
         'A*11:01': { pdb: '1Q94', chain: 'A', label: 'HLA-A*11:01 (RCSB 1Q94)' },
         'B*35:01': { pdb: '1A1N', chain: 'A', label: 'HLA-B*35:01 (RCSB 1A1N)' },
         'B*44:02': { pdb: '1M6O', chain: 'A', label: 'HLA-B*44:02 (RCSB 1M6O)' },
         'B*57:01': { pdb: '2RFX', chain: 'A', label: 'HLA-B*57:01 (RCSB 2RFX)' },
         'B*27:05': { pdb: '1HSA', chain: 'A', label: 'HLA-B*27:05 (RCSB 1HSA)' },
-        'B*08:01': { pdb: '1MI5', chain: 'A', label: 'HLA-B*08:01 (with TCR, RCSB 1MI5)' },
+        'B*08:01': { pdb: '1MI5', chain: 'A', label: 'HLA-B*08:01 (RCSB 1MI5)' },
         'B*07:02': { pdb: '5EO0', chain: 'A', label: 'HLA-B*07:02 (RCSB 5EO0)' },
         'C*04:01': { pdb: '1QQD', chain: 'A', label: 'HLA-C*04:01 (RCSB 1QQD)' },
         'C*06:02': { pdb: '5W67', chain: 'A', label: 'HLA-C*06:02 (RCSB 5W67)' },
-        'DRB1*01:01': { pdb: '1DLH', chain: 'B', label: 'HLA-DR1 beta chain DRB1*01:01 (RCSB 1DLH)' },
-        'DRB1*15:01': { pdb: '1BX2', chain: 'B', label: 'HLA-DR2 beta chain DRB1*15:01 (RCSB 1BX2)' },
-        'DRB1*04:01': { pdb: '1J8H', chain: 'B', label: 'HLA-DR4 beta chain DRB1*04:01 (with TCR, RCSB 1J8H)' },
-        'DRB1*03:01': { pdb: '1A6A', chain: 'B', label: 'HLA-DR3 beta chain DRB1*03:01 (RCSB 1A6A)' },
-        'DQB1*03:02': { pdb: '1JK8', chain: 'B', label: 'HLA-DQ8 beta chain DQB1*03:02 (RCSB 1JK8)' },
-        'DQA1*03:01': { pdb: '1JK8', chain: 'A', label: 'HLA-DQ8 alpha chain DQA1*03:01 (RCSB 1JK8)' },
-        'DQB1*02:01': { pdb: '1S9V', chain: 'B', label: 'HLA-DQ2 beta chain DQB1*02:01 (RCSB 1S9V)' },
-        'DQA1*05:01': { pdb: '1S9V', chain: 'A', label: 'HLA-DQ2 alpha chain DQA1*05:01 (RCSB 1S9V)' },
-        'DQB1*06:02': { pdb: '1UVQ', chain: 'B', label: 'HLA-DQ6 beta chain DQB1*06:02 (RCSB 1UVQ)' },
-        'DQA1*01:02': { pdb: '1UVQ', chain: 'A', label: 'HLA-DQ6 alpha chain DQA1*01:02 (RCSB 1UVQ)' },
-        'DPB1*02:01': { pdb: '3LQZ', chain: 'B', label: 'HLA-DP2 beta chain DPB1*02:01 (RCSB 3LQZ)' },
-        'DPA1*01:03': { pdb: '3LQZ', chain: 'A', label: 'HLA-DP2 alpha chain DPA1*01:03 (RCSB 3LQZ)' }
+        'DRB1*01:01': { pdb: '1DLH', chain: 'B', label: 'HLA-DR1 β chain DRB1*01:01 (RCSB 1DLH)' },
+        'DRB1*15:01': { pdb: '1BX2', chain: 'B', label: 'HLA-DR2 β chain DRB1*15:01 (RCSB 1BX2)' },
+        'DRB1*04:01': { pdb: '1J8H', chain: 'B', label: 'HLA-DR4 β chain DRB1*04:01 (RCSB 1J8H)' },
+        'DRB1*03:01': { pdb: '1A6A', chain: 'B', label: 'HLA-DR3 β chain DRB1*03:01 (RCSB 1A6A)' },
+        'DQB1*03:02': { pdb: '1JK8', chain: 'B', label: 'HLA-DQ8 β chain DQB1*03:02 (RCSB 1JK8)' },
+        'DQA1*03:01': { pdb: '1JK8', chain: 'A', label: 'HLA-DQ8 α chain DQA1*03:01 (RCSB 1JK8)' },
+        'DQB1*02:01': { pdb: '1S9V', chain: 'B', label: 'HLA-DQ2 β chain DQB1*02:01 (RCSB 1S9V)' },
+        'DQA1*05:01': { pdb: '1S9V', chain: 'A', label: 'HLA-DQ2 α chain DQA1*05:01 (RCSB 1S9V)' },
+        'DQB1*06:02': { pdb: '1UVQ', chain: 'B', label: 'HLA-DQ6 β chain DQB1*06:02 (RCSB 1UVQ)' },
+        'DQA1*01:02': { pdb: '1UVQ', chain: 'A', label: 'HLA-DQ6 α chain DQA1*01:02 (RCSB 1UVQ)' },
+        'DPB1*02:01': { pdb: '3LQZ', chain: 'B', label: 'HLA-DP2 β chain DPB1*02:01 (RCSB 3LQZ)' },
+        'DPA1*01:03': { pdb: '3LQZ', chain: 'A', label: 'HLA-DP2 α chain DPA1*01:03 (RCSB 3LQZ)' }
     };
     const TEMPLATES = {
         A: 'A*02:01', B: 'B*35:01', C: 'C*04:01',
         DRB1: 'DRB1*01:01', DRB3: 'DRB1*01:01', DRB4: 'DRB1*01:01', DRB5: 'DRB1*01:01',
         DQB1: 'DQB1*03:02', DQA1: 'DQA1*03:01', DPB1: 'DPB1*02:01', DPA1: 'DPA1*01:03'
     };
-    const COLORS = { ie: '#fad1ff', abver: '#38bdf8', other: '#b8c4c3', neighbour: '#5b7f7b', chain: '#2f5f5a', otherChains: '#13302e' };
+    const COLORS = { ie: '#fad1ff', abver: '#38bdf8', other: '#b8c4c3', chain: '#2f5f5a', otherChains: '#13302e' };
+    const AA = { ALA: 'A', ARG: 'R', ASN: 'N', ASP: 'D', CYS: 'C', GLN: 'Q', GLU: 'E', GLY: 'G', HIS: 'H', ILE: 'I', LEU: 'L', LYS: 'K', MET: 'M', PHE: 'F', PRO: 'P', SER: 'S', THR: 'T', TRP: 'W', TYR: 'Y', VAL: 'V' };
 
-    let viewer = null;
-    let libPromise = null;
-    let current = null;          // last analysis result
-    let localPdb = null;         // {name, text} supplied by the user
-    let spinning = false;
+    let viewer = null, libPromise = null, bundlePromise = null, manifestPromise = null;
+    let current = null, localPdb = null, spinning = false;
 
     function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
     function setMsg(html, kind) { const el = $('hla3d-msg'); if (el) { el.className = 'hla-warn hla-warn-' + (kind || 'info'); el.innerHTML = html; } }
-
-    function loadLibrary() {
-        if (window.$3Dmol) return Promise.resolve();
-        if (libPromise) return libPromise;
-        libPromise = new Promise(function (resolve, reject) {
-            const s = document.createElement('script');
-            s.src = LIB_URL; s.async = true;
-            s.onload = function () { resolve(); };
-            s.onerror = function () { libPromise = null; reject(new Error('The 3D viewer library could not be loaded (internet connection needed for cdnjs.cloudflare.com).')); };
+    function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+            const s = document.createElement('script'); s.src = src; s.async = true;
+            s.onload = function () { resolve(src); }; s.onerror = function () { reject(new Error('could not load ' + src)); };
             document.head.appendChild(s);
         });
+    }
+    function loadLibrary() {
+        if (window.$3Dmol) return Promise.resolve();
+        if (!libPromise) libPromise = loadScript(LIB_LOCAL).catch(function () { return loadScript(LIB_CDN); }).catch(function () { libPromise = null; throw new Error('The 3D viewer library could not be loaded (vendor/3Dmol-min.js missing and no internet connection to cdnjs).'); });
         return libPromise;
     }
+    function loadBundle() {
+        if (window.HLA_STRUCTURES) return Promise.resolve();
+        if (!bundlePromise) bundlePromise = loadScript(BUNDLE).catch(function () { bundlePromise = null; });
+        return bundlePromise;
+    }
+    function loadManifest() {
+        if (!manifestPromise) {
+            manifestPromise = (window.location.protocol.indexOf('http') === 0 && window.fetch)
+                ? fetch(PHLA_MANIFEST, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+                : Promise.resolve({});
+        }
+        return manifestPromise;
+    }
 
-    function positionOf(name) { const m = String(name).match(/^[a-z]*(\d+)/); return m ? parseInt(m[1], 10) : null; }
+    function positionsOf(name, classKey, locus) {
+        const table = window.HLA_EPLET_RES && window.HLA_EPLET_RES[classKey];
+        const rec = table && table[name];
+        if (rec && rec.anchor) {
+            let positions = rec.positions && rec.positions.length ? rec.positions.slice() : [rec.anchor];
+            let anchor = positions[0];
+            // interlocus eplets are named in DR/DQ-aligned numbering; DP chains lack two residues (aligned 23-24)
+            if (rec.aligned && locus === 'DPB1') { positions = positions.map(function (q) { return q >= 25 ? q - 2 : q; }); anchor = positions[0]; }
+            if (rec.aligned && locus === 'DPA1') { positions = positions.map(function (q) { return q >= 17 ? q - 3 : q - 2; }); anchor = positions[0]; }
+            return { anchor: anchor, positions: positions, method: rec.method };
+        }
+        const m = String(name).match(/^[a-z]*(\d+)/);
+        return m ? { anchor: parseInt(m[1], 10), positions: [parseInt(m[1], 10)], method: 'anchor-only' } : null;
+    }
+    function letterOf(name) { const m = String(name).match(/^[a-z]*\d+([A-Z])/); return m ? m[1] : null; }
 
-    /* donor alleles with mismatched eplets from the last analysis */
     function donorEntries(res) {
         const out = [];
         ['classI', 'classIIB', 'classIIA'].forEach(function (k) {
@@ -94,96 +117,128 @@
         current = res;
         const sel = $('hla3d-allele');
         if (!sel) return;
-        const entries = donorEntries(res);
-        const prev = sel.value;
-        sel.innerHTML = entries.length
-            ? entries.map(function (e) { return '<option value="' + esc(e.allele) + '">' + esc(e.allele) + (e.inferred ? ' (inferred)' : '') + ' · ' + e.mismatched.length + ' mismatched eplet' + (e.mismatched.length === 1 ? '' : 's') + (STRUCTURES[e.allele] ? ' · solved structure' : ' · locus template') + '</option>'; }).join('')
-            : '<option value="">No donor allele with an eplet comparison yet</option>';
-        if (prev && entries.some(function (e) { return e.allele === prev; })) sel.value = prev;
-        const btn = $('hla3d-load');
-        if (btn) btn.disabled = !entries.length;
-        const cnt = $('hla-count-3d');
-        if (cnt) cnt.textContent = entries.length ? entries.length + ' donor alleles' : '0';
-        if (viewer && entries.length && sel.value) render(sel.value);    // keep the open view in sync
+        loadManifest().then(function (manifest) {
+            const entries = donorEntries(res);
+            const prev = sel.value;
+            sel.innerHTML = entries.length
+                ? entries.map(function (e) {
+                    const src = manifest[e.allele] ? 'pHLA3D model' : (STRUCTURES[e.allele] ? 'solved structure' : 'locus template');
+                    return '<option value="' + esc(e.allele) + '">' + esc(e.allele) + (e.inferred ? ' (inferred)' : '') + ' · ' + e.mismatched.length + ' mismatched eplet' + (e.mismatched.length === 1 ? '' : 's') + ' · ' + src + '</option>';
+                }).join('')
+                : '<option value="">No donor allele with an eplet comparison yet</option>';
+            if (prev && entries.some(function (e) { return e.allele === prev; })) sel.value = prev;
+            const btn = $('hla3d-load'); if (btn) btn.disabled = !entries.length;
+            const cnt = $('hla-count-3d'); if (cnt) cnt.textContent = entries.length ? entries.length + ' donor alleles' : '0';
+            if (viewer && entries.length && sel.value) render(sel.value);
+        });
     }
 
+    /* returns a promise of {text, chain, label, template, source} */
     function resolveStructure(entry) {
-        if (localPdb) return { pdb: null, text: localPdb.text, chain: null, label: 'Local file ' + localPdb.name, template: false };
+        if (localPdb) return Promise.resolve({ text: localPdb.text, chain: null, label: 'local file ' + localPdb.name, template: false, source: 'local' });
+        return loadManifest().then(function (manifest) {
+            const rel = manifest[entry.allele];
+            if (rel && window.fetch) {
+                return fetch(rel).then(function (r) { if (!r.ok) throw new Error('missing'); return r.text(); })
+                    .then(function (text) { return { text: text, chain: null, label: 'pHLA3D homology model of ' + entry.allele + ' (www.phla3d.com.br, research use; cite pHLA3D)', template: false, source: 'phla3d' }; })
+                    .catch(function () { return fromBundleOrRcsb(entry); });
+            }
+            return fromBundleOrRcsb(entry);
+        });
+    }
+    function fromBundleOrRcsb(entry) {
         const exact = STRUCTURES[entry.allele];
-        if (exact) return Object.assign({ template: false }, exact);
-        const t = TEMPLATES[entry.locus];
-        const s = STRUCTURES[t];
-        return Object.assign({ template: true, templateAllele: t }, s);
+        const key = exact ? entry.allele : TEMPLATES[entry.locus];
+        const s = STRUCTURES[key];
+        const base = { chain: s.chain, label: s.label, template: !exact, templateAllele: key, pdb: s.pdb };
+        return loadBundle().then(function () {
+            if (window.HLA_STRUCTURES && window.HLA_STRUCTURES[s.pdb]) return Object.assign({ text: window.HLA_STRUCTURES[s.pdb].pdb, source: 'bundle' }, base);
+            return Object.assign({ text: null, source: 'rcsb' }, base);   // fetched by 3Dmol from RCSB
+        });
     }
 
-    function chainCounts(model) {
-        const counts = {};
+    function chainInfo(model) {
+        const counts = {}, resn = {};
         model.selectedAtoms({}).forEach(function (a) {
             if (a.atom !== 'CA') return;
             counts[a.chain] = (counts[a.chain] || 0) + 1;
+            (resn[a.chain] = resn[a.chain] || {})[a.resi] = a.resn;
         });
-        return counts;
+        return { counts: counts, resn: resn };
     }
 
     function show() {
         const sel = $('hla3d-allele');
         if (!sel || !sel.value || !current) return;
-        setMsg('Loading the 3D viewer…', 'info');
-        loadLibrary().then(function () { render(sel.value); }).catch(function (e) { setMsg(esc(e.message), 'error'); });
+        setMsg('Loading the 3D viewer and the structure…', 'info');
+        loadLibrary().then(function () { return render(sel.value); }).catch(function (e) { setMsg(esc(e.message), 'error'); });
     }
 
     function render(allele) {
         const entry = donorEntries(current).filter(function (e) { return e.allele === allele; })[0];
-        if (!entry) return;
-        const struct = resolveStructure(entry);
+        if (!entry) return Promise.resolve();
         const host = $('hla3d-viewer');
         host.hidden = false;
         if (!viewer) viewer = $3Dmol.createViewer(host, { backgroundColor: '#011d1c' });
-        viewer.removeAllModels(); viewer.removeAllLabels(); viewer.removeAllSurfaces();
-        const done = function (model) {
-            if (!model) { setMsg('Structure could not be loaded (internet connection needed for files.rcsb.org, or load a local PDB file).', 'error'); return; }
-            const counts = chainCounts(model);
-            let chain = struct.chain;
-            if (!chain || !counts[chain] || counts[chain] < 150) {          // fall back to the longest chain
-                chain = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; })[0];
-            }
-            const byCat = { ie: [], abver: [], other: [] };
-            const labelled = {};
-            entry.mismatched.forEach(function (e) {
-                const p = positionOf(e.name);
-                if (p === null) return;
-                const cat = e.ie ? 'ie' : (e.abver ? 'abver' : 'other');
-                byCat[cat].push(p);
-                (labelled[p] = labelled[p] || []).push(e.name);
-            });
-            const all = [].concat(byCat.ie, byCat.abver, byCat.other);
-            viewer.setStyle({}, { cartoon: { color: COLORS.otherChains, opacity: 0.55 } });
-            viewer.setStyle({ chain: chain }, { cartoon: { color: COLORS.chain } });
-            if (all.length) {
-                viewer.addStyle({ chain: chain, within: { distance: 3.5, sel: { chain: chain, resi: all } } }, { cartoon: { color: COLORS.neighbour } });
+        return resolveStructure(entry).then(function (struct) {
+            viewer.removeAllModels(); viewer.removeAllLabels(); viewer.removeAllSurfaces();
+            const done = function (model) {
+                if (!model) { setMsg('Structure could not be loaded (no internet connection to files.rcsb.org; load a local PDB file instead).', 'error'); return; }
+                const info = chainInfo(model);
+                let chain = struct.chain;
+                if (!chain || !info.counts[chain] || info.counts[chain] < 150) chain = Object.keys(info.counts).sort(function (a, b) { return info.counts[b] - info.counts[a]; })[0];
+                const byCat = { ie: { anchors: [], patch: [] }, abver: { anchors: [], patch: [] }, other: { anchors: [], patch: [] } };
+                const labelled = {};
+                let checked = 0, agree = 0, anchorOnly = 0;
+                entry.mismatched.forEach(function (e) {
+                    const p = positionsOf(e.name, entry.classKey, entry.locus);
+                    if (!p) return;
+                    const cat = e.ie ? 'ie' : (e.abver ? 'abver' : 'other');
+                    byCat[cat].anchors.push(p.anchor);
+                    p.positions.forEach(function (q) { if (q !== p.anchor) byCat[cat].patch.push(q); });
+                    if (p.method === 'anchor-only' || p.method === 'incomplete') anchorOnly++;
+                    (labelled[p.anchor] = labelled[p.anchor] || { names: [], cat: cat }).names.push(e.name);
+                    const found = info.resn[chain] && info.resn[chain][p.anchor];
+                    const want = letterOf(e.name);
+                    if (found && want) { checked++; if (AA[found] === want) agree++; }
+                });
+                viewer.setStyle({}, { cartoon: { color: COLORS.otherChains, opacity: 0.55 } });
+                viewer.setStyle({ chain: chain }, { cartoon: { color: COLORS.chain } });
                 ['other', 'abver', 'ie'].forEach(function (cat) {
-                    if (!byCat[cat].length) return;
-                    viewer.addStyle({ chain: chain, resi: byCat[cat] }, { sphere: { radius: 1.7, color: COLORS[cat] }, stick: { radius: 0.25, color: COLORS[cat] } });
+                    if (byCat[cat].patch.length) viewer.addStyle({ chain: chain, resi: byCat[cat].patch }, { sphere: { radius: 1.1, color: COLORS[cat], opacity: 0.85 } });
+                    if (byCat[cat].anchors.length) viewer.addStyle({ chain: chain, resi: byCat[cat].anchors }, { sphere: { radius: 1.8, color: COLORS[cat] }, stick: { radius: 0.25, color: COLORS[cat] } });
                 });
                 Object.keys(labelled).forEach(function (p) {
-                    const names = labelled[p];
-                    const cat = byCat.ie.indexOf(+p) !== -1 ? 'ie' : (byCat.abver.indexOf(+p) !== -1 ? 'abver' : 'other');
-                    viewer.addLabel(names.join(' / '), { fontSize: 11, fontColor: '#012624', backgroundColor: COLORS[cat], backgroundOpacity: 0.9, borderThickness: 0, inFront: true }, { chain: chain, resi: +p, atom: 'CA' });
+                    viewer.addLabel(labelled[p].names.join(' / '), { fontSize: 11, fontColor: '#012624', backgroundColor: COLORS[labelled[p].cat], backgroundOpacity: 0.9, borderThickness: 0, inFront: true }, { chain: chain, resi: +p, atom: 'CA' });
                 });
-            }
-            viewer.zoomTo({ chain: chain });
-            viewer.render();
-            if (spinning) viewer.spin('y', 0.4);
-            const total = entry.mismatched.length, shown = all.length;
-            setMsg('<strong>' + esc(entry.allele) + '</strong> shown on ' + esc(struct.label) + (struct.template ? ' — <strong>template of the same locus</strong>, not the donor allele itself (no solved structure in the built-in list; load a pHLA3D model for the exact allele).' : '.') +
-                ' Chain ' + esc(chain) + ' (' + counts[chain] + ' residues). Highlighted: ' + shown + ' of ' + total + ' mismatched eplet positions — ' + byCat.ie.length + ' immunogenic (pink), ' + byCat.abver.length + ' antibody-verified (cyan), ' + byCat.other.length + ' other (grey); residues within 3.5 Å of an anchor are tinted green.', 'ok');
-        };
-        if (struct.text) {
-            const m = viewer.addModel(struct.text, 'pdb');
-            done(m);
-        } else {
-            $3Dmol.download('pdb:' + struct.pdb, viewer, {}, function (m) { done(m); });
-        }
+                viewer.zoomTo({ chain: chain });
+                viewer.render();
+                if (spinning) viewer.spin('y', 0.4);
+                const total = entry.mismatched.length;
+                const nIE = byCat.ie.anchors.length, nAb = byCat.abver.anchors.length, nOt = byCat.other.anchors.length;
+                const numbering = checked ? (agree === checked ? 'Numbering check passed: the residue at every anchor position matches the eplet name (' + agree + '/' + checked + ').'
+                    : '<strong>Numbering check: ' + agree + ' of ' + checked + ' anchor residues match the eplet names</strong>' + (agree < checked / 2 ? ' — this structure is probably numbered differently from HLAMatchmaker, or it is a template of another allele; positions may be shifted.' : ' (differences are expected on a template of another allele).')) : '';
+                const kind = checked && agree < checked / 2 ? 'warn' : 'ok';
+                setMsg('<strong>' + esc(entry.allele) + '</strong> shown on ' + esc(struct.label) + (struct.template ? ' — <strong>template of the same locus</strong>, not the donor allele itself (download a pHLA3D model for the exact allele with tools/fetch_structures.py, or load a PDB file above).' : '.') +
+                    ' Chain ' + esc(chain) + ' (' + info.counts[chain] + ' residues; source: ' + esc(struct.source) + '). Highlighted ' + (nIE + nAb + nOt) + ' of ' + total + ' mismatched eplets — ' + nIE + ' immunogenic (pink), ' + nAb + ' antibody-verified (cyan), ' + nOt + ' other (grey); large spheres are anchor residues, small spheres the other residues of each eplet patch' + (anchorOnly ? ' (' + anchorOnly + ' shown as anchor only)' : '') + '. ' + numbering, kind);
+            };
+            if (struct.text) done(viewer.addModel(struct.text, 'pdb'));
+            else $3Dmol.download('pdb:' + struct.pdb, viewer, {}, function (m) { done(m); });
+        });
+    }
+
+    /* deep-link helper: wait until the allele list is populated, pick the first donor allele with mismatches, show it */
+    function showFirstWithMismatches() {
+        if (!current) return;
+        loadManifest().then(function () {
+            const sel = $('hla3d-allele');
+            const entries = donorEntries(current);
+            const first = entries.filter(function (e) { return e.mismatched.length; })[0];
+            if (!sel || !first) return;
+            const sec = $('hla3d-section'); if (sec) sec.open = true;
+            sel.value = first.allele;
+            show();
+        });
     }
 
     function toggleSpin() { spinning = !spinning; if (viewer) viewer.spin(spinning ? 'y' : false, 0.4); const b = $('hla3d-spin'); if (b) b.textContent = spinning ? 'Stop rotation' : 'Rotate'; }
@@ -202,7 +257,7 @@
         r.onload = function () { localPdb = { name: f.name, text: String(r.result) }; setMsg('Local structure ' + esc(f.name) + ' will be used for the next 3D view (press Load 3D view).', 'info'); };
         r.readAsText(f);
     }
-    function clearLocalFile() { localPdb = null; const i = $('hla3d-file'); if (i) i.value = ''; setMsg('Built-in RCSB structures will be used.', 'info'); }
+    function clearLocalFile() { localPdb = null; const i = $('hla3d-file'); if (i) i.value = ''; setMsg('Built-in structures will be used.', 'info'); }
 
-    window.HLA3D = { update: update, show: show, toggleSpin: toggleSpin, resetView: resetView, toggleSurface: toggleSurface, loadLocalFile: loadLocalFile, clearLocalFile: clearLocalFile, STRUCTURES: STRUCTURES, TEMPLATES: TEMPLATES };
+    window.HLA3D = { update: update, show: show, showFirstWithMismatches: showFirstWithMismatches, toggleSpin: toggleSpin, resetView: resetView, toggleSurface: toggleSurface, loadLocalFile: loadLocalFile, clearLocalFile: clearLocalFile, STRUCTURES: STRUCTURES, TEMPLATES: TEMPLATES };
 })();
