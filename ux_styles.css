@@ -1,0 +1,147 @@
+/* ==========================================================================
+   UX LAYER — readability, guidance, layout fixes (loaded after styles.css)
+   ========================================================================== */
+
+/* Layout fix: grid items must be allowed to shrink so wide tables scroll inside their card
+   instead of pushing the card past the viewport (body has overflow-x hidden, so it was clipped). */
+.terminal-grid > * { min-width: 0; }
+.grid-cols-2 > *, .grid-cols-3 > *, .grid-cols-4 > * { min-width: 0; }
+
+/* Readable captions: sentence case, larger, higher contrast */
+.control-caption {
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: #a9b7b6;
+    line-height: 1.45;
+}
+.group-kicker {
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    color: #cbfffc;
+    flex-wrap: wrap;
+}
+.control-label { font-size: 13.5px; color: #e6f4f3; }
+.card-subtitle { font-size: 13.5px; line-height: 1.5; }
+.table-matrix th { letter-spacing: 0.06em; }
+
+/* Plain-language link button used inside kickers and captions */
+.ux-link-btn {
+    background: none; border: none; padding: 0; margin-left: auto;
+    color: #38bdf8; font-family: var(--font-matter); font-size: 12.5px; letter-spacing: 0.02em;
+    text-transform: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+}
+.ux-link-btn:hover { color: #7dd3fc; }
+
+/* Step strip */
+.ux-steps { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 var(--spacing-20); }
+.ux-step {
+    flex: 1 1 160px; display: flex; gap: 10px; align-items: flex-start;
+    background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px;
+}
+.ux-step-num {
+    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    background: var(--gradient-aurora); color: #012624; font-weight: 600; font-size: 12px;
+}
+.ux-step-title { font-size: 13px; color: #edfffe; font-weight: 500; }
+.ux-step-text { font-size: 12px; color: #a9b7b6; line-height: 1.4; }
+
+/* Segmented control */
+.ux-seg { display: inline-flex; border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; overflow: hidden; margin-bottom: var(--spacing-16); }
+.ux-seg button {
+    background: transparent; border: none; color: #bbc7c6; padding: 8px 14px; font-family: var(--font-matter); font-size: 13px; cursor: pointer;
+}
+.ux-seg button.active { background: rgba(56,189,248,0.18); color: #e0f2fe; }
+.ux-seg button + button { border-left: 1px solid rgba(255,255,255,0.14); }
+
+/* Status banner */
+.ux-status { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 8px; margin: var(--spacing-16) 0; font-size: 13.5px; line-height: 1.5; border: 1px solid; }
+.ux-status-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.ux-status-ok { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.45); color: #d1fae5; }
+.ux-status-ok .ux-status-dot { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.ux-status-warn { background: rgba(245,158,11,0.10); border-color: rgba(245,158,11,0.45); color: #fef3c7; }
+.ux-status-warn .ux-status-dot { background: #f59e0b; }
+.ux-status-err { background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.5); color: #fee2e2; }
+.ux-status-err .ux-status-dot { background: #ef4444; }
+.ux-status-idle { background: rgba(56,189,248,0.08); border-color: rgba(56,189,248,0.35); color: #e0f2fe; }
+.ux-status-idle .ux-status-dot { background: #38bdf8; }
+
+/* Collapsible sections */
+.ux-details { border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; background: rgba(1, 29, 28, 0.55); margin-bottom: var(--spacing-16); }
+.ux-details > summary {
+    cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    font-family: var(--font-matter); font-size: 13.5px; font-weight: 500; color: #edfffe; user-select: none;
+}
+.ux-details > summary::-webkit-details-marker { display: none; }
+.ux-details > summary::before { content: '▸'; color: #38bdf8; font-size: 12px; transition: transform 0.15s; }
+.ux-details[open] > summary::before { transform: rotate(90deg); }
+.ux-details > summary:hover { background: rgba(255,255,255,0.03); }
+.ux-details > .ux-details-body { padding: 4px 16px 16px; }
+.ux-count { margin-left: auto; font-family: var(--font-mono); font-size: 11.5px; color: #bbc7c6; background: rgba(255,255,255,0.06); border-radius: 999px; padding: 2px 9px; }
+.ux-muted { color: #94a3b8; font-weight: 400; font-size: 12.5px; }
+
+/* Explanation box */
+.ux-explain { background: rgba(56,189,248,0.07); border-left: 3px solid #38bdf8; border-radius: 6px; padding: 12px 16px; margin-bottom: var(--spacing-16); font-size: 13px; line-height: 1.55; color: #dbeafe; }
+.ux-explain ul { margin: 6px 0 0 18px; padding: 0; }
+.ux-explain li { margin-bottom: 4px; }
+.ux-explain strong { color: #fff; }
+
+/* Secondary action row */
+.ux-more-actions { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; }
+.ux-more-actions button { background: none; border: none; color: #93c5fd; font-family: var(--font-matter); font-size: 12.5px; cursor: pointer; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+.ux-more-actions button:hover { color: #bfdbfe; }
+
+/* Floating help / motion dock */
+.ux-dock { position: fixed; right: 16px; bottom: 16px; z-index: 900; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.ux-dock button {
+    background: #003734; color: #edfffe; border: 1px solid rgba(203,255,252,0.35); border-radius: 999px; padding: 9px 14px;
+    font-family: var(--font-matter); font-size: 12.5px; cursor: pointer; box-shadow: none;
+}
+.ux-dock button:hover { background: #01463f; }
+@media print { .ux-dock { display: none; } }
+
+/* Glossary modal */
+.ux-modal { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; background: rgba(1, 20, 19, 0.75); padding: 16px; }
+.ux-modal.open { display: flex; }
+.ux-modal-card { background: #012624; border: 1px solid rgba(203,255,252,0.25); border-radius: 14px; max-width: 760px; width: 100%; max-height: 85vh; overflow: auto; padding: 24px 28px; }
+.ux-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.ux-modal-head h3 { font-family: var(--font-matter); font-size: 20px; color: #fff; margin: 0; }
+.ux-modal-close { background: none; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+.ux-glossary dt { color: #cbfffc; font-weight: 500; font-size: 14px; margin-top: 12px; }
+.ux-glossary dd { margin: 3px 0 0; color: #cbd5e1; font-size: 13.5px; line-height: 1.55; }
+
+/* Risk gauge on the nomogram */
+.ux-gauge { margin: 0 0 var(--spacing-20); }
+.ux-gauge-track { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; position: relative; height: 34px; }
+.ux-gauge-seg { border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: var(--font-mono); color: #012624; opacity: 0.75; }
+.ux-gauge-seg.active { opacity: 1; outline: 2px solid #fff; outline-offset: 1px; }
+.ux-gauge-marker { position: absolute; top: -8px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid #fde9ff; transform: translateX(-8px); }
+.ux-gauge-caption { font-size: 12px; color: #a9b7b6; margin-top: 8px; line-height: 1.45; }
+.ux-gauge-labels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-top: 4px; font-size: 11px; color: #bbc7c6; text-align: center; }
+
+/* Tab labels: allow wrapping on narrow screens; neutral (not warning-coloured) badge */
+.calc-tab-btn { white-space: normal; text-align: left; letter-spacing: 0.03em; font-size: 13.5px; }
+.calc-tab-btn .tab-badge-advisory {
+    text-transform: none; letter-spacing: 0;
+    background: rgba(56,189,248,0.12); color: #bae6fd; border-color: rgba(56,189,248,0.4);
+}
+
+/* Risk-band table: fit all columns inside the card */
+.matrix-container .quintile-table { width: 100%; min-width: 0; }
+.matrix-container .quintile-table th, .matrix-container .quintile-table td { padding: 10px 8px; font-size: 12.5px; white-space: normal; line-height: 1.4; }
+.matrix-container .quintile-table th { font-size: 10.5px; }
+.matrix-container .quintile-table td:first-child { white-space: nowrap; }
+
+/* Model disclosure banner: calmer */
+.model-disclosure-banner { font-size: 13px !important; }
+
+@media (max-width: 640px) {
+    /* Phone header: the menu button must stay reachable; the calculator links live in the menu */
+    .nav-action-wrap { display: none; }
+    .ramrt-nav { justify-content: space-between; }
+    .brand-wordmark { font-size: 11.5px; }
+    .ux-dock { right: 8px; bottom: 8px; flex-direction: row; gap: 6px; max-width: calc(100vw - 16px); }
+    .ux-dock button { padding: 7px 10px; font-size: 11.5px; max-width: 46vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ux-modal-card { padding: 18px; }
+    .quintile-table td, .quintile-table th { font-size: 12px; padding-left: 8px; padding-right: 8px; }
+}

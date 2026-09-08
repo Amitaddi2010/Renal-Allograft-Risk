@@ -16,3 +16,6 @@ yarn-error.log*
 # Documents / Manuscripts
 docs/
 *.docx
+
+# Large HLAMatchmaker source workbooks (87 MB; the generated hla_reference_data.js is used by the app)
+reference_sources/*.xlsb

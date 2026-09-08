@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAMRT // PGIMER Renal Allograft Risk Terminal</title>
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
-    <link rel="stylesheet" href="styles.css?v=20260905_responsive">
+    <link rel="stylesheet" href="styles.css?v=20260908_hla">
+    <link rel="stylesheet" href="hla_styles.css?v=20260908d">
+    <link rel="stylesheet" href="ux_styles.css?v=20260908d">
 </head>
 <body>
     <!-- 3D Bioluminescent Particle Sphere Background -->
@@ -25,8 +27,8 @@
             <button type="button" class="nav-link active" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">OVERVIEW</button>
             <button type="button" class="nav-link" id="nav-btn-evidence" onclick="scrollToSection('evidence-section'); closeNav();">EVIDENCE AUDIT</button>
             <button type="button" class="nav-link" id="nav-btn-domains" onclick="scrollToSection('domains-section'); closeNav();">IMMUNE DOMAINS</button>
-            <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">CALCULATOR</button>
-            <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">EPLETS (ADVISORY)</button>
+            <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">RISK CALCULATOR</button>
+            <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">HLA &amp; EPLETS</button>
         </nav>
 
         <div class="nav-action-wrap">
@@ -57,16 +59,24 @@
                     <span>DOCTORAL RESEARCH PIPELINE</span>
                 </div>
                 <h1 class="hero-title">Precision Allograft Risk Stratification.</h1>
-                <p class="hero-subtext">A multi-domain machine learning architecture integrating recipient non-HLA checkpoint genetics, molecular HLA eplets, and pre-transplant flow cytometric crossmatching in renal transplantation.</p>
+                <p class="hero-subtext">Two tools from the PGIMER doctoral study: an HLA mismatch and eplet analysis that works from donor and recipient typing, and a rejection-risk calculator that combines those mismatches with donor age, induction therapy and the flow crossmatch.</p>
                 
                 <div class="action-cluster" style="margin-top: 10px;">
-                    <button type="button" class="btn-aurora" onclick="switchView('calculator')">
-                        <span>Enter Calculator Dashboard</span>
+                    <button type="button" class="btn-aurora" onclick="switchView('calculator'); switchCalculatorTab('eplet');">
+                        <span>Start with HLA typing</span>
                         <span>↗</span>
                     </button>
-                    <button type="button" class="btn-ghost" onclick="scrollToSection('evidence-section')">
-                        <span>Review Doctoral Evidence</span>
+                    <button type="button" class="btn-ghost" onclick="switchView('calculator'); switchCalculatorTab('nomogram');">
+                        <span>Open the risk calculator</span>
                     </button>
+                    <button type="button" class="btn-ghost" onclick="scrollToSection('evidence-section')">
+                        <span>See the evidence</span>
+                    </button>
+                </div>
+                <div class="ux-steps" style="margin-top: 22px; max-width: 980px;">
+                    <div class="ux-step"><div class="ux-step-num">1</div><div><div class="ux-step-title">Enter donor and recipient HLA typing</div><div class="ux-step-text">Paste alleles or type them by locus; results appear as you type.</div></div></div>
+                    <div class="ux-step"><div class="ux-step-num">2</div><div><div class="ux-step-title">Review mismatches and immunogenic eplets</div><div class="ux-step-text">Antigen and allele mismatches, eplet loads and IE-catalogue eplets in one dashboard.</div></div></div>
+                    <div class="ux-step"><div class="ux-step-num">3</div><div><div class="ux-step-title">Estimate rejection risk</div><div class="ux-step-text">Send the counts to the risk calculator and add donor age, induction and crossmatch values.</div></div></div>
                 </div>
             </section>
 
@@ -74,26 +84,26 @@
             <section class="stats-ribbon">
                 <div class="stat-block">
                     <span class="stat-number">0.6926</span>
-                    <span class="stat-label">MULTIMODAL ROC-AUC [0.629–0.751]</span>
+                    <span class="stat-label">MODEL ACCURACY, AUC (95% CI 0.63–0.75)</span>
                 </div>
                 <div class="stat-block">
                     <span class="stat-number">+0.1018</span>
-                    <span class="stat-label">INCREMENTAL GAIN (DELONG P &lt; 0.001)</span>
+                    <span class="stat-label">AUC GAIN FROM HLA + CROSSMATCH DATA (P &lt; 0.001)</span>
                 </div>
                 <div class="stat-block">
                     <span class="stat-number">6.4×</span>
-                    <span class="stat-label">MONOTONIC RISK GRADIENT (5.6% → 36.0%)</span>
+                    <span class="stat-label">REJECTION RATE, LOWEST TO HIGHEST RISK BAND (5.6% → 36.0%)</span>
                 </div>
                 <div class="stat-block">
                     <span class="stat-number">N = 2,220</span>
-                    <span class="stat-label">AUDITED PGIMER MASTER COHORT</span>
+                    <span class="stat-label">TRANSPLANTS IN THE PGIMER STUDY REGISTRY</span>
                 </div>
             </section>
 
             <!-- Core Pillars / Research Domains -->
             <section class="content-section" id="domains-section">
                 <div class="section-header-compact">
-                    <div class="group-kicker">01 // MULTIMODAL ALLORECOGNITION AXES</div>
+                    <div class="group-kicker">What the study measured</div>
                     <h2 class="section-heading-sm">Three Complementary Biological Domains</h2>
                     <p class="section-desc">Traditional broad HLA matching provides modest risk discrimination in contemporary immunosuppression. This doctoral pipeline captures covert alloreactivity across three distinct mechanisms.</p>
                 </div>
@@ -115,8 +125,8 @@
                             <h3 class="card-title" style="font-size: 19px;">Non-HLA Checkpoint SNPs</h3>
                             <button class="arrow-btn" onclick="switchView('calculator')" aria-label="Open">↗</button>
                         </div>
-                        <p class="card-body-text">Confirms <strong>*PD-L1* rs4143815</strong> as an authentic non-HLA genetic risk locus (Allelic OR: 1.38, Recessive OR: 2.49, p = 0.00037). Polymorphisms disrupt microRNA binding, impairing peripheral T-cell co-inhibition.</p>
-                        <div class="card-tag">Confirmed Risk Locus (CD274)</div>
+                        <p class="card-body-text">Association of <strong>*PD-L1* rs4143815</strong> with rejection (Allelic OR: 1.38, Recessive OR: 2.49, p = 0.00037). Case genotypes depart from Hardy-Weinberg equilibrium (heterozygote deficit, χ² = 68.3), the same signature as the flagged assays, so orthogonal re-genotyping is required before it can be called a risk locus.</p>
+                        <div class="card-tag">Association Observed · QC Pending (CD274)</div>
                     </div>
 
                     <!-- Card 3 -->
@@ -134,7 +144,7 @@
             <!-- Evidence Audit Matrix Section -->
             <section class="content-section" id="evidence-section" style="margin-top: var(--section-gap);">
                 <div class="section-header-compact">
-                    <div class="group-kicker">02 // DOCTORAL DISSERTATION OBJECTIVES</div>
+                    <div class="group-kicker">Evidence behind the tools</div>
                     <h2 class="section-heading-sm">Audited Evidence & Scientific Verdicts</h2>
                     <p class="section-desc">Every hypothesis from the doctoral synopsis was evaluated against biopsy-proven clinical ground truth, categorized under three rigorous scientific verdict standards.</p>
                 </div>
@@ -177,8 +187,8 @@
                                     <td><strong>Obj 2</strong></td>
                                     <td>*PD-L1* rs4143815 Polymorphism</td>
                                     <td>N = 1,586 / 215</td>
-                                    <td><span class="status-tag tag-confirmed">Confirmed</span></td>
-                                    <td>Significant risk locus (Allelic OR = 1.38, Recessive OR = 2.49, p = 0.00037). Mild nominal deviation from HWE (p = 0.0259).</td>
+                                    <td><span class="status-tag tag-inconclusive">Provisional</span></td>
+                                    <td>Association observed (Allelic OR = 1.38, Recessive OR = 2.49, p = 0.00037), but controls (p = 0.0259) and especially cases (χ² = 68.3, p ≈ 10⁻¹⁶, heterozygote deficit) depart from HWE; re-genotyping required.</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Obj 2</strong></td>
@@ -217,12 +227,12 @@
             <!-- Pre-Transplant Calculator Launch Banner Card -->
             <section class="launch-banner-card">
                 <div>
-                    <span class="group-kicker">03 // CLINICAL TRANSLATION</span>
-                    <h2 class="section-heading-sm">Ready for Patient Evaluation?</h2>
-                    <p class="section-desc">Launch the interactive clinical risk terminal to calculate predicted 1-year rejection probability and nomogram quintile placement.</p>
+                    <span class="group-kicker">Ready to start?</span>
+                    <h2 class="section-heading-sm">Analyse a donor–recipient pair</h2>
+                    <p class="section-desc">Enter the HLA typing of both people to get mismatches and immunogenic eplets, then add donor age, induction and crossmatch values for the 1-year rejection-risk estimate.</p>
                 </div>
                 <button type="button" class="btn-aurora" onclick="switchView('calculator')" style="flex-shrink: 0;">
-                    <span>Launch Terminal Dashboard</span>
+                    <span>Open the calculator</span>
                     <span>↗</span>
                 </button>
             </section>
@@ -269,22 +279,22 @@
             <!-- Dashboard Sub-Header -->
             <div class="dashboard-top-bar">
                 <button type="button" class="back-link-btn" onclick="switchView('landing')">
-                    <span>← Return to Research Landing</span>
+                    <span>← Back to overview</span>
                 </button>
                 <div class="dash-meta-badge">
                     <span class="active-pill"></span>
-                    <span>ACTIVE EVALUATION SESSION • ELASTICNET MODEL (N = 443)</span>
+                    <span>Risk model trained on 443 PGIMER transplant recipients</span>
                 </div>
             </div>
 
             <!-- Calculator Mode Tab Bar -->
             <div class="calc-tab-bar">
                 <button type="button" class="calc-tab-btn active" id="calc-tab-nomogram" onclick="switchCalculatorTab('nomogram')">
-                    <span>01 // MULTIMODAL NOMOGRAM (AUDITED)</span>
+                    <span>1 · Rejection risk calculator</span>
                 </button>
                 <button type="button" class="calc-tab-btn" id="calc-tab-eplet" onclick="switchCalculatorTab('eplet')">
-                    <span>02 // IMMUNOGENIC EPLET LOAD</span>
-                    <span class="tab-badge-advisory">ADVISORY ONLY</span>
+                    <span>2 · HLA mismatch &amp; eplet analysis</span>
+                    <span class="tab-badge-advisory">typing → mismatches → immunogenic eplets</span>
                 </button>
             </div>
 
@@ -296,168 +306,169 @@
                     <section class="surface-card">
                     <div class="card-header-bar">
                         <div>
-                            <h2 class="card-title">Patient Parameter Instrumentation</h2>
-                            <p class="card-subtitle">Pre-transplant clinical, molecular HLA, and flow crossmatch metrics.</p>
+                            <h2 class="card-title">Patient details</h2>
+                            <p class="card-subtitle">Enter the donor, HLA and crossmatch values. The risk estimate updates as you type.</p>
                         </div>
                         <button class="arrow-btn" type="button" onclick="resetDefaults()" title="Reset Medians">↺</button>
                     </div>
 
                     <!-- Model Simplification Disclosure Box -->
                     <div class="model-disclosure-banner" style="background: rgba(0, 55, 52, 0.45); border-left: 3px solid #38bdf8; border-radius: 4px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.5; color: #cbd5e1;">
-                        <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">Model Specification & Simplification Notice:</strong>
-                        This tool uses the 11 most influential predictors from the full 31-covariate locked model (incorporating discrete HLA-A, HLA-B, HLA-DRB1, and HLA-DQB1 mismatches alongside regularized total mismatch burden and flow crossmatch T/B channel shifts); less influential factors (recipient age/sex, FCXM dual-positivity) are held at cohort-average values. Predictions for patients who deviate substantially from cohort averages on these factors may differ from the full model.
+                        <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">About this estimate</strong>
+                        The calculator uses the 11 strongest predictors of the study's ElasticNet model (donor age and source, sibling donor, induction, HLA-A/B/DRB1/DQB1 antigen mismatches and their total, and the T- and B-cell flow crossmatch shifts). Recipient age, sex and crossmatch dual-positivity are held at cohort averages, so patients far from the average on those may differ from the full model. Research use only.
+                        <div id="nomogram-fill-note" style="margin-top: 6px; color: #a7f3d0;"></div>
                     </div>
 
                     <form id="calculator-form" onsubmit="event.preventDefault(); calculateRisk();">
                         <!-- Section 1: Demographics & Organ Source -->
                         <div class="instrument-group">
-                            <div class="group-kicker">01 // CLINICAL & DEMOGRAPHIC COVARIATES (LOCKED)</div>
+                            <div class="group-kicker">1 · Donor and treatment</div>
                             <div class="grid-cols-2">
                                 <div class="control-field">
                                     <label for="donor-age" class="control-label">Donor Age (Years)</label>
                                     <input type="number" id="donor-age" class="control-input" min="18" max="75" value="46" oninput="calculateRisk()" required>
-                                    <span class="control-caption">PRIMARY HAZARD (HR: 1.049/YR, COHORT MEAN: 46.4)</span>
+                                    <span class="control-caption">Older donors carry higher risk (about 5% more per year; cohort mean 46 years).</span>
                                 </div>
                                 <div class="control-field">
                                     <label for="donor-source" class="control-label">Donor Source</label>
                                     <select id="donor-source" class="control-select" onchange="calculateRisk()">
-                                        <option value="0">Living-Related (88.7%)</option>
-                                        <option value="1">Deceased / Cadaveric (11.3%)</option>
+                                        <option value="0">Living donor</option>
+                                        <option value="1">Deceased donor</option>
                                     </select>
-                                    <span class="control-caption">ALLOGRAFT SOURCE (β: -0.6943)</span>
+                                    <span class="control-caption">Living or deceased donor.</span>
                                 </div>
                                 <div class="control-field">
                                     <label for="sibling-donor" class="control-label">Sibling Donor?</label>
                                     <select id="sibling-donor" class="control-select" onchange="calculateRisk()">
-                                        <option value="0">Unrelated / Non-Sibling</option>
-                                        <option value="1">Full Sibling (OR: 0.439, Protective)</option>
+                                        <option value="0">No (parent, spouse, other or unrelated)</option>
+                                        <option value="1">Yes, full sibling</option>
                                     </select>
-                                    <span class="control-caption">HISTOCOMPATIBILITY (β: -0.8236)</span>
+                                    <span class="control-caption">Full-sibling donors had lower rejection risk in this cohort.</span>
                                 </div>
                                 <div class="control-field">
                                     <label for="standard-induction" class="control-label">Induction Regimen</label>
                                     <select id="standard-induction" class="control-select" onchange="calculateRisk()">
-                                        <option value="1">Standard Induction (Basiliximab / IL-2RA)</option>
-                                        <option value="0">Intensified Induction (Anti-Thymocyte Globulin / ATG)</option>
+                                        <option value="1">Standard: basiliximab (IL-2 receptor antagonist)</option>
+                                        <option value="0">Intensified: anti-thymocyte globulin (ATG)</option>
                                     </select>
-                                    <span class="control-caption">BASELINE REGIMEN (β: +0.6993)</span>
+                                    <span class="control-caption">The induction planned or given at transplantation.</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Section 2: Allele-Level HLA Matching -->
                         <div class="instrument-group">
-                            <div class="group-kicker">02 // ALLELE-LEVEL HLA MISMATCH BURDEN (PER-LOCUS & TOTAL)</div>
+                            <div class="group-kicker">2 · HLA antigen mismatches <button type="button" class="ux-link-btn" onclick="switchCalculatorTab('eplet')">Compute these from HLA typing →</button></div>
                             <div class="grid-cols-4">
                                 <div class="control-field">
                                     <label for="mm-a" class="control-label">HLA-A MM</label>
                                     <select id="mm-a" class="control-select" onchange="updateTotalMM(); calculateRisk();">
-                                        <option value="0">0 MM</option>
-                                        <option value="1" selected>1 MM (Mean: 0.93)</option>
-                                        <option value="2">2 MM</option>
+                                        <option value="0">0 mismatches</option>
+                                        <option value="1" selected>1 mismatch</option>
+                                        <option value="2">2 mismatches</option>
                                     </select>
-                                    <span class="control-caption">LOCUS A (OR: 1.568)</span>
+                                    <span class="control-caption">Antigen-level (first field), 0–2.</span>
                                 </div>
                                 <div class="control-field">
                                     <label for="mm-b" class="control-label">HLA-B MM</label>
                                     <select id="mm-b" class="control-select" onchange="updateTotalMM(); calculateRisk();">
-                                        <option value="0">0 MM</option>
-                                        <option value="1" selected>1 MM (Mean: 0.98)</option>
-                                        <option value="2">2 MM</option>
+                                        <option value="0">0 mismatches</option>
+                                        <option value="1" selected>1 mismatch</option>
+                                        <option value="2">2 mismatches</option>
                                     </select>
-                                    <span class="control-caption">LOCUS B (OR: 1.650)</span>
+                                    <span class="control-caption">Antigen-level (first field), 0–2.</span>
                                 </div>
                                 <div class="control-field">
                                     <label for="mm-drb1" class="control-label">HLA-DRB1 MM</label>
                                     <select id="mm-drb1" class="control-select" onchange="updateTotalMM(); calculateRisk();">
-                                        <option value="0">0 MM</option>
-                                        <option value="1" selected>1 MM (Mean: 0.83)</option>
-                                        <option value="2">2 MM</option>
+                                        <option value="0">0 mismatches</option>
+                                        <option value="1" selected>1 mismatch</option>
+                                        <option value="2">2 mismatches</option>
                                     </select>
-                                    <span class="control-caption">PRIMARY DRIVER (OR: 2.541)</span>
+                                    <span class="control-caption">Antigen-level (first field), 0–2; the strongest HLA term in the model.</span>
                                 </div>
                                 <div class="control-field">
                                     <label for="mm-dqb1" class="control-label">HLA-DQB1 MM</label>
                                     <select id="mm-dqb1" class="control-select" onchange="updateTotalMM(); calculateRisk();">
-                                        <option value="0">0 MM</option>
-                                        <option value="1" selected>1 MM (Mean: 0.79)</option>
-                                        <option value="2">2 MM</option>
+                                        <option value="0">0 mismatches</option>
+                                        <option value="1" selected>1 mismatch</option>
+                                        <option value="2">2 mismatches</option>
                                     </select>
-                                    <span class="control-caption">LOCUS DQ (OR: 1.451)</span>
+                                    <span class="control-caption">Antigen-level (first field), 0–2.</span>
                                 </div>
                             </div>
                             <div class="grid-cols-2" style="margin-top: var(--spacing-16);">
                                 <div class="control-field">
-                                    <label for="total-mm" class="control-label">Total HLA Mismatches (A+B+DR)</label>
+                                    <label for="total-mm" class="control-label">Total mismatches, A + B + DR</label>
                                     <input type="number" id="total-mm" class="control-input calculated" value="3" readonly>
-                                    <span class="control-caption">MODELED REGULARIZATION CONSTRAINT (β: -1.6432, MEAN: 3.17)</span>
+                                    <span class="control-caption">Filled in automatically (0–6).</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="extended-total-mm" class="control-label">Extended Total Burden (A+B+DR+DQ)</label>
+                                    <label for="extended-total-mm" class="control-label">Total including DQ, A + B + DR + DQ</label>
                                     <input type="number" id="extended-total-mm" class="control-input calculated" value="4" readonly>
-                                    <span class="control-caption">EXTENDED 4-LOCUS TOTAL (FOR REFERENCE)</span>
+                                    <span class="control-caption">For reference only (0–8); not used by the model.</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Section 3: Flow Cytometric Crossmatch -->
                         <div class="instrument-group">
-                            <div class="group-kicker">03 // PRE-TRANSPLANT FLOW CYTOMETRIC CROSSMATCH (FCXM)</div>
+                            <div class="group-kicker">3 · Pre-transplant flow crossmatch</div>
                             <div class="grid-cols-2">
                                 <div class="control-field">
-                                    <label for="mcs-t" class="control-label">T-Cell Channel Shift (T-MCS)</label>
+                                    <label for="mcs-t" class="control-label">T-cell median channel shift</label>
                                     <input type="number" id="mcs-t" class="control-input" step="1" min="0" max="300" value="12" oninput="calculateRisk()" required>
-                                    <span class="control-caption">T-CELL HAZARD (OR: 1.425 / SD, MEAN: 19.0)</span>
+                                    <span class="control-caption">From the flow cytometry crossmatch report (cohort mean 19).</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="mcs-b" class="control-label">B-Cell Channel Shift (B-MCS)</label>
+                                    <label for="mcs-b" class="control-label">B-cell median channel shift</label>
                                     <input type="number" id="mcs-b" class="control-input" step="1" min="0" max="400" value="48" oninput="calculateRisk()" required>
-                                    <span class="control-caption">B-CELL HAZARD (OR: 1.116 / SD, MEAN: 71.7)</span>
+                                    <span class="control-caption">From the flow cytometry crossmatch report (cohort mean 72).</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Section 4: Molecular HLA Eplet Mismatches (Objective 3) -->
                         <div class="instrument-group">
-                            <div class="group-kicker">04 // MOLECULAR EPLET SURVEILLANCE ADVISORY (OBJECTIVE 3)</div>
-                            <p style="font-size: 12.5px; color: #94a3b8; margin-top: -6px; margin-bottom: 14px;">Guides post-transplant Luminex SAB antibody surveillance; qualitative advisory only (does not alter numerical logistic rejection risk).</p>
+                            <div class="group-kicker">4 · Eplet mismatch (advisory only)</div>
+                            <p style="font-size: 12.5px; color: #a9b7b6; margin-top: -6px; margin-bottom: 14px;">Filled in from the HLA typing analysis. Used only to add a surveillance note; it does not change the risk percentage (in the study, eplet counts alone did not predict rejection).</p>
                             <div class="grid-cols-3">
                                 <div class="control-field">
-                                    <label for="eplet-class1" class="control-label">Class I Eplet Mismatches</label>
+                                    <label for="eplet-class1" class="control-label">Class I mismatched eplets</label>
                                     <input type="number" id="eplet-class1" class="control-input" min="0" max="30" value="1" onchange="updateTotalEplets(); calculateRisk();" oninput="updateTotalEplets(); calculateRisk();" required>
-                                    <span class="control-caption">HLA-A/B/C (MEDIAN: 1.0)</span>
+                                    <span class="control-caption">HLA-A, -B, -C.</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="eplet-class2" class="control-label">Class II Eplet Mismatches</label>
+                                    <label for="eplet-class2" class="control-label">Class II mismatched eplets</label>
                                     <input type="number" id="eplet-class2" class="control-input" min="0" max="30" value="1" onchange="updateTotalEplets(); calculateRisk();" oninput="updateTotalEplets(); calculateRisk();" required>
-                                    <span class="control-caption">HLA-DR/DQ (MEDIAN: 1.0)</span>
+                                    <span class="control-caption">HLA-DR, -DQ (and DP when typed).</span>
                                 </div>
                                 <div class="control-field">
-                                    <label for="total-eplets" class="control-label">Total Molecular Load</label>
+                                    <label for="total-eplets" class="control-label">Total mismatched eplets</label>
                                     <input type="number" id="total-eplets" class="control-input calculated" value="2" readonly>
-                                    <span class="control-caption">CLASS I + II LOAD</span>
+                                    <span class="control-caption">Class I + class II.</span>
                                 </div>
                             </div>
                             <div class="control-field" style="margin-top: var(--spacing-16);">
-                                <label for="dominant-eplet" class="control-label">Dominant Epitope Target Specificity</label>
+                                <label for="dominant-eplet" class="control-label">Dominant target eplet present? (optional)</label>
                                 <select id="dominant-eplet" class="control-select" onchange="calculateRisk()">
-                                    <option value="0">Standard / Non-Dominant Repertoire</option>
-                                    <option value="1">Class I Dominant Target (163LG / 65GK Epitope)</option>
-                                    <option value="2">Class II Dominant Target (130Q / 86G2 Epitope)</option>
-                                    <option value="3">Dual Class High-Risk Epitopes (163LG + 130Q)</option>
+                                    <option value="0">None of the frequent PGIMER targets</option>
+                                    <option value="1">Class I target present (163LG or 65GK)</option>
+                                    <option value="2">Class II target present (130Q or 86G2)</option>
+                                    <option value="3">Both classes (163LG and 130Q)</option>
                                 </select>
-                                <span class="control-caption">PGIMER REFERENCE IMMUNOGENIC EPLET REPERTOIRE</span>
+                                <span class="control-caption">The most frequent antibody targets seen in the PGIMER cohort.</span>
                             </div>
                         </div>
 
                         <!-- Actions -->
                         <div class="action-cluster">
                             <button type="button" class="btn-aurora" onclick="calculateRisk()" id="calculate-btn">
-                                <span>Compute Patient Risk</span>
+                                <span>Calculate risk</span>
                                 <span>↗</span>
                             </button>
                             <button type="button" class="btn-ghost" onclick="resetDefaults()" id="reset-btn">
-                                Reset Cohort Medians
+                                Reset to typical values
                             </button>
                         </div>
                     </form>
@@ -467,8 +478,8 @@
                 <section class="surface-card">
                     <div class="card-header-bar">
                         <div>
-                            <h2 class="card-title">Risk Synthesis & Stratification</h2>
-                            <p class="card-subtitle">Predicted probabilistic outcome mapped to PGIMER nomogram quintiles.</p>
+                            <h2 class="card-title">Predicted rejection risk</h2>
+                            <p class="card-subtitle">Estimated probability of biopsy-proven rejection within one year, and the risk band it falls into.</p>
                         </div>
                         <button class="arrow-btn" type="button" onclick="window.print()" title="Print Summary">↗</button>
                     </div>
@@ -488,46 +499,40 @@
                             <thead>
                                 <tr>
                                     <th>Stratum</th>
-                                    <th>Predicted Band</th>
-                                    <th>Observed Rate</th>
-                                    <th>Wilson 95% CI</th>
-                                    <th>Relative Risk</th>
+                                    <th>Predicted risk</th>
+                                    <th>Observed rejections (95% CI)</th>
+                                    <th>Versus lowest band</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr id="row-q1">
                                     <td><span class="stratum-bullet"></span>Q1 Very Low</td>
                                     <td>&lt; 8.3%</td>
-                                    <td>5.6% (5/89)</td>
-                                    <td>2.4% – 12.5%</td>
+                                    <td>5.6% (5/89)<br><small class="ux-muted">2.4% – 12.5%</small></td>
                                     <td>1.0× (Baseline)</td>
                                 </tr>
                                 <tr id="row-q2">
                                     <td><span class="stratum-bullet"></span>Q2 Low</td>
                                     <td>8.3% – 13.2%</td>
-                                    <td>10.2% (9/88)</td>
-                                    <td>5.5% – 18.3%</td>
+                                    <td>10.2% (9/88)<br><small class="ux-muted">5.5% – 18.3%</small></td>
                                     <td>1.8× Risk</td>
                                 </tr>
                                 <tr id="row-q3" class="active-stratum">
                                     <td><span class="active-pill"></span><strong>Q3 Moderate</strong></td>
                                     <td>13.2% – 18.2%</td>
-                                    <td><strong>20.2% (18/89)</strong></td>
-                                    <td>13.2% – 29.7%</td>
+                                    <td><strong>20.2% (18/89)</strong><br><small class="ux-muted">13.2% – 29.7%</small></td>
                                     <td>3.6× Risk</td>
                                 </tr>
                                 <tr id="row-q4">
                                     <td><span class="stratum-bullet"></span>Q4 High</td>
                                     <td>18.2% – 29.2%</td>
-                                    <td>21.6% (19/88)</td>
-                                    <td>14.3% – 31.3%</td>
+                                    <td>21.6% (19/88)<br><small class="ux-muted">14.3% – 31.3%</small></td>
                                     <td>3.9× Risk</td>
                                 </tr>
                                 <tr id="row-q5">
                                     <td><span class="stratum-bullet"></span>Q5 Extreme</td>
                                     <td>&gt; 29.2%</td>
-                                    <td>36.0% (32/89)</td>
-                                    <td>26.8% – 46.3%</td>
+                                    <td>36.0% (32/89)<br><small class="ux-muted">26.8% – 46.3%</small></td>
                                     <td>6.4× Risk</td>
                                 </tr>
                             </tbody>
@@ -536,7 +541,7 @@
 
                     <!-- Clinical Protocol Panel -->
                     <div class="protocol-panel" id="protocol">
-                        <div class="protocol-header">Clinical Action Protocol (PGIMER Guidelines)</div>
+                        <div class="protocol-header">Suggested actions for this risk band (PGIMER practice)</div>
                         <ul class="protocol-items" id="protocol-items">
                             <li><strong>Induction Therapy:</strong> Standard IL-2 receptor antagonist (basiliximab) induction is acceptable given intermediate risk.</li>
                             <li><strong>Calcineurin Inhibitor Target:</strong> Maintain strict tacrolimus trough levels between 8–10 ng/mL through post-transplant month 3.</li>
@@ -547,17 +552,17 @@
 
                     <!-- Model Progression Panel -->
                     <div class="progression-panel" id="audit">
-                        <div class="progression-title">Audited Incremental Gain (Identical N = 443 Cohort)</div>
+                        <div class="progression-title">How much each information layer added (same 443 patients)</div>
                         <div class="bar-row">
-                            <div class="bar-meta"><span>Config 1: Clinical Baseline</span><span>AUC: 0.5908</span></div>
+                            <div class="bar-meta"><span>Clinical data only</span><span>AUC 0.591</span></div>
                             <div class="bar-track"><div class="bar-fill" style="width: 59.08%;"></div></div>
                         </div>
                         <div class="bar-row">
-                            <div class="bar-meta"><span>Config 2: Clinical + HLA Mismatches</span><span>AUC: 0.6719 (+0.0811)</span></div>
+                            <div class="bar-meta"><span>+ HLA mismatches</span><span>AUC 0.672 (+0.081)</span></div>
                             <div class="bar-track"><div class="bar-fill" style="width: 67.19%;"></div></div>
                         </div>
                         <div class="bar-row">
-                            <div class="bar-meta"><span style="color: var(--color-liquid-mist);">Config 3: Full Multimodal (+ FCXM)</span><span style="color: var(--color-platinum); font-weight: 500;">AUC: 0.6926 (+0.1018, DeLong p = 0.00074)</span></div>
+                            <div class="bar-meta"><span style="color: var(--color-liquid-mist);">+ flow crossmatch</span><span style="color: var(--color-platinum); font-weight: 500;">AUC 0.693 (+0.102 overall, DeLong p = 0.0007)</span></div>
                             <div class="bar-track"><div class="bar-fill highlight" style="width: 69.26%;"></div></div>
                         </div>
                     </div>
@@ -565,146 +570,189 @@
             </div>
             </div><!-- /#pane-nomogram -->
 
-            <!-- TAB PANE 2: IMMUNOGENIC EPLET LOAD (ADVISORY ONLY) -->
+            <!-- TAB PANE 2: INTEGRATED HLA MISMATCH & EPLET ENGINE (HLAMatchmaker v3.1 tables + IE.xlsx) -->
             <div id="pane-eplet" class="calc-tab-pane hidden-tab">
-                <div class="terminal-grid">
-                    <!-- Left Surface Card: Eplet Profiler -->
+                <div class="terminal-grid hla-grid">
+                    <!-- Left Surface Card: Typing Input -->
                     <section class="surface-card">
                         <div class="card-header-bar">
                             <div>
-                                <h2 class="card-title">Immunogenic Eplet Profiler (Catalogue Logic)</h2>
-                                <p class="card-subtitle">Matched against PGIMER IE.xlsx reference eplet catalogue.</p>
+                                <h2 class="card-title">Enter HLA typing</h2>
+                                <p class="card-subtitle">Type or paste the alleles for both people. Everything on the right updates automatically.</p>
                             </div>
-                            <button class="arrow-btn" type="button" onclick="updateAdvisoryEplets()" title="Recompute Advisory">↺</button>
+                            <button class="arrow-btn" type="button" onclick="UX.openGlossary()" title="Help and glossary">?</button>
                         </div>
 
-                        <!-- Mandatory Scientific Advisory Disclosure Banner -->
-                        <div class="eplet-advisory-banner">
-                            <strong style="display: block; margin-bottom: 4px; color: #f59e0b; font-size: 13.5px;">Scientific Advisory Notice (Objective 3):</strong>
-                            <em>"Immunogenic-weighted eplet scoring is an active area of refinement (Mostafa et al. 2026 methodology) and has not yet been validated against this cohort's outcomes. This tab is for reference and surveillance planning only and does not affect the calculated risk percentage."</em>
+                        <div class="ux-steps">
+                            <div class="ux-step"><div class="ux-step-num">1</div><div><div class="ux-step-title">Recipient typing</div><div class="ux-step-text">A, B, C, DRB1, DQB1 at least; add DRB3/4/5, DQA1, DP if known.</div></div></div>
+                            <div class="ux-step"><div class="ux-step-num">2</div><div><div class="ux-step-title">Donor typing</div><div class="ux-step-text">Same loci for the donor. Any common notation works.</div></div></div>
+                            <div class="ux-step"><div class="ux-step-num">3</div><div><div class="ux-step-title">Read the results</div><div class="ux-step-text">Mismatches and immunogenic eplets appear on the right; send them to the risk calculator.</div></div></div>
                         </div>
 
-                        <form id="eplet-advisory-form" onsubmit="event.preventDefault(); updateAdvisoryEplets();">
+                        <div class="ux-seg" role="tablist" aria-label="Input mode">
+                            <button type="button" id="hla-mode-paste-btn" class="active" onclick="HLAUI.setMode('paste')">Paste typing</button>
+                            <button type="button" id="hla-mode-grid-btn" onclick="HLAUI.setMode('grid')">Enter by locus</button>
+                        </div>
+
+                        <div id="hla-mode-paste">
                             <div class="instrument-group">
-                                <div class="group-kicker">01 // MOLECULAR EPLET COUNTS BY LOCUS GROUP (ADVISORY / DOCUMENTATION ONLY)</div>
-                                <p style="font-size: 12.5px; color: #94a3b8; margin-top: -6px; margin-bottom: 12px;">Documentation aid for post-transplant surveillance; per-locus-group counts are completely isolated from risk probability calculations (Objective 3 locked result: AUC = 0.501, non-discriminative).</p>
-                                <div class="grid-cols-4">
+                                <div class="group-kicker">1 · Recipient <button type="button" class="ux-link-btn" onclick="HLAUI.loadExample()">Load an example pair</button></div>
+                                <textarea id="hla-recipient" class="control-input hla-textarea" rows="3" spellcheck="false" placeholder="e.g. A*01:01, A*24:02, B*35:03, B*57:01, C*04:01, C*06:02, DRB1*11:01, DRB1*12:02, DQB1*03:01, DQB1*03:01"></textarea>
+                                <div id="hla-recipient-parsed" class="hla-parsed"></div>
+                            </div>
+                            <div class="instrument-group">
+                                <div class="group-kicker">2 · Donor</div>
+                                <textarea id="hla-donor" class="control-input hla-textarea" rows="3" spellcheck="false" placeholder="e.g. A*03:01, A*24:02, B*35:01, B*35:03, C*04:01, C*15:02, DRB1*11:01, DRB1*15:02, DQB1*03:01, DQB1*06:01"></textarea>
+                                <div id="hla-donor-parsed" class="hla-parsed"></div>
+                                <span class="control-caption">Accepted: two-field alleles such as A*02:01, A*0201 or HLA-A*02:01:01, separated by commas, spaces or new lines. One allele at a locus is treated as homozygous.</span>
+                            </div>
+                        </div>
+
+                        <div id="hla-mode-grid" hidden>
+                            <div class="instrument-group">
+                                <div class="group-kicker">Alleles by locus <span class="ux-muted">start typing to see matching alleles</span></div>
+                                <div class="matrix-container hla-gridwrap">
+                                    <table class="hla-gridtable" id="hla-gridtable">
+                                        <thead><tr><th>Locus</th><th colspan="2">Recipient</th><th colspan="2">Donor</th></tr></thead>
+                                        <tbody id="hla-gridbody"></tbody>
+                                    </table>
+                                </div>
+                                <span class="control-caption">You can type just the fields (02:01) for A, B, C, DRB1, DQA1, DQB1, DPA1, DPB1; for DRB3/4/5 type the full name (DRB3*01:01). Leave the second box empty when homozygous.</span>
+                            </div>
+                        </div>
+
+                        <div id="hla-status" class="ux-status ux-status-idle"><span class="ux-status-dot"></span><div>Enter typing for both people, or load the example, to see results.</div></div>
+
+                        <details id="hla-notes" class="ux-details">
+                            <summary>Notes, warnings and inferred alleles <span class="ux-count" id="hla-notes-count">0</span></summary>
+                            <div class="ux-details-body"><div id="hla-warnings" class="hla-warn-list"></div></div>
+                        </details>
+
+                        <details class="ux-details">
+                            <summary>Options <span class="ux-muted" id="hla-opt-summary"></span></summary>
+                            <div class="ux-details-body">
+                                <div class="grid-cols-3">
                                     <div class="control-field">
-                                        <label for="adv-eplet-abc" class="control-label">HLA-ABC Eplets</label>
-                                        <input type="number" id="adv-eplet-abc" class="control-input" min="0" max="40" value="3" oninput="updateAdvisoryEplets()">
-                                        <span class="control-caption">CLASS I LOAD</span>
+                                        <label for="hla-infer" class="control-label">Fill in DRB3/4/5 and DQA1 when not typed</label>
+                                        <label class="hla-check"><input type="checkbox" id="hla-infer" checked> Use the workbook linkage tables</label>
+                                        <span class="control-caption">Inferred alleles are labelled everywhere; type the real alleles to override them.</span>
                                     </div>
                                     <div class="control-field">
-                                        <label for="adv-eplet-dr" class="control-label">HLA-DR Eplets</label>
-                                        <input type="number" id="adv-eplet-dr" class="control-input" min="0" max="40" value="2" oninput="updateAdvisoryEplets()">
-                                        <span class="control-caption">CLASS II (DR)</span>
+                                        <label for="hla-pop" class="control-label">Population for linkage frequencies</label>
+                                        <select id="hla-pop" class="control-select">
+                                            <option value="API" selected>Asian / Pacific Islander (API)</option>
+                                            <option value="CAU">Caucasian (CAU)</option>
+                                            <option value="AFR">African (AFR)</option>
+                                            <option value="HIS">Hispanic (HIS)</option>
+                                        </select>
+                                        <span class="control-caption">Only these four populations exist in the workbook table.</span>
                                     </div>
                                     <div class="control-field">
-                                        <label for="adv-eplet-dq" class="control-label">HLA-DQ Eplets</label>
-                                        <input type="number" id="adv-eplet-dq" class="control-input" min="0" max="40" value="2" oninput="updateAdvisoryEplets()">
-                                        <span class="control-caption">CLASS II (DQ)</span>
-                                    </div>
-                                    <div class="control-field">
-                                        <label for="adv-eplet-total" class="control-label">Total Eplet Burden</label>
-                                        <input type="number" id="adv-eplet-total" class="control-input calculated" value="7" readonly>
-                                        <span class="control-caption">UNWEIGHTED SUM</span>
+                                        <label for="hla-rule" class="control-label">Allele-level counting</label>
+                                        <select id="hla-rule" class="control-select">
+                                            <option value="unique" selected>Distinct donor alleles absent in recipient (0–2)</option>
+                                            <option value="haplotype">Per haplotype (homozygous donor counts twice)</option>
+                                        </select>
+                                        <span class="control-caption">Antigen-level counts (first field) are always shown as well; they are what the risk model uses.</span>
                                     </div>
                                 </div>
                             </div>
+                        </details>
 
-                            <div class="instrument-group" style="margin-top: var(--spacing-20);">
-                                <div class="group-kicker">02 // DOMINANT CLINICAL TARGET SPECIFICITIES (IE.XLSX)</div>
-                                <p style="font-size: 12.5px; color: #94a3b8; margin-top: -6px; margin-bottom: 12px;">Select verified high-immunogenicity target eplets identified in the PGIMER kidney transplant cohort:</p>
-                                <div class="grid-cols-2">
-                                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 12px; cursor: pointer;">
-                                        <input type="checkbox" id="target-163lg" onchange="updateAdvisoryEplets()" checked>
-                                        <div>
-                                            <strong style="color: #e0f2fe; font-size: 13px;">163LG (Class I)</strong>
-                                            <div style="font-size: 11px; color: #94a3b8;">Dominant HLA-A/B clinical target</div>
-                                        </div>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 12px; cursor: pointer;">
-                                        <input type="checkbox" id="target-65gk" onchange="updateAdvisoryEplets()">
-                                        <div>
-                                            <strong style="color: #e0f2fe; font-size: 13px;">65GK (Class I)</strong>
-                                            <div style="font-size: 11px; color: #94a3b8;">High-frequency HLA-A target</div>
-                                        </div>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 12px; cursor: pointer;">
-                                        <input type="checkbox" id="target-130q" onchange="updateAdvisoryEplets()" checked>
-                                        <div>
-                                            <strong style="color: #e0f2fe; font-size: 13px;">130Q (Class II)</strong>
-                                            <div style="font-size: 11px; color: #94a3b8;">Dominant HLA-DRB1 target</div>
-                                        </div>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 10px; background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px 12px; cursor: pointer;">
-                                        <input type="checkbox" id="target-86g2" onchange="updateAdvisoryEplets()">
-                                        <div>
-                                            <strong style="color: #e0f2fe; font-size: 13px;">86G2 (Class II)</strong>
-                                            <div style="font-size: 11px; color: #94a3b8;">Recurrent HLA-DQB1 target</div>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="action-cluster" style="margin-top: var(--spacing-24);">
-                                <button type="button" class="btn-aurora" onclick="updateAdvisoryEplets()">
-                                    <span>Update Advisory Assessment</span>
-                                    <span>↗</span>
-                                </button>
-                                <button type="button" class="btn-ghost" onclick="switchCalculatorTab('nomogram')">
-                                    ← Return to Risk Nomogram
-                                </button>
-                            </div>
-                        </form>
+                        <div class="action-cluster">
+                            <button type="button" class="btn-aurora" onclick="HLAUI.sendToNomogram()" id="hla-send-btn">
+                                <span>Send to risk calculator</span>
+                                <span>↗</span>
+                            </button>
+                            <button type="button" class="btn-ghost" onclick="HLAUI.loadExample()">Load example</button>
+                            <button type="button" class="btn-ghost" onclick="HLAUI.clearAll()">Clear</button>
+                        </div>
+                        <div class="ux-more-actions">
+                            <button type="button" onclick="HLAUI.copyReport()">Copy text report</button>
+                            <button type="button" onclick="HLAUI.downloadCsv()">Download CSV</button>
+                            <button type="button" onclick="window.print()">Print</button>
+                            <button type="button" onclick="HLAUI.runSelfTest()">Run self-test</button>
+                        </div>
+                        <div id="hla-flash" class="hla-flash" aria-live="polite"></div>
+                        <div id="hla-selftest" class="hla-selftest"></div>
                     </section>
 
-                    <!-- Right Surface Card: Surveillance Synthesis -->
+                    <!-- Right Surface Card: Result Dashboard -->
                     <section class="surface-card">
                         <div class="card-header-bar">
                             <div>
-                                <h2 class="card-title">Molecular Surveillance Protocol</h2>
-                                <p class="card-subtitle">Objective 3 evidence-grounded clinical decision support.</p>
+                                <h2 class="card-title">Results</h2>
+                                <p class="card-subtitle">Mismatches and immunogenic load for this donor–recipient pair.</p>
                             </div>
-                            <button class="arrow-btn" type="button" onclick="window.print()" title="Print Advisory">↗</button>
+                            <button class="arrow-btn" type="button" onclick="window.print()" title="Print">↗</button>
                         </div>
 
-                        <!-- Active Matched Targets Display -->
-                        <div class="eplet-catalog-card">
-                            <div class="group-kicker" style="color: #38bdf8; margin-bottom: 8px;">AUDITED HIGH-RISK TARGETS PRESENT</div>
-                            <div id="adv-matched-targets" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; align-items: center;">
-                                <span class="eplet-tag-pill eplet-tag-matched">✓ 163LG (Class I Dominant)</span>
-                                <span class="eplet-tag-pill eplet-tag-matched">✓ 130Q (Class II Dominant)</span>
-                            </div>
+                        <div id="hla-headline" class="hla-headline"></div>
+                        <div id="hla-tiles-sm" class="hla-tiles-sm"></div>
+
+                        <div class="protocol-panel hla-panel">
+                            <div class="protocol-header">By locus at a glance</div>
+                            <div id="hla-glance" class="hla-glance"></div>
                         </div>
 
-                        <!-- Objective 3 Scientific Grounding Summary -->
-                        <div class="protocol-panel" style="margin-top: var(--spacing-20);">
-                            <div class="protocol-header">Objective 3 Audited Scientific Finding</div>
-                            <p id="adv-eplet-summary-text" style="font-size: 13.5px; line-height: 1.6; color: #cbd5e1; margin-bottom: 12px;">
-                                <strong>Cataloged Molecular Burden:</strong> 7 total immunogenic eplet mismatches (3 Class I, 4 Class II). Includes high-frequency clinical targets: <strong>163LG, 130Q</strong>.
-                            </p>
-                            <div style="background: rgba(1, 38, 36, 0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5; color: #94a3b8;">
-                                <strong style="color: #edfffe;">Audited Objective 3 Benchmark:</strong> In the PGIMER doctoral cohort, unweighted numerical eplet burden does not discriminate acute cellular rejection (<strong>ROC-AUC = 0.501</strong>, non-discriminative). Eplet analysis provides qualitative epitope specificity for tailored post-transplant antibody surveillance rather than linear pre-transplant risk prediction.
-                            </div>
-                        </div>
+                        <div class="ux-explain" id="hla-explain"></div>
 
-                        <!-- Recommended Surveillance Schedule -->
-                        <div class="protocol-panel" style="margin-top: var(--spacing-20);">
-                            <div class="protocol-header">Tailored Luminex SAB Surveillance Protocol</div>
-                            <ul class="protocol-items">
-                                <li><strong>Pre-Transplant Gate:</strong> Negative CDC crossmatch and flow crossmatch thresholding (&lt; 20 MCS T-cell, &lt; 80 MCS B-cell).</li>
-                                <li><strong>Month 3 Screening:</strong> Luminex single-antigen bead (SAB) assay targeted specifically to identify anti-163LG or anti-130Q dnDSA.</li>
-                                <li><strong>Month 6 Protocol:</strong> Protocol allograft biopsy if eplet burden exceeds institutional surveillance threshold and any de novo DSA is detected.</li>
-                                <li><strong>Month 12 Horizon:</strong> Longitudinal annual SAB panel and chronic allograft injury screening.</li>
-                            </ul>
-                        </div>
+                        <details class="ux-details" open>
+                            <summary>Allele-level detail by locus <span class="ux-count" id="hla-count-allele">0</span></summary>
+                            <div class="ux-details-body">
+                                <div class="hla-alist-head"><div>Locus</div><div>Donor / recipient alleles and what the recipient lacks</div><div>Mismatches</div></div>
+                                <div id="hla-allele-list" class="hla-alist"></div>
+                            </div>
+                        </details>
+
+                        <details class="ux-details">
+                            <summary>Eplet detail by donor allele <span class="ux-count" id="hla-count-eplet">0</span></summary>
+                            <div class="ux-details-body">
+                                <p class="hla-legend"><span class="hla-chip hla-chip-ie">★ immunogenic (IE.xlsx)</span> <span class="hla-chip hla-chip-abv">✓ antibody-verified (HLAMatchmaker)</span> <span class="hla-chip hla-chip-plain">other mismatched eplet</span></p>
+                                <div class="matrix-container">
+                                    <table class="table-matrix hla-table">
+                                        <thead><tr><th>Class</th><th>Donor allele</th><th>Mismatched eplets (absent from every recipient molecule of the class)</th><th>Total</th><th>Ab-verified</th><th>Immunogenic</th></tr></thead>
+                                        <tbody id="hla-eplet-table"></tbody>
+                                    </table>
+                                </div>
+                                <div class="protocol-header" style="margin-top: 12px;">Locus-wise loads</div>
+                                <div class="matrix-container">
+                                    <table class="table-matrix hla-table">
+                                        <thead><tr><th>Locus / class</th><th>Total eplet MM</th><th>Immunogenic (IE)</th><th>Non-immunogenic</th><th>Ab-verified</th></tr></thead>
+                                        <tbody id="hla-locus-table"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </details>
+
+                        <details class="ux-details" open>
+                            <summary>Immunogenic eplets identified <span class="ux-count" id="hla-count-ie">0</span></summary>
+                            <div class="ux-details-body">
+                                <div id="hla-ie-list" class="hla-chip-wrap"></div>
+                                <div class="protocol-header" style="margin-top: 14px;">Mismatched eplets by HLAMatchmaker category</div>
+                                <div id="hla-cat-list" class="hla-chip-wrap"></div>
+                            </div>
+                        </details>
+
+                        <details class="ux-details">
+                            <summary>Method, reference database and result ID</summary>
+                            <div class="ux-details-body hla-footer">
+                                <div id="hla-result-id" class="hla-result-id"></div>
+                                <div id="hla-ref-info" class="hla-ref-info"></div>
+                                <div class="hla-ref-info">A donor eplet counts as mismatched when it is absent from every recipient molecule of the same class (class I: A/B/C together; class II: DRB1/3/4/5, DQB1, DPB1 β chains together and DQA1/DPA1 α chains together), which is the HLAMatchmaker intra- and interlocus comparison. Loads are counts of unique mismatched eplets. Immunogenic load counts mismatched eplets whose names appear in IE.xlsx; antibody-verified load uses the workbook's own flags. Antigen-level mismatches (first field) are the counts used in the thesis registers and the risk model.</div>
+                            </div>
+                        </details>
                     </section>
                 </div>
             </div><!-- /#pane-eplet -->
         </div>
     </div>
 
-    <script src="app.js?v=20260905_responsive"></script>
+    <script src="hla_reference_data.js?v=20260908"></script>
+    <script src="hla_engine.js?v=20260908"></script>
+    <script src="hla_validation_vectors.js?v=20260908"></script>
+    <script src="ux.js?v=20260908"></script>
+    <script src="hla_ui.js?v=20260908e"></script>
+    <script src="app.js?v=20260908b"></script>
 </body>
 </html>

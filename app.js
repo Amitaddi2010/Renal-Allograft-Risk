@@ -223,6 +223,7 @@ function calculateRisk() {
         recommendations.push(`<strong>Molecular Eplet Advisory (Objective 3):</strong> ${totalEplets} total eplet mismatches with ${targetDesc} specificity. <em>Clinical Context:</em> In the audited PGIMER cohort, numerical eplet burden alone does not predict acute cellular rejection (AUC = 0.501, Objective 3 locked result), but guides longitudinal Luminex single-antigen bead (SAB) surveillance at 3, 6, and 12 months to detect de novo anti-eplet DSA development.`);
     }
     protocolList.innerHTML = recommendations.map(item => `<li>${item}</li>`).join('');
+    if (window.UX && typeof UX.afterRisk === 'function') UX.afterRisk();
 }
 
 function resetDefaults() {
@@ -304,6 +305,8 @@ window.addEventListener('resize', () => {
 function initParticleSphere() {
     const canvas = document.getElementById('particle-canvas');
     if (!canvas) return;
+    if (window.__ramrtStopAnim) return;          // reduced-motion preference (see ux.js)
+    window.__ramrtAnimRunning = true;
     const ctx = canvas.getContext('2d');
 
     let width = (canvas.width = window.innerWidth);
@@ -339,6 +342,7 @@ function initParticleSphere() {
 
     function render() {
         ctx.clearRect(0, 0, width, height);
+        if (window.__ramrtStopAnim) { window.__ramrtAnimRunning = false; return; }   // stop when motion is switched off
 
         // Center orb — shift towards right on desktop, center on mobile
         const centerX = width < 640 ? width * 0.5 : width * 0.65;
@@ -480,7 +484,7 @@ function switchView(viewName) {
             navLaunchBtn.style.display = 'inline-flex';
         }
 
-        window.location.hash = 'dashboard';
+        if (!/^#(dashboard|hla)/.test(window.location.hash)) window.location.hash = 'dashboard';
         calculateRisk();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -527,13 +531,15 @@ function switchCalculatorTab(tabName) {
         if (tabEplet) tabEplet.classList.add('active');
         if (paneNomogram) paneNomogram.classList.add('hidden-tab');
         if (paneEplet) paneEplet.classList.remove('hidden-tab');
-        updateAdvisoryEplets();
+        if (window.HLAUI) HLAUI.recalculate();
+        if (!/^#hla/.test(window.location.hash)) window.location.hash = 'hla';
     } else {
         if (tabEplet) tabEplet.classList.remove('active');
         if (tabNomogram) tabNomogram.classList.add('active');
         if (paneEplet) paneEplet.classList.add('hidden-tab');
         if (paneNomogram) paneNomogram.classList.remove('hidden-tab');
         calculateRisk();
+        if (/^#hla/.test(window.location.hash)) window.location.hash = 'dashboard';
     }
 }
 
@@ -579,13 +585,24 @@ function updateAdvisoryEplets() {
     }
 }
 
-// Handle browser back/forward buttons
-window.addEventListener('hashchange', () => {
-    if (window.location.hash === '#dashboard') {
+// Deep links: #landing, #dashboard (risk calculator), #hla (HLA & eplet analysis), #hla-example (with the example pair)
+function routeFromHash() {
+    const h = window.location.hash;
+    if (h === '#hla' || h === '#hla-example' || h === '#hla-grid-example') {
+        switchView('calculator');
+        switchCalculatorTab('eplet');
+        if (h !== '#hla' && window.HLAUI) HLAUI.loadExample();
+        if (h === '#hla-grid-example' && window.HLAUI) HLAUI.setMode('grid');
+    } else if (h === '#dashboard') {
         switchView('calculator');
     } else {
         switchView('landing');
     }
+}
+
+// Handle browser back/forward buttons
+window.addEventListener('hashchange', () => {
+    routeFromHash();
 });
 
 // Initialize on DOM Ready
@@ -596,10 +613,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initMolecularDiagram();
 
     // Check initial route
-    if (window.location.hash === '#dashboard') {
-        switchView('calculator');
-    } else {
-        switchView('landing');
-    }
+    routeFromHash();
 });
 
