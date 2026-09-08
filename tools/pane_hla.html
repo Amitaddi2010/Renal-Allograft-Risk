@@ -162,6 +162,33 @@
                             </div>
                         </details>
 
+                        <details class="ux-details" id="hla3d-section">
+                            <summary>3D view of mismatched eplets on the donor molecule <span class="ux-muted">proof of concept</span> <span class="ux-count" id="hla-count-3d">0</span></summary>
+                            <div class="ux-details-body">
+                                <p class="hla-ref-info" style="margin: 0 0 10px;">Shows the donor HLA molecule with the anchor position of every mismatched eplet marked (pink = immunogenic per IE.xlsx, cyan = antibody-verified, grey = other). Solved structures come from RCSB PDB for common alleles; other alleles use a template of the same locus, or you can load a homology model downloaded from <a href="https://www.phla3d.com.br/" target="_blank" rel="noopener" style="color:#93c5fd;">pHLA3D</a> (research-use licence, cite their papers). Needs an internet connection for the viewer library and RCSB files.</p>
+                                <div class="grid-cols-2">
+                                    <div class="control-field">
+                                        <label for="hla3d-allele" class="control-label">Donor allele to display</label>
+                                        <select id="hla3d-allele" class="control-select"><option value="">No donor allele with an eplet comparison yet</option></select>
+                                    </div>
+                                    <div class="control-field">
+                                        <label for="hla3d-file" class="control-label">Optional: local PDB file for this allele (e.g. from pHLA3D)</label>
+                                        <input type="file" id="hla3d-file" class="control-input" accept=".pdb,.ent,.txt" onchange="HLA3D.loadLocalFile(this)">
+                                        <span class="control-caption"><button type="button" class="ux-link-btn" style="margin-left:0;" onclick="HLA3D.clearLocalFile()">Use built-in structures instead</button></span>
+                                    </div>
+                                </div>
+                                <div class="action-cluster" style="margin-top: 6px;">
+                                    <button type="button" class="btn-aurora" id="hla3d-load" onclick="HLA3D.show()" disabled><span>Load 3D view</span><span>↗</span></button>
+                                    <button type="button" class="btn-ghost" id="hla3d-spin" onclick="HLA3D.toggleSpin()">Rotate</button>
+                                    <button type="button" class="btn-ghost" id="hla3d-surface" data-on="0" onclick="HLA3D.toggleSurface()">Show surface</button>
+                                    <button type="button" class="btn-ghost" onclick="HLA3D.resetView()">Reset view</button>
+                                </div>
+                                <div id="hla3d-msg" class="hla-warn hla-warn-info" style="margin-top: 10px;">Choose a donor allele and press <em>Load 3D view</em>.</div>
+                                <div id="hla3d-viewer" class="hla3d-viewer" hidden></div>
+                                <p class="hla-legend" style="margin-top: 10px;"><span class="hla-chip hla-chip-ie">immunogenic eplet anchor</span> <span class="hla-chip hla-chip-abv">antibody-verified anchor</span> <span class="hla-chip hla-chip-plain">other mismatched anchor</span> <span class="hla-chip hla-chip-ok">residues within 3.5 Å</span></p>
+                            </div>
+                        </details>
+
                         <details class="ux-details">
                             <summary>Method, reference database and result ID</summary>
                             <div class="ux-details-body hla-footer">

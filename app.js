@@ -588,11 +588,18 @@ function updateAdvisoryEplets() {
 // Deep links: #landing, #dashboard (risk calculator), #hla (HLA & eplet analysis), #hla-example (with the example pair)
 function routeFromHash() {
     const h = window.location.hash;
-    if (h === '#hla' || h === '#hla-example' || h === '#hla-grid-example') {
+    if (h === '#hla' || h === '#hla-example' || h === '#hla-grid-example' || h === '#hla-3d-example') {
         switchView('calculator');
         switchCalculatorTab('eplet');
         if (h !== '#hla' && window.HLAUI) HLAUI.loadExample();
         if (h === '#hla-grid-example' && window.HLAUI) HLAUI.setMode('grid');
+        if (h === '#hla-3d-example' && window.HLA3D) {
+            const sec = document.getElementById('hla3d-section');
+            if (sec) sec.open = true;
+            const sel = document.getElementById('hla3d-allele');
+            if (sel && sel.options.length > 1) sel.selectedIndex = 1;     // second donor allele of the example (A*24:02) has mismatches
+            setTimeout(function () { HLA3D.show(); }, 50);
+        }
     } else if (h === '#dashboard') {
         switchView('calculator');
     } else {

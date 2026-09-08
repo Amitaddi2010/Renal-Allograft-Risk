@@ -93,7 +93,8 @@ Open your browser at `http://localhost:8080/`.
 - **Dashboard**: headline counts, a per-locus glance (antigen mismatches as dots, eplet load bars with the immunogenic share in pink), a "what these numbers mean" box, and collapsible detail sections (allele-level by locus, eplets by donor allele, immunogenic eplets, method and result ID).
 - **Help & glossary** button (bottom right) explains every term; **background motion** can be switched off (also follows the system reduced-motion setting).
 - **Export**: copy a text report, download a CSV, or print (collapsed sections expand when printing).
-- **Deep links**: `index.html#dashboard` (risk calculator), `#hla` (HLA & eplet analysis), `#hla-example` (with a demo pair), `#hla-grid-example` (demo pair in the by-locus grid).
+- **3D view (proof of concept, pHLA3D-style)**: in the results, "3D view of mismatched eplets on the donor molecule" renders the chosen donor allele with the anchor residue of every mismatched eplet marked (pink immunogenic, cyan antibody-verified, grey other; neighbours within 3.5 Å tinted). Structures come from RCSB PDB for 23 common alleles (`hla_3d.js`, IDs verified), a same-locus template otherwise, or a local PDB file such as a pHLA3D homology model. Uses 3Dmol.js from cdnjs on demand; needs internet unless a local file is loaded.
+- **Deep links**: `index.html#dashboard` (risk calculator), `#hla` (HLA & eplet analysis), `#hla-example` (with a demo pair), `#hla-grid-example` (demo pair in the by-locus grid), `#hla-3d-example` (demo pair with the 3D view opened).
 - The engine pane markup lives in `tools/pane_hla.html`; after editing it run `python tools/splice_pane.py`.
 
 ---

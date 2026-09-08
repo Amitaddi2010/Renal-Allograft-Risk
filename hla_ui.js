@@ -351,6 +351,7 @@
 
         $('hla-result-id').textContent = res.evaluable ? 'Result ID ' + res.signature + ' — identical inputs and options always reproduce this result.' : 'Waiting for input.';
         $('hla-send-btn').disabled = !(A.evaluated.length);
+        if (window.HLA3D) HLA3D.update(res);
     }
 
     /* ---------------- actions ---------------- */

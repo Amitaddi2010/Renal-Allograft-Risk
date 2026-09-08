@@ -96,6 +96,9 @@
 .hla-selftest-summary.hla-pass, tr.hla-pass td:first-child { border-left-color: #10b981; color: #a7f3d0; }
 .hla-selftest-summary.hla-fail, tr.hla-fail td:first-child { border-left-color: #ef4444; color: #fca5a5; }
 
+.hla3d-viewer { position: relative; width: 100%; height: 460px; margin-top: 12px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(203,255,252,0.25); background: #011d1c; }
+.hla3d-viewer canvas { border-radius: 10px; }
+@media (max-width: 640px) { .hla3d-viewer { height: 340px; } }
 .hla-mm-big { font-family: var(--font-mono); font-size: 17px; color: var(--color-lavender-phosphor); }
 .hla-recip-only { display: block; margin-top: 4px; font-size: 11.5px; }
 /* Allele-level detail as a stacked list (fits any card width, no horizontal scrolling) */
