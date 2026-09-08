@@ -247,7 +247,7 @@ body {
     height: 2px;
     background: var(--color-platinum);
     margin: 5px auto;
-    border-radius: 1px;
+    border-radius: 6px;
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
@@ -406,12 +406,12 @@ body {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 .tag-confirmed {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
+    background: rgba(0, 130, 124, 0.15);
+    color: #00827c;
 }
 
 .tag-null {
@@ -420,8 +420,8 @@ body {
 }
 
 .tag-inconclusive {
-    background: rgba(245, 158, 11, 0.18);
-    color: #f59e0b;
+    background: rgba(250, 209, 255, 0.18);
+    color: #fad1ff;
 }
 
 /* ==========================================================================
@@ -667,7 +667,7 @@ body {
 
 .control-select option {
     background-color: #011d1c;
-    color: #ffffff;
+    color: #edfffe;
     padding: 8px 12px;
 }
 
@@ -711,7 +711,7 @@ body {
     padding: 14px var(--spacing-28);
     font-family: var(--font-arial);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     cursor: pointer;
@@ -809,7 +809,7 @@ body {
 
 .matrix-container::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
+    border-radius: 6px;
 }
 
 .table-matrix {
@@ -996,14 +996,14 @@ body {
     width: 100%;
     height: 4px;
     background: rgba(255, 255, 255, 0.08);
-    border-radius: 2px;
+    border-radius: 6px;
     overflow: hidden;
 }
 
 .bar-fill {
     height: 100%;
     background: var(--color-slate-deep);
-    border-radius: 2px;
+    border-radius: 6px;
     transition: width 0.6s ease;
 }
 
@@ -1315,7 +1315,7 @@ body {
 
     .surface-card {
         padding: var(--spacing-20);
-        border-radius: 12px;
+        border-radius: 16px;
     }
 
     .grid-cols-2 {
@@ -1554,18 +1554,18 @@ body {
 }
 
 .calc-tab-btn.active {
-    color: #38bdf8;
-    border-bottom-color: #38bdf8;
-    background: rgba(56, 189, 248, 0.05);
+    color: #cbfffc;
+    border-bottom-color: #cbfffc;
+    background: rgba(203, 255, 252, 0.05);
 }
 
 .calc-tab-btn .tab-badge-advisory {
     font-size: 10px;
-    background: rgba(245, 158, 11, 0.2);
-    color: #f59e0b;
-    border: 1px solid rgba(245, 158, 11, 0.4);
+    background: rgba(250, 209, 255, 0.2);
+    color: #fad1ff;
+    border: 1px solid rgba(250, 209, 255, 0.4);
     padding: 1px 6px;
-    border-radius: 4px;
+    border-radius: 6px;
     letter-spacing: 0.05em;
 }
 
@@ -1578,14 +1578,14 @@ body {
 }
 
 .eplet-advisory-banner {
-    background: rgba(245, 158, 11, 0.1);
-    border-left: 3px solid #f59e0b;
-    border-radius: 4px;
+    background: rgba(250, 209, 255, 0.1);
+    border-left: 3px solid #fad1ff;
+    border-radius: 6px;
     padding: 14px 18px;
     margin-bottom: var(--spacing-24);
     font-size: 13px;
     line-height: 1.55;
-    color: #fde68a;
+    color: #fde9ff;
 }
 
 .eplet-catalog-card {
@@ -1601,7 +1601,7 @@ body {
     align-items: center;
     gap: 6px;
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 11px;
     font-family: var(--font-mono);
     font-weight: 500;
@@ -1609,15 +1609,15 @@ body {
 }
 
 .eplet-tag-matched {
-    background: rgba(56, 189, 248, 0.2);
-    border: 1px solid rgba(56, 189, 248, 0.5);
-    color: #e0f2fe;
+    background: rgba(203, 255, 252, 0.2);
+    border: 1px solid rgba(203, 255, 252, 0.5);
+    color: #edfffe;
 }
 
 .eplet-tag-unmatched {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
+    color: #707777;
 }
 
 /* ==========================================================================

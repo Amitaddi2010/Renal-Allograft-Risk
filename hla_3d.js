@@ -53,7 +53,7 @@
         DRB1: 'DRB1*01:01', DRB3: 'DRB1*01:01', DRB4: 'DRB1*01:01', DRB5: 'DRB1*01:01',
         DQB1: 'DQB1*03:02', DQA1: 'DQA1*03:01', DPB1: 'DPB1*02:01', DPA1: 'DPA1*01:03'
     };
-    const COLORS = { ie: '#ec4899', abver: '#0891b2', other: '#94a3b8', chain: '#2f5f5a', otherChains: '#13302e' };
+    const COLORS = { ie: '#fde9ff', abver: '#cbfffc', other: '#707777', chain: '#2f5f5a', otherChains: '#13302e' };
     const AA = { ALA: 'A', ARG: 'R', ASN: 'N', ASP: 'D', CYS: 'C', GLN: 'Q', GLU: 'E', GLY: 'G', HIS: 'H', ILE: 'I', LEU: 'L', LYS: 'K', MET: 'M', PHE: 'F', PRO: 'P', SER: 'S', THR: 'T', TRP: 'W', TYR: 'Y', VAL: 'V' };
 
     let viewer = null, libPromise = null, bundlePromise = null, manifestPromise = null;
@@ -180,10 +180,10 @@
         const host = $('hla3d-viewer');
         host.hidden = false;
         const light = (window.UX && UX.currentTheme && UX.currentTheme() === 'glass');
-        if (!viewer) viewer = $3Dmol.createViewer(host, { backgroundColor: light ? '#f8fafc' : '#011d1c' });
-        else viewer.setBackgroundColor(light ? '#f8fafc' : '#011d1c');
+        if (!viewer) viewer = $3Dmol.createViewer(host, { backgroundColor: light ? '#edfffe' : '#011d1c' });
+        else viewer.setBackgroundColor(light ? '#edfffe' : '#011d1c');
         COLORS.chain = light ? '#5b8a86' : '#2f5f5a';
-        COLORS.otherChains = light ? '#c7d2d0' : '#13302e';
+        COLORS.otherChains = light ? '#bbc7c6' : '#13302e';
         return resolveStructure(entry).then(function (struct) {
             viewer.removeAllModels(); viewer.removeAllLabels(); viewer.removeAllSurfaces();
             const done = function (model) {
@@ -251,7 +251,7 @@
         if (!viewer) return;
         const b = $('hla3d-surface');
         if (b.dataset.on === '1') { viewer.removeAllSurfaces(); b.dataset.on = '0'; b.textContent = 'Show surface'; }
-        else { viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.35, color: '#0d9488' }, {}); b.dataset.on = '1'; b.textContent = 'Hide surface'; }
+        else { viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.35, color: '#00827c' }, {}); b.dataset.on = '1'; b.textContent = 'Hide surface'; }
         viewer.render();
     }
     function loadLocalFile(input) {

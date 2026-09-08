@@ -11,7 +11,7 @@
 :root {
     --font-arial: var(--font-matter);
     --page-max-width: 1440px;
-    --section-gap: 48px;
+    --section-gap: 68px;
 
     --ab-canvas: var(--color-liquid-abyss);
     --ab-deep: var(--color-liquid-deep);
@@ -104,8 +104,8 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 .surface-card, .launch-banner-card, .lp-feature, .home-card, .stat-block {
     background: var(--ab-kelp); border: none; border-radius: var(--radius-cards); box-shadow: none; backdrop-filter: none;
 }
-.surface-card { padding: 32px 36px; }
-.home-card { padding: 32px 36px; }
+.surface-card { padding: var(--spacing-36); }
+.home-card { padding: var(--spacing-36); }
 .stat-block { padding: 22px 24px; background: var(--ab-deep); }
 .ux-details, .ux-step, .hla-head, .hla-tile, .protocol-panel { background: var(--ab-deep); border: none; border-radius: var(--radius-cards); box-shadow: none; }
 .hla-tile { border-radius: var(--radius-small); }
@@ -156,7 +156,7 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 .risk-display-num { color: var(--ab-phosphor); }
 .quintile-indicator { color: var(--ab-text); }
 .quintile-subtext { color: var(--ab-silver); }
-.ux-gauge-seg { border-radius: 4px; }
+.ux-gauge-seg { border-radius: var(--radius-small); }
 .ux-gauge-seg.active { outline-color: var(--ab-phosphor); }
 .ux-gauge-marker { border-top-color: var(--ab-phosphor); }
 .ux-gauge-caption, .ux-gauge-labels { color: var(--ab-silver); }
@@ -184,7 +184,7 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 .ux-seg button + button { border-left-color: var(--ab-line); }
 .ux-status-ok { background: rgba(0,130,124,0.18); border-color: rgba(0,130,124,0.6); color: var(--ab-aqua); }
 .ux-status-warn { background: rgba(250,209,255,0.08); border-color: rgba(250,209,255,0.5); color: var(--ab-phosphor); }
-.ux-status-err { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.6); color: #fecaca; }
+.ux-status-err { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.6); color: #ffb4b4; }
 .ux-status-idle { background: var(--ab-deep); border-color: var(--ab-line); color: var(--ab-silver); }
 .ux-details > summary { color: var(--ab-text); }
 .ux-details > summary::before { color: var(--ab-aqua); }
@@ -202,7 +202,7 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 .stat-number { color: var(--ab-phosphor); }
 .stat-label { color: var(--ab-mist); text-transform: uppercase; letter-spacing: 0.055em; font-size: 13px; }
 .hla-tile-value-sm { color: var(--ab-mist); }
-.ux-danger { color: #fca5a5 !important; }
+.ux-danger { color: #ffb4b4 !important; }
 .recent-pair { color: var(--ab-silver); }
 .recent-table th { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ab-silver); }
 

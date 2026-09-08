@@ -83,7 +83,7 @@
         m.id = 'ux-glossary-modal'; m.className = 'ux-modal';
         m.innerHTML = '<div class="ux-modal-card" role="dialog" aria-modal="true" aria-labelledby="ux-glossary-title">' +
             '<div class="ux-modal-head"><h3 id="ux-glossary-title">Help &amp; glossary</h3><button type="button" class="ux-modal-close" id="ux-glossary-close">Close ✕</button></div>' +
-            '<p style="font-size:13.5px;color:#cbd5e1;line-height:1.55;margin:0 0 6px;"><strong style="color:#fff;">How to use the calculator.</strong> Tab 2: paste or type the recipient and donor HLA alleles; the mismatch tables update as you type. Press <em>Send to risk calculator</em> to copy the antigen mismatches and eplet loads into tab 1, where donor age, induction and crossmatch values complete the rejection-risk estimate.</p>' +
+            '<p style="font-size:13.5px;color:#bbc7c6;line-height:1.55;margin:0 0 6px;"><strong style="color:#fff;">How to use the calculator.</strong> Tab 2: paste or type the recipient and donor HLA alleles; the mismatch tables update as you type. Press <em>Send to risk calculator</em> to copy the antigen mismatches and eplet loads into tab 1, where donor age, induction and crossmatch values complete the rejection-risk estimate.</p>' +
             '<dl class="ux-glossary">' + GLOSSARY.map(function (g) { return '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>'; }).join('') + '</dl>' +
             '</div>';
         document.body.appendChild(m);
@@ -111,7 +111,7 @@
         const bounds = (typeof QUINTILE_BOUNDS !== 'undefined') ? QUINTILE_BOUNDS : [0.0834, 0.1316, 0.1816, 0.2924];
         const edges = [0].concat(bounds).concat([0.6]);
         const observed = ['5.6%', '10.2%', '20.2%', '21.6%', '36.0%'];
-        const colors = ['#a7f3d0', '#cbfffc', '#fde68a', '#fdba74', '#fca5a5'];
+        const colors = ['#6fc9c2', '#a5e3dd', '#cbfffc', '#f2d4f8', '#fde9ff'];   // teal -> phosphor-pink risk ramp
         let q = 5;
         for (let i = 0; i < bounds.length; i++) { if (p <= bounds[i]) { q = i + 1; break; } }
         track.innerHTML = colors.map(function (c, i) { return '<div class="ux-gauge-seg' + (i + 1 === q ? ' active' : '') + '" style="background:' + c + '">Q' + (i + 1) + '</div>'; }).join('');
