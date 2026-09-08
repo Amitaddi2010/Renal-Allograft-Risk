@@ -141,6 +141,8 @@ Deep links: `#hla-batch` opens the empty batch tab, `#hla-batch-example` loads a
 
 `node tools/batch_eplet.js <pairs.json> <out.csv>` runs the same computation headlessly for a whole dataset.
 
+**Typing notations accepted.** Besides the usual forms, the parser reads IMGT **G groups** (`A*11:01:01G`) and **P groups** (`A*11:01P`) by reducing them to the two-field allele, since group members share the sequence that carries the eplets; a **doubled locus prefix** (`A*A*03:01:01:01`, produced by some exports); and an **undetermined second field** (`A*33:xx`, `B*15.XX`), reported as low resolution with candidate alleles. An **ambiguous either/or typing** (`DRB1*15:01/03`) is rejected with a message naming the alternatives rather than being guessed at.
+
 **Note on comparability with the registry calculator.** This app computes eplet loads from the HLAMatchmaker 3.1 workbooks supplied with the thesis, not from the HLA Eplet Registry release used at epregistry.com.br. The two sources curate eplets differently, so absolute counts are not expected to match one for one; rankings and relative loads are the comparable quantities. Loci missing from a typing are skipped, so pairs typed for fewer loci carry lower loads and must not be compared with fully typed pairs.
 
 ## 📂 Repository Structure

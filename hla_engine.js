@@ -107,6 +107,11 @@
         t = t.replace(/^["'\[\]]+|["'\[\]\.]+$/g, '');
         t = t.replace(/^HLA[-\s]?/i, '');
         t = t.replace(/::+/g, ':').replace(/\s+/g, '');
+        const dup = t.match(/^([A-Za-z]+[1-5]?)\*([A-Za-z]+[1-5]?)\*(.+)$/);   // A*A*03:01:01:01 -> A*03:01:01:01 (locus prefix written twice)
+        if (dup && dup[1].toUpperCase() === dup[2].toUpperCase()) t = dup[2] + '*' + dup[3];
+        t = t.replace(/[:.](?:x{2,}|n{2,})$/i, '');            // A*33:xx, B*15.XX: second field not determined -> handled as low resolution
+        const gm = t.match(/^(.*\d)([GP])$/i);                    // A*11:01:01G, A*11:01P: IMGT G / P group
+        if (gm) { t = gm[1]; rec.group = gm[2].toUpperCase(); }
         if (!t) { rec.status = 'empty'; return rec; }
         if (/^(?:[A-Za-z]+[1-5]?\*?)?(NA|N\/A|NIL|NONE|NEG|NT|X+|-+)$/i.test(t) || /^[A-Za-z]+[1-5]?\*$/.test(t)) {
             rec.status = 'empty'; rec.message = 'No allele entered'; return rec;
@@ -129,6 +134,9 @@
         }
         if (!m) {
             if (/^\d{1,3}(:\d{1,3})?$/.test(t)) { rec.message = 'Missing locus prefix (e.g. write A*' + t + ')'; }
+            else if (t.indexOf('/') !== -1) {                      // DRB1*15:01/03, DRB1*03:01/08:01(?)
+                rec.message = 'Ambiguous typing: the report gives more than one possibility (' + t.replace(/\*/, ' ') + '). Enter the resolved allele, or one line per possibility';
+            }
             else rec.message = 'Unrecognised HLA format';
             return rec;
         }
@@ -207,6 +215,7 @@
                 if (r.status === 'unsupported') warnings.push({ level: 'warn', locus: locus, message: locus + ': ' + r.allele + ' is not in the HLAMatchmaker 3.1 tables; it counts for allele-level mismatch but not for eplet analysis' + (r.suggestions.length ? ' (closest listed: ' + r.suggestions.slice(0, 6).join(', ') + ')' : '') });
                 if (r.status === 'null') warnings.push({ level: 'warn', locus: locus, message: locus + ': ' + r.allele + 'N is a null allele and is excluded' });
                 if (r.status === 'excess') warnings.push({ level: 'error', locus: locus, message: r.message });
+                if (r.group && r.allele) warnings.push({ level: 'info', locus: locus, message: locus + ': "' + r.raw + '" is an IMGT ' + r.group + ' group; read as ' + r.allele + ' (members of the group share the sequence that carries the eplets)' });
             });
         });
         tokens.forEach(function (r) {

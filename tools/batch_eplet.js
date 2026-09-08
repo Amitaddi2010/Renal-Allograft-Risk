@@ -33,12 +33,15 @@ const cols = Object.keys(rows[0]);
 fs.writeFileSync(process.argv[3], cols.join(',') + '\n' +
     rows.map(function (r) { return cols.map(function (c) { return r[c]; }).join(','); }).join('\n') + '\n');
 
+// medians use rows with no invalid allele, as the in-app batch summary does: a row with an
+// unreadable allele computes its load from the remaining alleles and so under-reports.
+const clean = rows.filter(function (r) { return r.warnings === 0; });
 function stats(k) {
-    const v = rows.map(function (r) { return r[k]; }).filter(function (x) { return x !== ''; }).sort(function (a, b) { return a - b; });
+    const v = clean.map(function (r) { return r[k]; }).filter(function (x) { return x !== ''; }).sort(function (a, b) { return a - b; });
     if (!v.length) return 'n/a';
     const sum = v.reduce(function (a, b) { return a + b; }, 0);
     return 'n=' + v.length + ' median ' + v[Math.floor(v.length / 2)] + ' mean ' + (sum / v.length).toFixed(1) + ' range ' + v[0] + '-' + v[v.length - 1];
 }
-console.log('pairs analysed : ' + rows.length + (errs.length ? '  (errors ' + errs.length + ')' : ''));
+console.log('pairs analysed : ' + rows.length + '  (rows with an invalid allele, excluded from the medians: ' + (rows.length - clean.length) + ')' + (errs.length ? '  (errors ' + errs.length + ')' : ''));
 ['antigenMM', 'epI', 'epIIB', 'epIIA', 'epTotal', 'ie', 'abver'].forEach(function (k) { console.log('  ' + k.padEnd(10) + stats(k)); });
 if (errs.length) console.log(JSON.stringify(errs.slice(0, 5), null, 1));
