@@ -6,7 +6,7 @@
     <title>RAMRT // PGIMER Renal Allograft Risk Terminal</title>
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
     <link rel="stylesheet" href="styles.css?v=20260910b">
-    <link rel="stylesheet" href="hla_styles.css?v=20260913">
+    <link rel="stylesheet" href="hla_styles.css?v=20260913b">
     <link rel="stylesheet" href="ux_styles.css?v=20260912c">
     <link rel="stylesheet" href="dashboard_theme.css?v=20260912b">
     <link rel="stylesheet" id="theme-glass" href="dashboard_glass.css?v=20260910" disabled>
@@ -1181,6 +1181,44 @@
                         </div>
                     </details>
 
+                    <details class="ux-details" id="hla-bridge-section">
+                        <summary>Send this pair to PIRCHE-II, HLA-EMMA or IEDB <span class="ux-muted">external tools</span></summary>
+                        <div class="ux-details-body">
+                            <p class="hla-ref-info" style="margin-top:0;">
+                                PIRCHE-II and HLA-EMMA are closed tools with no open-source implementation, so this app does not attempt to reproduce their scores. Instead it prepares the input in the format each expects and gives you somewhere to paste the answer back, so their published numbers sit beside our own measures for the same pair.
+                            </p>
+                            <div class="hla-toolbar">
+                                <button type="button" class="btn-ghost btn-sm" onclick="HLAUI.copyBridge('pirche')">Copy for PIRCHE-II</button>
+                                <button type="button" class="btn-ghost btn-sm" onclick="HLAUI.copyBridge('emma')">Copy for HLA-EMMA</button>
+                                <button type="button" class="btn-ghost btn-sm" onclick="HLAUI.copyBridge('tsv')">Copy as TSV</button>
+                                <button type="button" class="btn-ghost btn-sm" onclick="HLAUI.downloadBridge()">Download pair file</button>
+                            </div>
+                            <div class="hla-toolbar" style="margin-top:6px;">
+                                <a class="ux-link-btn" href="https://www.pirche.com/" target="_blank" rel="noopener noreferrer">pirche.com &#8599;</a>
+                                <a class="ux-link-btn" href="https://hla-emma.com/" target="_blank" rel="noopener noreferrer">hla-emma.com &#8599;</a>
+                                <a class="ux-link-btn" href="https://tools.iedb.org/main/bcell/" target="_blank" rel="noopener noreferrer">IEDB B-cell tools &#8599;</a>
+                                <a class="ux-link-btn" href="https://hladiv.net/" target="_blank" rel="noopener noreferrer">hladiv.net &#8599;</a>
+                            </div>
+                            <pre id="hla-bridge-preview" class="hla-bridge-pre"></pre>
+
+                            <div class="group-kicker" style="margin-top:14px;">Paste results back</div>
+                            <div class="grid-cols-2">
+                                <div class="control-field">
+                                    <label class="control-label" for="hla-ext-pirche">PIRCHE-II score</label>
+                                    <input type="number" step="0.1" min="0" id="hla-ext-pirche" class="control-input" placeholder="e.g. 62" oninput="HLAUI.saveExternal()">
+                                </div>
+                                <div class="control-field">
+                                    <label class="control-label" for="hla-ext-emma">HLA-EMMA solvent-accessible AA mismatch</label>
+                                    <input type="number" step="1" min="0" id="hla-ext-emma" class="control-input" placeholder="e.g. 34" oninput="HLAUI.saveExternal()">
+                                </div>
+                            </div>
+                            <div id="hla-ext-compare" class="hla-ref-info" style="margin-top:8px;"></div>
+                            <p class="hla-ref-info">
+                                Values you paste here are stored in this browser against the result ID of the current pair, so they reappear when you reopen the same analysis. They are never sent anywhere.
+                            </p>
+                        </div>
+                    </details>
+
                     <details class="ux-details">
                         <summary>Method, reference database and result ID</summary>
                         <div class="ux-details-body hla-footer">
@@ -1209,7 +1247,7 @@
     <script src="ux.js?v=20260910b"></script>
     <script src="hla_molecular_data.js?v=20260913"></script>
     <script src="hla_molecular.js?v=20260913"></script>
-    <script src="hla_ui.js?v=20260913"></script>
+    <script src="hla_ui.js?v=20260913b"></script>
     <script src="hla_eplet_residues.js?v=20260908d"></script>
     <script src="hla_3d.js?v=20260910b"></script>
     <script src="dashboard_home.js?v=20260908"></script>

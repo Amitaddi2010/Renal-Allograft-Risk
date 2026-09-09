@@ -478,6 +478,7 @@
         if (si) si.textContent = E.overall.evaluated ? String(E.overall.ie) : '–';
         if (sn) sn.textContent = res.evaluable ? 'Live values from the current HLA analysis' + (res.signature ? ' (result ID ' + res.signature + ')' : '') + ' and the risk calculator.' : 'Mismatch and eplet counts appear after an HLA analysis; the risk figure follows the calculator\'s current inputs.';
         renderMolecular(res);
+        refreshBridge();
         $('hla-send-btn').disabled = !(A.evaluated.length);
         if (window.HLA3D) HLA3D.update(res);
     }
@@ -541,6 +542,93 @@
         return '<div class="hla-tile"><div class="hla-tile-value">' + value +
             '</div><div class="hla-tile-label">' + label + '</div>' +
             (sub ? '<div class="hla-tile-sub hla-na">' + sub + '</div>' : '') + '</div>';
+    }
+
+
+    /* ---------------- bridge to the external tools ---------------- */
+    function bridgeText(kind) {
+        if (!lastResult) return '';
+        const rec = (lastResult.recipient && lastResult.recipient.alleles) || {};
+        const don = (lastResult.donor && lastResult.donor.alleles) || {};
+        const flat = function (byLocus) {
+            const out = [];
+            Object.keys(byLocus).forEach(function (loc) {
+                (byLocus[loc] || []).forEach(function (a) { out.push(a.name || a); });
+            });
+            return out;
+        };
+        const r = flat(rec), d = flat(don);
+        if (kind === 'pirche') {
+            // PIRCHE-II expects one typing per line, recipient then donor
+            return 'Recipient\t' + r.join(',') + '\nDonor\t' + d.join(',');
+        }
+        if (kind === 'emma') {
+            // HLA-EMMA takes patient and donor typings as separate comma lists
+            return 'Patient: ' + r.join(', ') + '\nDonor: ' + d.join(', ');
+        }
+        return ['role\talleles', 'recipient\t' + r.join(','), 'donor\t' + d.join(',')].join('\n');
+    }
+
+    function refreshBridge() {
+        const pre = $('hla-bridge-preview');
+        if (pre) pre.textContent = bridgeText('tsv') || 'Enter a donor and recipient typing first.';
+        restoreExternal();
+    }
+
+    function copyBridge(kind) {
+        const text = bridgeText(kind);
+        if (!text) { flash('Enter a donor and recipient typing first.', 'warn'); return; }
+        const done = function () { flash('Copied in ' + (kind === 'tsv' ? 'TSV' : kind.toUpperCase()) + ' format'); };
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done);
+        else done();
+    }
+
+    function downloadBridge() {
+        const text = bridgeText('tsv');
+        if (!text) { flash('Enter a donor and recipient typing first.', 'warn'); return; }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+        a.download = 'hla_pair_' + (lastResult.signature || 'pair') + '.txt';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        flash('Pair file downloaded');
+    }
+
+    function externalKey() {
+        return lastResult && lastResult.signature ? 'ramrt-ext-' + lastResult.signature : null;
+    }
+
+    function saveExternal() {
+        const key = externalKey();
+        if (!key) return;
+        const rec = { pirche: $('hla-ext-pirche').value, emma: $('hla-ext-emma').value };
+        try { localStorage.setItem(key, JSON.stringify(rec)); } catch (e) { /* ignore */ }
+        renderExternalCompare(rec);
+    }
+
+    function restoreExternal() {
+        const key = externalKey();
+        let rec = { pirche: '', emma: '' };
+        if (key) {
+            try { rec = JSON.parse(localStorage.getItem(key)) || rec; } catch (e) { /* ignore */ }
+        }
+        if ($('hla-ext-pirche')) $('hla-ext-pirche').value = rec.pirche || '';
+        if ($('hla-ext-emma')) $('hla-ext-emma').value = rec.emma || '';
+        renderExternalCompare(rec);
+    }
+
+    function renderExternalCompare(rec) {
+        const box = $('hla-ext-compare');
+        if (!box) return;
+        const bits = [];
+        if (rec && rec.emma !== '' && rec.emma !== undefined && lastMolecular && lastMolecular.available) {
+            bits.push('HLA-EMMA reports <strong>' + esc(String(rec.emma)) +
+                '</strong> solvent-accessible mismatches; our equivalent measure gives <strong>' +
+                lastMolecular.totals.aaExposed + '</strong>. They use different accessibility data, so a gap is expected.');
+        }
+        if (rec && rec.pirche !== '' && rec.pirche !== undefined) {
+            bits.push('PIRCHE-II score <strong>' + esc(String(rec.pirche)) + '</strong> recorded for this pair.');
+        }
+        box.innerHTML = bits.join(' ');
     }
 
     /* ---------------- actions ---------------- */
@@ -663,6 +751,6 @@
             '<div class="matrix-container"><table class="table-matrix hla-table"><thead><tr><th>Result</th><th>Check</th><th>Detail</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></details>';
     }
 
-    window.HLAUI = { runBatch: runBatch, downloadBatchCsv: downloadBatchCsv, clearBatch: clearBatch, loadBatchExample: loadBatchExample, init: init, recalculate: recalculate, setMode: setMode, loadExample: loadExample, clearAll: clearAll, copyReport: copyReport, downloadCsv: downloadCsv, sendToNomogram: sendToNomogram, runSelfTest: runSelfTest, saveRecent: function () { saveRecent(false); }, restore: restore, last: function () { return lastResult; } };
+    window.HLAUI = { copyBridge: copyBridge, downloadBridge: downloadBridge, saveExternal: saveExternal, runBatch: runBatch, downloadBatchCsv: downloadBatchCsv, clearBatch: clearBatch, loadBatchExample: loadBatchExample, init: init, recalculate: recalculate, setMode: setMode, loadExample: loadExample, clearAll: clearAll, copyReport: copyReport, downloadCsv: downloadCsv, sendToNomogram: sendToNomogram, runSelfTest: runSelfTest, saveRecent: function () { saveRecent(false); }, restore: restore, last: function () { return lastResult; } };
     document.addEventListener('DOMContentLoaded', init);
 })();

@@ -148,3 +148,11 @@
 
 /* the hidden attribute must win over the display rules above (batch mode hides the single-pair controls) */
 .hla-toolbar[hidden], .hla-batch-summary[hidden], .hla-parsed[hidden] { display: none !important; }
+
+/* external-tool bridge: the formatted pair, ready to paste elsewhere */
+.hla-bridge-pre {
+    margin: 10px 0 0; padding: 10px 12px; border-radius: var(--radius-small);
+    background: rgba(1, 29, 28, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: var(--font-mono); font-size: 11.5px; line-height: 1.6; color: #bbc7c6;
+    white-space: pre-wrap; overflow-wrap: anywhere; max-height: 140px; overflow: auto;
+}

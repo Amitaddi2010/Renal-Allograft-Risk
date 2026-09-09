@@ -179,6 +179,31 @@ The HLA module also reports three measures the eplet tables cannot produce, beca
 
 **Deliberately not implemented.** PIRCHE-II requires a licensed peptide–MHC binding predictor, so it cannot be reproduced honestly here; the app links out instead. ElliPro and the IEDB B-cell tools predict epitopes on any protein from structure and are not donor–recipient measures at all. These values are our own implementations and are **not numerically interchangeable** with HLA-EMMA, PIRCHE-II or the Kosmoliaptsis tools — use them for ranking within a cohort, not as a substitute for those services.
 
+## 🔗 The external tools (PIRCHE-II, HLA-EMMA, IEDB)
+
+**Neither PIRCHE-II nor HLA-EMMA has an open-source implementation.** Both were checked against GitHub, PyPI and the literature: PIRCHE-II is proprietary to PIRCHE AG and depends on a licensed peptide–MHC binding predictor; HLA-EMMA is a licensed download requiring registration. Nothing from either is reproduced here. Two things are provided instead.
+
+### 1. A bridge to the real services
+
+The HLA module has a *Send this pair to PIRCHE-II, HLA-EMMA or IEDB* panel: it formats the entered typing the way each service expects (copy or download), links out, and gives you fields to paste the returned scores back. Pasted values are stored in the browser against that pair's result ID and shown beside our own measures — so the authoritative numbers and ours sit side by side, and nothing is invented.
+
+### 2. `tools/pirche_style.py` — an offline approximation
+
+```bash
+python tools/pirche_style.py --recipient "A*01:01,..." --donor "A*02:01,..."
+python tools/pirche_style.py --pairs scratch/hla_pairs.json --out scores.csv
+```
+
+Implements the *approach* of PIRCHE-II — donor-HLA 15-mers, presentation by the recipient's own DR molecules, self-peptide subtraction — using the open TEPITOPE pocket-profile matrices (Sturniolo et al. 1999) in place of NetMHCIIpan.
+
+**It is not PIRCHE-II and the numbers will not match published PIRCHE-II values.** Two approximations are stated in the script header: TEPITOPE matrices exist for only 10 DRB1 alleles and 1 DRB5, so a query allele is mapped to the reference it most resembles across the peptide-binding domain (TEPITOPEpan does this per pocket, which is finer); and only DR presentation is modelled. Use it as an internally consistent ranking within one cohort.
+
+On the thesis dataset (132 pairs): **120 evaluable, median 31, IQR 24–41, range 0–60**; 12 pairs have no mappable DR allele and are reported blank rather than zero, so they cannot be averaged in as if they scored nothing.
+
+### 3. Independent cross-check of the eplet reference
+
+`tools/crosscheck_hlar.py` compares our eplet tables against [hlaR](https://github.com/LarsenLab/hlaR) (Emory, MIT licence, on CRAN) — the only open-source implementation of HLAMatchmaker tables. Full write-up in [`validation/HLAR_CROSSCHECK.md`](validation/HLAR_CROSSCHECK.md). Headline: allele coverage is identical, ours is a superset (hlaR ships v3, we build from v3.1), and **51 eplet names used by v3-era tools do not exist in v3.1 at all** — including `130Q` and `160D`, which appear in the thesis's own Class II catalogue. That matters for how eplet names are reported in the thesis.
+
 ## 📂 Repository Structure
 
 ```
