@@ -43,12 +43,11 @@ JOBS = {
         (340, 50, 690, 488),
         (560, 700),
     ),
-    # Waiting on the source file. Save the portrait to Downloads as "Ritu Aggarwal.jpg",
-    # re-run this script, then swap the placeholder in index.html for:
-    #   <img class="about-photo" src="images/dr-ritu-aggarwal.jpg?v=20260912" ...>
+    # Supplied as a letterboxed screenshot: the photo sits at (48, 74)-(648, 599),
+    # and this 4:5 box is centred on the face inside that region.
     "dr-ritu-aggarwal.jpg": (
-        "Ritu Aggarwal.jpg",
-        None,                        # None = centre a 4:5 box automatically
+        os.path.join(os.path.expanduser("~"), "Pictures", "Screenshots", "Screenshot 2026-09-09 101909.png"),
+        (140, 74, 560, 599),
         (560, 700),
     ),
     "dr-siddhartha-sharma.jpg": (
@@ -60,7 +59,7 @@ JOBS = {
 
 
 def build(out_name, src_name, box, size):
-    src_path = os.path.join(SRC_DIR, src_name)
+    src_path = src_name if os.path.isabs(src_name) else os.path.join(SRC_DIR, src_name)
     if not os.path.exists(src_path):
         print("  MISSING source: %s" % src_path)
         return False

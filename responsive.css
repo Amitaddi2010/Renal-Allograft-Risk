@@ -268,16 +268,16 @@ body.motion-off *, body.motion-off *::before, body.motion-off *::after { animati
 @media (max-width: 640px) { .kbd-shortcut-strip { display: none !important; } }
 @media (pointer: coarse) { .kbd-shortcut-strip { display: none !important; } }
 
-@media (min-width: 961px) and (max-width: 1200px) {
-    .about-grid-team { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 1200px) {
+    .about-grid-team, .about-grid-lead { --about-cols: 3; }
+    .about-grid-team { --about-row: 3; }
 }
-
-/* ---- 18 · About section ---------------------------------------------------- */
-@media (max-width: 960px) {
-    .about-grid, .about-grid-team { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .about-grid-lead { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 900px) {
+    .about-grid-team, .about-grid-lead { --about-cols: 2; }
+    .about-grid-team { --about-row: 2; }
 }
 @media (max-width: 640px) {
-    .about-grid, .about-grid-lead, .about-grid-team { grid-template-columns: minmax(0, 1fr); }
+    .about-grid-team, .about-grid-lead { --about-cols: 1; --about-row: 1; }
     .about-card { max-width: 360px; margin: 0 auto; width: 100%; }
+}
 }
