@@ -260,63 +260,83 @@
     }
 
     /* ---------------- Interactive Live Risk Sandbox (Landing Page) ---------------- */
+    // Splits a total A+B+DR mismatch count into per-locus counts. The sandbox and the
+    // "transfer to full terminal" button must use the same split, or the demo and the
+    // calculator disagree about the same patient.
+    function splitMismatches(total) {
+        const dr = Math.min(2, Math.floor(total / 3) + (total % 3 > 0 ? 1 : 0));
+        const a = Math.min(2, Math.floor((total - dr) / 2));
+        const b = Math.min(2, total - dr - a);
+        return { a: a, b: b, dr: dr };
+    }
+
     function calcSandboxRisk() {
         const ageEl = $('sb-donor-age');
         const mmEl = $('sb-total-mm');
         const mcsEl = $('sb-mcs-t');
+        const mcsBEl = $('sb-mcs-b');
         const sourceEl = $('sb-donor-source');
         if (!ageEl || !mmEl || !mcsEl) return;
 
         const age = parseFloat(ageEl.value) || 46;
-        const totalMM = parseInt(mmEl.value, 10) || 3;
-        const mcsT = parseFloat(mcsEl.value) || 19;
-        const sourceVal = sourceEl ? sourceEl.value : '0'; // '0': living non-sibling, '1': living sibling, '2': deceased
+        const totalMM = parseInt(mmEl.value, 10) || 0;
+        const mcsT = parseFloat(mcsEl.value) || 0;
+        const mcsB = mcsBEl ? parseFloat(mcsBEl.value) : 48;
+        const sourceVal = sourceEl ? sourceEl.value : '0'; // 0 living non-sibling, 1 sibling, 2 deceased
 
-        // Standardize with cohort constants
-        const zAge = (age - 46.4086) / 9.5739;
-        const zTotalMM = (totalMM - 3.1716) / 1.7463;
-        const zMCST = (mcsT - 19.0308) / 42.8138;
+        // Use the locked model from app.js rather than a second copy of the numbers,
+        // so the sandbox cannot drift away from the calculator.
+        const C = (typeof COEFFS !== 'undefined') ? COEFFS : null;
+        const S = (typeof COHORT_STATS !== 'undefined') ? COHORT_STATS : null;
+        if (!C || !S) return;
+        const z = function (v, stat) { return (v - stat.mean) / stat.sd; };
 
-        // Proportional per-locus approximations for totalMM
-        const zMMA = ((totalMM * 0.3) - 0.9255) / 0.6241;
-        const zMMB = ((totalMM * 0.35) - 0.9842) / 0.6064;
-        const zMMDR = ((totalMM * 0.35) - 0.8330) / 0.6438;
+        const mm = splitMismatches(totalMM);
+        // DQB1 is not exposed as a slider; hold it at the calculator's own default so the
+        // two agree after a transfer, which leaves that field untouched.
+        const dqEl = $('mm-dqb1');
+        const mmDQB1 = dqEl ? (parseInt(dqEl.value, 10) || 0) : 1;
 
-        let logOdds = -2.1944 + (0.2773 * zAge) + (-1.6432 * zTotalMM) + (0.4497 * zMMA) + (0.5006 * zMMB) + (0.9327 * zMMDR) + (0.3542 * zMCST);
-        if (sourceVal === '1') logOdds += -0.8236; // sibling protective
-        else if (sourceVal === '2') logOdds += -0.6943; // deceased
+        let logOdds = C.intercept
+            + C.donorAge * z(age, S.donorAge)
+            + C.totalMM * z(totalMM, S.totalMM)
+            + C.mmA * z(mm.a, S.mmA)
+            + C.mmB * z(mm.b, S.mmB)
+            + C.mmDRB1 * z(mm.dr, S.mmDRB1)
+            + C.mmDQB1 * z(mmDQB1, S.mmDQB1)
+            + C.mcsT * z(mcsT, S.mcsT)
+            + C.mcsB * z(mcsB, S.mcsB);
 
-        // Standard basiliximab induction
-        logOdds += 0.6993;
+        if (sourceVal === '1') logOdds += C.siblingDonor;
+        else if (sourceVal === '2') logOdds += C.deceasedDonor;
+        logOdds += C.standardInduction;                 // standard basiliximab, the calculator's default
 
         const predProb = 1 / (1 + Math.exp(-logOdds));
 
-        let quintile = 1;
-        if (predProb <= 0.0834) quintile = 1;
-        else if (predProb <= 0.1316) quintile = 2;
-        else if (predProb <= 0.1816) quintile = 3;
-        else if (predProb <= 0.2924) quintile = 4;
-        else quintile = 5;
+        const bounds = (typeof QUINTILE_BOUNDS !== 'undefined') ? QUINTILE_BOUNDS : [0.0834, 0.1316, 0.1816, 0.2924];
+        let quintile = bounds.length + 1;
+        for (let i = 0; i < bounds.length; i++) { if (predProb <= bounds[i]) { quintile = i + 1; break; } }
 
-        // Update slider value labels
         const ageVal = $('sb-val-age'); if (ageVal) ageVal.textContent = age + ' yrs';
         const mmVal = $('sb-val-mm'); if (mmVal) mmVal.textContent = totalMM + ' mismatches';
         const mcsVal = $('sb-val-mcs'); if (mcsVal) mcsVal.textContent = mcsT + ' shift';
+        const mcsBVal = $('sb-val-mcs-b'); if (mcsBVal) mcsBVal.textContent = mcsB + ' shift';
 
         updateSvgGauge('sandbox-gauge', predProb, quintile);
     }
 
     function setSandboxPreset(name) {
         const presets = {
-            sibling: { age: 32, mm: 0, mcs: 10, source: '1' },
-            cohort: { age: 46, mm: 3, mcs: 19, source: '0' },
-            highrisk: { age: 58, mm: 5, mcs: 55, source: '2' }
+            sibling: { age: 32, mm: 0, mcs: 10, mcsB: 20, source: '1' },
+            cohort: { age: 46, mm: 3, mcs: 19, mcsB: 48, source: '0' },
+            highrisk: { age: 58, mm: 5, mcs: 55, mcsB: 180, source: '2' }
         };
         const p = presets[name];
         if (!p) return;
         const ageEl = $('sb-donor-age'); if (ageEl) ageEl.value = p.age;
         const mmEl = $('sb-total-mm'); if (mmEl) mmEl.value = p.mm;
         const mcsEl = $('sb-mcs-t'); if (mcsEl) mcsEl.value = p.mcs;
+        const mcsBEl = $('sb-mcs-b'); if (mcsBEl) mcsBEl.value = p.mcsB;
         const sourceEl = $('sb-donor-source'); if (sourceEl) sourceEl.value = p.source;
 
         // Active preset pill state
@@ -331,10 +351,12 @@
         const ageEl = $('sb-donor-age');
         const mmEl = $('sb-total-mm');
         const mcsEl = $('sb-mcs-t');
+        const mcsBEl = $('sb-mcs-b');
         const sourceEl = $('sb-donor-source');
 
         if (ageEl && $('donor-age')) $('donor-age').value = ageEl.value;
         if (mcsEl && $('mcs-t')) $('mcs-t').value = mcsEl.value;
+        if (mcsBEl && $('mcs-b')) $('mcs-b').value = mcsBEl.value;
 
         if (sourceEl) {
             const v = sourceEl.value;
@@ -343,13 +365,10 @@
         }
 
         if (mmEl) {
-            const total = parseInt(mmEl.value, 10) || 0;
-            const dr = Math.min(2, Math.floor(total / 3) + (total % 3 > 0 ? 1 : 0));
-            const a = Math.min(2, Math.floor((total - dr) / 2));
-            const b = Math.min(2, total - dr - a);
-            if ($('mm-a')) $('mm-a').value = a;
-            if ($('mm-b')) $('mm-b').value = b;
-            if ($('mm-drb1')) $('mm-drb1').value = dr;
+            const mm = splitMismatches(parseInt(mmEl.value, 10) || 0);
+            if ($('mm-a')) $('mm-a').value = mm.a;
+            if ($('mm-b')) $('mm-b').value = mm.b;
+            if ($('mm-drb1')) $('mm-drb1').value = mm.dr;
             if (typeof updateTotalMM === 'function') updateTotalMM();
         }
 

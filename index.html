@@ -234,6 +234,13 @@
                                 </div>
                                 <input type="range" id="sb-mcs-t" class="sandbox-range" min="0" max="150" value="19" oninput="Motion.calcSandboxRisk()">
                             </div>
+                            <div class="sandbox-slider-row">
+                                <div class="sandbox-slider-head">
+                                    <span>B-cell Crossmatch Shift (B-MCS)</span>
+                                    <span id="sb-val-mcs-b" class="sandbox-slider-val">48 shift</span>
+                                </div>
+                                <input type="range" id="sb-mcs-b" class="sandbox-range" min="0" max="300" value="48" oninput="Motion.calcSandboxRisk()">
+                            </div>
                             <div class="control-field" style="margin-top: 4px;">
                                 <label for="sb-donor-source" class="control-label" style="font-size: 12px;">Donor Relationship &amp; Type</label>
                                 <select id="sb-donor-source" class="control-select" onchange="Motion.calcSandboxRisk()">
@@ -1180,6 +1187,6 @@
     <script src="dashboard_home.js?v=20260908"></script>
     <script src="dna_hero.js?v=20260912b"></script>
     <script src="app.js?v=20260910c"></script>
-    <script src="motion.js?v=20260911"></script>
+    <script src="motion.js?v=20260912d"></script>
 </body>
 </html>
