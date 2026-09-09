@@ -21,22 +21,31 @@
     function remove(key, idx) { const list = read(key); list.splice(idx, 1); write(key, list); render(); }
     function clear(key) { write(key, []); render(); }
 
-    function shortTyping(t) { const s = String(t || '').replace(/\s+/g, ' ').trim(); return s.length > 60 ? s.slice(0, 57) + '…' : s; }
+    function oneLine(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
+    function attr(t) { return esc(oneLine(t)); }
 
     function renderHla() {
         const el = $('home-recent-hla');
         if (!el) return;
         const list = read(KEY_HLA);
         if (!list.length) { el.innerHTML = '<p class="hla-na">No saved analyses yet. In the HLA &amp; eplets tool, press <em>Save to recent</em> (sending to the risk calculator also saves).</p>'; return; }
-        el.innerHTML = '<div class="matrix-container"><table class="table-matrix recent-table"><thead><tr><th>Saved</th><th>Pair</th><th>Antigen MM</th><th>Eplets</th><th>Immunogenic</th><th></th></tr></thead><tbody>' +
+        el.innerHTML = '<ul class="recent-list">' +
             list.map(function (e, i) {
-                return '<tr><td class="recent-when">' + esc(when(e.ts)) + '<br><small class="ux-muted">ID ' + esc(e.id) + '</small></td>' +
-                    '<td class="recent-pair"><div><span class="ux-muted">R</span> ' + esc(shortTyping(e.recipient)) + '</div><div><span class="ux-muted">D</span> ' + esc(shortTyping(e.donor)) + '</div></td>' +
-                    '<td class="hla-num">' + esc(e.summary.antigenABDR === null ? '–' : e.summary.antigenABDR + ' / 6') + '</td>' +
-                    '<td class="hla-num">' + esc(e.summary.eplets === null ? '–' : e.summary.eplets) + '</td>' +
-                    '<td class="hla-num">' + esc(e.summary.immunogenic === null ? '–' : e.summary.immunogenic) + '</td>' +
-                    '<td class="recent-actions"><button type="button" class="ux-link-btn" onclick="DashboardHome.openHla(' + i + ')">Open</button> <button type="button" class="ux-link-btn ux-danger" onclick="DashboardHome.removeHla(' + i + ')">Delete</button></td></tr>';
-            }).join('') + '</tbody></table></div>' +
+                const mm = e.summary.antigenABDR === null ? '–' : e.summary.antigenABDR + '<small>/6</small>';
+                const ep = e.summary.eplets === null ? '–' : e.summary.eplets;
+                const ie = e.summary.immunogenic === null ? '–' : e.summary.immunogenic;
+                return '<li class="recent-item">' +
+                    '<div class="recent-head">' +
+                        '<span class="recent-when">' + esc(when(e.ts)) + ' <small class="ux-muted">ID ' + esc(e.id) + '</small></span>' +
+                        '<span class="recent-metrics"><b>' + mm + '</b> MM · <b>' + esc(String(ep)) + '</b> eplets · <b>' + esc(String(ie)) + '</b> immunogenic</span>' +
+                    '</div>' +
+                    '<div class="recent-typing"><span class="recent-role">R</span><code title="' + attr(e.recipient) + '">' + esc(oneLine(e.recipient)) + '</code></div>' +
+                    '<div class="recent-typing"><span class="recent-role">D</span><code title="' + attr(e.donor) + '">' + esc(oneLine(e.donor)) + '</code></div>' +
+                    '<div class="recent-actions">' +
+                        '<button type="button" class="ux-link-btn" onclick="DashboardHome.openHla(' + i + ')">Open</button>' +
+                        '<button type="button" class="ux-link-btn ux-danger" onclick="DashboardHome.removeHla(' + i + ')">Delete</button>' +
+                    '</div></li>';
+            }).join('') + '</ul>' +
             '<div class="ux-more-actions"><button type="button" onclick="DashboardHome.clearHla()">Clear list</button></div>';
     }
     function renderRisk() {
@@ -44,15 +53,26 @@
         if (!el) return;
         const list = read(KEY_RISK);
         if (!list.length) { el.innerHTML = '<p class="hla-na">No saved estimates yet. In the risk calculator, press <em>Save estimate</em>.</p>'; return; }
-        el.innerHTML = '<div class="matrix-container"><table class="table-matrix recent-table"><thead><tr><th>Saved</th><th>Inputs</th><th>Risk</th><th>Band</th><th></th></tr></thead><tbody>' +
+        el.innerHTML = '<ul class="recent-list">' +
             list.map(function (e, i) {
                 const inp = e.inputs;
-                const desc = 'Donor ' + inp.donorAge + ' y, ' + (inp.donorSource === '1' ? 'deceased' : 'living') + (inp.siblingDonor === '1' ? ', sibling' : '') + ', ' + (inp.standardInduction === '1' ? 'basiliximab' : 'ATG') +
-                    '; MM A' + inp.mmA + ' B' + inp.mmB + ' DR' + inp.mmDRB1 + ' DQ' + inp.mmDQB1 + '; T-MCS ' + inp.mcsT + ', B-MCS ' + inp.mcsB;
-                return '<tr><td class="recent-when">' + esc(when(e.ts)) + '</td><td class="recent-pair">' + esc(desc) + '</td>' +
-                    '<td class="hla-num"><strong>' + esc(e.risk) + '</strong></td><td>' + esc(e.band) + '</td>' +
-                    '<td class="recent-actions"><button type="button" class="ux-link-btn" onclick="DashboardHome.openRisk(' + i + ')">Open</button> <button type="button" class="ux-link-btn ux-danger" onclick="DashboardHome.removeRisk(' + i + ')">Delete</button></td></tr>';
-            }).join('') + '</tbody></table></div>' +
+                const desc = 'Donor ' + inp.donorAge + ' y, ' +
+                    (inp.donorSource === '1' ? 'deceased' : 'living') +
+                    (inp.siblingDonor === '1' ? ', sibling' : '') + ', ' +
+                    (inp.standardInduction === '1' ? 'basiliximab' : 'depleting') +
+                    '; MM A' + inp.mmA + ' B' + inp.mmB + ' DR' + inp.mmDRB1 + ' DQ' + inp.mmDQB1 +
+                    '; T-MCS ' + inp.mcsT + ', B-MCS ' + inp.mcsB;
+                return '<li class="recent-item">' +
+                    '<div class="recent-head">' +
+                        '<span class="recent-when">' + esc(when(e.ts)) + '</span>' +
+                        '<span class="recent-metrics"><b>' + esc(e.risk) + '</b> · ' + esc(e.band) + '</span>' +
+                    '</div>' +
+                    '<div class="recent-typing"><code title="' + attr(desc) + '">' + esc(oneLine(desc)) + '</code></div>' +
+                    '<div class="recent-actions">' +
+                        '<button type="button" class="ux-link-btn" onclick="DashboardHome.openRisk(' + i + ')">Open</button>' +
+                        '<button type="button" class="ux-link-btn ux-danger" onclick="DashboardHome.removeRisk(' + i + ')">Delete</button>' +
+                    '</div></li>';
+            }).join('') + '</ul>' +
             '<div class="ux-more-actions"><button type="button" onclick="DashboardHome.clearRisk()">Clear list</button></div>';
     }
     function renderStatus() {
