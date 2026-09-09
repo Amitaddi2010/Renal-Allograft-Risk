@@ -22,3 +22,8 @@ reference_sources/*.xlsb
 
 # Raw structure files (regenerate with tools/fetch_structures.py); the trimmed bundle hla_structures_data.js is tracked
 structures/
+
+# IMGT/HLA alignment downloads and the parsed intermediate (regenerate with
+# tools/fetch_imgt_alignments.py); the trimmed hla_molecular_data.js is tracked
+tools/imgt_cache/
+tools/imgt_alignments.json

@@ -163,6 +163,22 @@ Deep links: `#hla-batch` opens the empty batch tab, `#hla-batch-example` loads a
 
 All of it is suppressed by the operating system's reduced-motion setting and by the in-app motion toggle; values with markup (such as `3/6`) are never touched by the counter. Note that headless screenshots always render the reduced-motion state, so the animation has to be judged in a real browser.
 
+## 🧪 Molecular mismatch beyond eplets
+
+The HLA module also reports three measures the eplet tables cannot produce, because HLAMatchmaker carries eplets rather than residues. All are computed in the browser from IPD-IMGT/HLA protein alignments and published constants.
+
+| Measure | In the style of | What it counts |
+|---|---|---|
+| **Amino-acid mismatch** | HLA-EMMA (Kramer, *HLA* 2020) | Donor residues the recipient carries on neither allele, at polymorphic positions; the solvent-accessible subset is shown separately |
+| **Electrostatic / hydropathy mismatch** | Kosmoliaptsis scores | Summed charge and Kyte–Doolittle differences at those accessible positions, each donor residue compared with the chemically nearest recipient residue |
+| **HLA evolutionary divergence (HED)** | Pierini & Lenz 2018 | Grantham distance between *one person's own* two alleles across the peptide-binding domain — a genotype property, not a mismatch |
+
+**Data build.** `tools/fetch_imgt_alignments.py` downloads and parses the IMGT protein alignments (codon 1 is read from the file's own numbering line, so leader length is never assumed); `tools/build_molecular_reference.py` emits `hla_molecular_data.js` (0.4 MB): polymorphic positions, per-allele residues for all 2,588 alleles the eplet engine supports, per-position solvent accessibility, and the Grantham / hydropathy / charge constants. Accessibility uses Shrake–Rupley on a representative structure per locus with peptide, CD8 and TCR removed, normalised by Tien et al. 2013 maxima; a position counts as accessible at ≥ 25% relative ASA.
+
+**Validation** (in `node tools/test_engine.js`, 248 checks): Grantham distances reproduce the published matrix at ten spot values; residues reproduce textbook positions (DQB1 Asp57, Bw4/Bw6 at B-80, KIR C1/C2 at C-80, DRB1 86 G/V); the textbook single-residue pairs B\*44:02 vs B\*44:03 and A\*02:01 vs A\*02:06 yield exactly one mismatch, at positions 156 and 9 respectively.
+
+**Deliberately not implemented.** PIRCHE-II requires a licensed peptide–MHC binding predictor, so it cannot be reproduced honestly here; the app links out instead. ElliPro and the IEDB B-cell tools predict epitopes on any protein from structure and are not donor–recipient measures at all. These values are our own implementations and are **not numerically interchangeable** with HLA-EMMA, PIRCHE-II or the Kosmoliaptsis tools — use them for ranking within a cohort, not as a substitute for those services.
+
 ## 📂 Repository Structure
 
 ```

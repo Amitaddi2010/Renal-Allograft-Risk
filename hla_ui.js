@@ -168,6 +168,7 @@
 
     /* ---------------- batch mode: many patients against one donor, or pre-paired rows ---------------- */
     let lastBatch = null;
+    let lastMolecular = null;
     const BATCH_MAX = 200;
 
     function parseBatchLines(text, fallbackDonor) {
@@ -476,8 +477,70 @@
         if (se) se.textContent = E.overall.evaluated ? String(E.overall.total) : '–';
         if (si) si.textContent = E.overall.evaluated ? String(E.overall.ie) : '–';
         if (sn) sn.textContent = res.evaluable ? 'Live values from the current HLA analysis' + (res.signature ? ' (result ID ' + res.signature + ')' : '') + ' and the risk calculator.' : 'Mismatch and eplet counts appear after an HLA analysis; the risk figure follows the calculator\'s current inputs.';
+        renderMolecular(res);
         $('hla-send-btn').disabled = !(A.evaluated.length);
         if (window.HLA3D) HLA3D.update(res);
+    }
+
+
+    /* ---------------- molecular mismatch (amino acid, charge, hydropathy, divergence) ---------------- */
+    function renderMolecular(res) {
+        const block = $('hla-mol-block'), section = $('hla-mol-section');
+        if (!block || !section) return;
+        const engineOK = window.HLAMolecular && res && res.allele && res.allele.perLocus;
+        if (!engineOK) { block.hidden = true; section.hidden = true; return; }
+
+        let m;
+        try { m = HLAMolecular.analyze(res.allele.perLocus); }
+        catch (e) { block.hidden = true; section.hidden = true; return; }
+        lastMolecular = m;
+        if (!m.available || !m.evaluated.length) { block.hidden = true; section.hidden = true; return; }
+
+        block.hidden = false; section.hidden = false;
+        const t = m.totals;
+        $('hla-mol-tiles').innerHTML =
+            tile(t.aa, 'Amino-acid mismatches', 'Donor residues absent from both recipient alleles') +
+            tile(t.aaExposed, 'Solvent-accessible', 'The antibody-reachable subset (&ge; 25% relative ASA)') +
+            tile(t.electrostatic.toFixed(1), 'Electrostatic mismatch', 'Summed charge difference at accessible positions') +
+            tile(t.hydrophobic.toFixed(1), 'Hydropathy mismatch', 'Summed Kyte&ndash;Doolittle difference') +
+            tile(m.hed.recipientMean === null ? '&ndash;' : m.hed.recipientMean.toFixed(2),
+                 'Recipient HED', 'Divergence between the recipient&#39;s own alleles') +
+            tile(m.hed.donorMean === null ? '&ndash;' : m.hed.donorMean.toFixed(2),
+                 'Donor HED', 'Divergence between the donor&#39;s own alleles');
+
+        const rows = m.evaluated.map(function (locus) {
+            const p = m.perLocus[locus];
+            const hed = m.hed.recipient[locus];
+            return '<tr><td>' + esc(locus) + '</td><td class="hla-num">' + p.aa +
+                '</td><td class="hla-num">' + p.aaExposed +
+                '</td><td class="hla-num">' + p.electrostatic.toFixed(2) +
+                '</td><td class="hla-num">' + p.hydrophobic.toFixed(1) +
+                '</td><td class="hla-num">' + (hed ? hed.hed.toFixed(2) + (hed.homozygous ? ' <span class="hla-na">(hmz)</span>' : '') : '<span class="hla-na">n/a</span>') +
+                '</td></tr>';
+        }).join('');
+        $('hla-mol-locus-body').innerHTML = rows || '<tr><td colspan="6"><span class="hla-na">No locus evaluable</span></td></tr>';
+
+        const pos = [];
+        m.evaluated.forEach(function (locus) {
+            m.perLocus[locus].detail.forEach(function (d) {
+                if (d.exposed) pos.push({ locus: locus, d: d });
+            });
+        });
+        pos.sort(function (a, b) { return (b.d.grantham || 0) - (a.d.grantham || 0); });
+        $('hla-mol-pos-body').innerHTML = pos.length ? pos.map(function (r) {
+            return '<tr><td>' + esc(r.locus) + '</td><td class="hla-num">' + r.d.position +
+                '</td><td class="hla-num"><strong>' + esc(r.d.donor) + '</strong></td><td class="hla-num">' +
+                esc(r.d.recipient.join(' / ')) + '</td><td class="hla-num">' +
+                (r.d.grantham === null ? '&ndash;' : r.d.grantham) + '</td><td class="hla-num">' +
+                (r.d.exposure === null ? '&ndash;' : r.d.exposure.toFixed(2)) + '</td></tr>';
+        }).join('') : '<tr><td colspan="6"><span class="hla-na">No solvent-accessible mismatch</span></td></tr>';
+        $('hla-count-mol').textContent = String(pos.length);
+    }
+
+    function tile(value, label, sub) {
+        return '<div class="hla-tile"><div class="hla-tile-value">' + value +
+            '</div><div class="hla-tile-label">' + label + '</div>' +
+            (sub ? '<div class="hla-tile-sub hla-na">' + sub + '</div>' : '') + '</div>';
     }
 
     /* ---------------- actions ---------------- */

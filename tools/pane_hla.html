@@ -179,6 +179,40 @@
                         </div>
                     </details>
 
+                    <div id="hla-mol-block" hidden>
+                        <div class="group-kicker" style="margin-top:18px;">Molecular mismatch <span class="ux-muted">beyond eplets</span></div>
+                        <div class="hla-tiles-sm" id="hla-mol-tiles"></div>
+                    </div>
+
+                    <details class="ux-details" id="hla-mol-section" hidden>
+                        <summary>Molecular mismatch detail: amino acids, charge, hydropathy and divergence <span class="ux-count" id="hla-count-mol">0</span></summary>
+                        <div class="ux-details-body">
+                            <div class="matrix-container">
+                                <table class="table-matrix hla-table" id="hla-mol-locus-table">
+                                    <thead><tr><th>Locus</th><th>AA mismatch</th><th>Solvent-accessible</th><th>Electrostatic</th><th>Hydropathy</th><th>Recipient HED</th></tr></thead>
+                                    <tbody id="hla-mol-locus-body"></tbody>
+                                </table>
+                            </div>
+                            <div class="group-kicker" style="margin-top:16px;">Solvent-accessible mismatched positions</div>
+                            <div class="matrix-container">
+                                <table class="table-matrix hla-table" id="hla-mol-pos-table">
+                                    <thead><tr><th>Locus</th><th>Position</th><th>Donor</th><th>Recipient</th><th>Grantham</th><th>Rel. ASA</th></tr></thead>
+                                    <tbody id="hla-mol-pos-body"></tbody>
+                                </table>
+                            </div>
+                            <p class="hla-ref-info" style="margin-top:12px;">
+                                <strong>What these are.</strong> Our own implementations of three published methods, computed in this browser from IPD-IMGT/HLA protein alignments and published amino-acid constants:
+                                amino-acid mismatch in the style of <strong>HLA-EMMA</strong> (Kramer et al., HLA 2020) &mdash; donor residues the recipient carries on neither allele, with the solvent-accessible subset shown separately;
+                                <strong>electrostatic and hydropathy</strong> mismatch in the style of the Kosmoliaptsis scores; and <strong>HLA evolutionary divergence (HED)</strong>, the Grantham distance between a person&#39;s own two alleles across the peptide-binding domain (Pierini &amp; Lenz 2018).
+                                Solvent accessibility is computed with Shrake&ndash;Rupley on a representative structure per locus (HLA molecule only, peptide and co-receptors removed) and normalised by the Tien et al. 2013 maxima; a position counts as accessible at &ge; 25% relative ASA.
+                            </p>
+                            <p class="hla-ref-info">
+                                <strong>What these are not.</strong> They are not the output of HLA-EMMA, PIRCHE-II or the Kosmoliaptsis tools, and the values are <em>not</em> interchangeable with them &mdash; use them for ranking within this cohort, not as a substitute for those services.
+                                <strong>PIRCHE-II is deliberately absent:</strong> it needs a licensed peptide&ndash;MHC binding predictor, so it cannot be reproduced here honestly. HED describes one person&#39;s own genotype, not the donor&ndash;recipient relationship, and must not be read as a mismatch count.
+                            </p>
+                        </div>
+                    </details>
+
                     <details class="ux-details" id="hla3d-section">
                         <summary>3D view of mismatched eplets on the donor molecule <span class="ux-count" id="hla-count-3d">0</span></summary>
                         <div class="ux-details-body">

@@ -6,7 +6,7 @@
     <title>RAMRT // PGIMER Renal Allograft Risk Terminal</title>
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
     <link rel="stylesheet" href="styles.css?v=20260910b">
-    <link rel="stylesheet" href="hla_styles.css?v=20260910d">
+    <link rel="stylesheet" href="hla_styles.css?v=20260913">
     <link rel="stylesheet" href="ux_styles.css?v=20260912c">
     <link rel="stylesheet" href="dashboard_theme.css?v=20260912b">
     <link rel="stylesheet" id="theme-glass" href="dashboard_glass.css?v=20260910" disabled>
@@ -954,14 +954,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Preset Pairs -->
-                    <div class="scenario-preset-bar" style="margin-bottom: 16px;">
-                        <span class="scenario-preset-label">Preset Pairs:</span>
-                        <button type="button" class="preset-chip" onclick="Motion.loadHlaPresetPair(0)">🧬 Sibling Low-Mismatch</button>
-                        <button type="button" class="preset-chip" onclick="Motion.loadHlaPresetPair(1)">🧬 Heavy Molecular Load</button>
-                        <button type="button" class="preset-chip" onclick="Motion.loadHlaPresetPair(2)">🧬 Dominant Targets (163LG &amp; 130Q)</button>
-                    </div>
-
                     <div id="hla-mode-paste">
                         <div class="hla-two-col">
                             <div class="instrument-group">
@@ -1119,6 +1111,40 @@
                         </div>
                     </details>
 
+                    <div id="hla-mol-block" hidden>
+                        <div class="group-kicker" style="margin-top:18px;">Molecular mismatch <span class="ux-muted">beyond eplets</span></div>
+                        <div class="hla-tiles-sm" id="hla-mol-tiles"></div>
+                    </div>
+
+                    <details class="ux-details" id="hla-mol-section" hidden>
+                        <summary>Molecular mismatch detail: amino acids, charge, hydropathy and divergence <span class="ux-count" id="hla-count-mol">0</span></summary>
+                        <div class="ux-details-body">
+                            <div class="matrix-container">
+                                <table class="table-matrix hla-table" id="hla-mol-locus-table">
+                                    <thead><tr><th>Locus</th><th>AA mismatch</th><th>Solvent-accessible</th><th>Electrostatic</th><th>Hydropathy</th><th>Recipient HED</th></tr></thead>
+                                    <tbody id="hla-mol-locus-body"></tbody>
+                                </table>
+                            </div>
+                            <div class="group-kicker" style="margin-top:16px;">Solvent-accessible mismatched positions</div>
+                            <div class="matrix-container">
+                                <table class="table-matrix hla-table" id="hla-mol-pos-table">
+                                    <thead><tr><th>Locus</th><th>Position</th><th>Donor</th><th>Recipient</th><th>Grantham</th><th>Rel. ASA</th></tr></thead>
+                                    <tbody id="hla-mol-pos-body"></tbody>
+                                </table>
+                            </div>
+                            <p class="hla-ref-info" style="margin-top:12px;">
+                                <strong>What these are.</strong> Our own implementations of three published methods, computed in this browser from IPD-IMGT/HLA protein alignments and published amino-acid constants:
+                                amino-acid mismatch in the style of <strong>HLA-EMMA</strong> (Kramer et al., HLA 2020) &mdash; donor residues the recipient carries on neither allele, with the solvent-accessible subset shown separately;
+                                <strong>electrostatic and hydropathy</strong> mismatch in the style of the Kosmoliaptsis scores; and <strong>HLA evolutionary divergence (HED)</strong>, the Grantham distance between a person&#39;s own two alleles across the peptide-binding domain (Pierini &amp; Lenz 2018).
+                                Solvent accessibility is computed with Shrake&ndash;Rupley on a representative structure per locus (HLA molecule only, peptide and co-receptors removed) and normalised by the Tien et al. 2013 maxima; a position counts as accessible at &ge; 25% relative ASA.
+                            </p>
+                            <p class="hla-ref-info">
+                                <strong>What these are not.</strong> They are not the output of HLA-EMMA, PIRCHE-II or the Kosmoliaptsis tools, and the values are <em>not</em> interchangeable with them &mdash; use them for ranking within this cohort, not as a substitute for those services.
+                                <strong>PIRCHE-II is deliberately absent:</strong> it needs a licensed peptide&ndash;MHC binding predictor, so it cannot be reproduced here honestly. HED describes one person&#39;s own genotype, not the donor&ndash;recipient relationship, and must not be read as a mismatch count.
+                            </p>
+                        </div>
+                    </details>
+
                     <details class="ux-details" id="hla3d-section">
                         <summary>3D view of mismatched eplets on the donor molecule <span class="ux-count" id="hla-count-3d">0</span></summary>
                         <div class="ux-details-body">
@@ -1181,7 +1207,9 @@
     <script src="hla_engine.js?v=20260908"></script>
     <script src="hla_validation_vectors.js?v=20260908"></script>
     <script src="ux.js?v=20260910b"></script>
-    <script src="hla_ui.js?v=20260910d"></script>
+    <script src="hla_molecular_data.js?v=20260913"></script>
+    <script src="hla_molecular.js?v=20260913"></script>
+    <script src="hla_ui.js?v=20260913"></script>
     <script src="hla_eplet_residues.js?v=20260908d"></script>
     <script src="hla_3d.js?v=20260910b"></script>
     <script src="dashboard_home.js?v=20260908"></script>
