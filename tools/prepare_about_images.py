@@ -43,6 +43,14 @@ JOBS = {
         (340, 50, 690, 488),
         (560, 700),
     ),
+    # Waiting on the source file. Save the portrait to Downloads as "Ritu Aggarwal.jpg",
+    # re-run this script, then swap the placeholder in index.html for:
+    #   <img class="about-photo" src="images/dr-ritu-aggarwal.jpg?v=20260912" ...>
+    "dr-ritu-aggarwal.jpg": (
+        "Ritu Aggarwal.jpg",
+        None,                        # None = centre a 4:5 box automatically
+        (560, 700),
+    ),
     "dr-siddhartha-sharma.jpg": (
         "Dr Siddhartha Sharma.jpeg",
         (230, 28, 950, 928),         # 1179x1009 headshot: 4:5 box centred on the face
@@ -58,6 +66,15 @@ def build(out_name, src_name, box, size):
         return False
     with Image.open(src_path) as im:
         original = im.size
+        if box is None:                                   # centre the largest 4:5 box
+            w, h = im.size
+            target = size[0] / float(size[1])
+            if w / float(h) > target:                     # too wide: trim the sides
+                nw = int(h * target); left = (w - nw) // 2
+                box = (left, 0, left + nw, h)
+            else:                                         # too tall: trim top and bottom
+                nh = int(w / target); top = int((h - nh) * 0.35)   # bias upward, faces sit high
+                box = (0, top, w, top + nh)
         im = im.convert("RGB").crop(box)
         cropped = im.size
         im = im.resize(size, Image.LANCZOS)

@@ -331,7 +331,7 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 /* ---- About section: the people behind the research and the software ------------ */
 .about-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
 .about-grid-lead { display: grid; grid-template-columns: repeat(2, minmax(0, 360px)); justify-content: center; gap: 28px; margin-top: 16px; }
-.about-grid-team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 16px; }
+.about-grid-team { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 16px; }
 .about-group-kicker {
     font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ab-aqua);
     text-align: center; margin-top: 36px; font-weight: 500;
@@ -379,3 +379,13 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 }
 .about-link:hover { color: var(--ab-text); border-bottom-color: var(--ab-text); }
 .about-card .about-title { flex: 1 1 auto; }   /* keeps the link on the card's baseline */
+/* stands in for a portrait that has not been supplied yet: same frame, same
+   proportions, so the row does not change shape when the photo replaces it */
+.about-photo-placeholder {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, var(--ab-kelp) 0%, var(--ab-deep) 100%);
+}
+.about-photo-placeholder span {
+    font-family: var(--font-matter); font-size: 46px; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--ab-aqua); opacity: 0.55;
+}
