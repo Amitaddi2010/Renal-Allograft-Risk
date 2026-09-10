@@ -7,7 +7,7 @@
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
     <link rel="stylesheet" href="styles.css?v=20260910b">
     <link rel="stylesheet" href="hla_styles.css?v=20260913b">
-    <link rel="stylesheet" href="ux_styles.css?v=20260914b">
+    <link rel="stylesheet" href="ux_styles.css?v=20260915">
     <link rel="stylesheet" href="dashboard_theme.css?v=20260912b">
     <link rel="stylesheet" id="theme-glass" href="dashboard_glass.css?v=20260910" disabled>
     <link rel="stylesheet" href="motion.css?v=20260911b">
@@ -798,8 +798,72 @@
                                 <span class="control-caption">The most frequent antibody targets seen in the PGIMER cohort.</span>
                             </div>
                         </div>
+
+
                             </div>
                         </details>
+
+                        <div class="instrument-group">
+                            <div class="group-kicker">Clinical context and DSA <span class="ux-muted">recorded, not used by the model</span></div>
+                            <p class="ctx-note">These fields are saved with the estimate and included in the export, but they do <strong>not</strong> change the predicted risk. The nomogram coefficients are locked to the published ElasticNet model, which was fitted on donor age, HLA mismatch, induction, donor relationship and flow crossmatch only &mdash; adding a predictor to it would require refitting and revalidating the model. Continuous DSA MFI in particular did <strong>not</strong> discriminate rejection in this cohort (Objective 1c, ROC-AUC 0.363), so it is recorded rather than scored.</p>
+                            <div class="grid-cols-3">
+                                <div class="control-field">
+                                    <label for="ctx-recipient-age" class="control-label">Recipient age (years)</label>
+                                    <input type="number" id="ctx-recipient-age" class="control-input" min="0" max="90" placeholder="e.g. 34" oninput="updateContext()">
+                                    <span class="control-caption">Recorded only. Donor age above is the model term.</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="ctx-recipient-sex" class="control-label">Recipient sex</label>
+                                    <select id="ctx-recipient-sex" class="control-select" onchange="updateContext()">
+                                        <option value="">Not recorded</option><option value="M">Male</option><option value="F">Female</option>
+                                    </select>
+                                </div>
+                                <div class="control-field">
+                                    <label for="ctx-recipient-bg" class="control-label">Recipient blood group</label>
+                                    <select id="ctx-recipient-bg" class="control-select" onchange="updateContext()">
+                                        <option value="">Not recorded</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid-cols-3">
+                                <div class="control-field">
+                                    <label for="ctx-donor-sex" class="control-label">Donor sex</label>
+                                    <select id="ctx-donor-sex" class="control-select" onchange="updateContext()">
+                                        <option value="">Not recorded</option><option value="M">Male</option><option value="F">Female</option>
+                                    </select>
+                                </div>
+                                <div class="control-field">
+                                    <label for="ctx-donor-bg" class="control-label">Donor blood group</label>
+                                    <select id="ctx-donor-bg" class="control-select" onchange="updateContext()">
+                                        <option value="">Not recorded</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                                    </select>
+                                </div>
+                                <div class="control-field">
+                                    <label for="ctx-abo" class="control-label">ABO compatibility</label>
+                                    <input type="text" id="ctx-abo" class="control-input calculated" readonly placeholder="set both blood groups">
+                                    <span class="control-caption">Derived from the two blood groups.</span>
+                                </div>
+                            </div>
+                            <div class="grid-cols-3">
+                                <div class="control-field">
+                                    <label for="ctx-dsa-peak" class="control-label">Peak DSA MFI</label>
+                                    <input type="number" id="ctx-dsa-peak" class="control-input" min="0" step="1" placeholder="e.g. 1042" oninput="updateContext()">
+                                    <span class="control-caption">Highest single-antigen bead MFI against a donor allele.</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="ctx-dsa-count" class="control-label">DSA at or above 1000 MFI</label>
+                                    <input type="number" id="ctx-dsa-count" class="control-input" min="0" max="20" step="1" placeholder="e.g. 2" oninput="updateContext()">
+                                    <span class="control-caption">Number of donor specificities reaching the usual positivity threshold.</span>
+                                </div>
+                                <div class="control-field">
+                                    <label for="ctx-dsa-class" class="control-label">DSA class</label>
+                                    <select id="ctx-dsa-class" class="control-select" onchange="updateContext()">
+                                        <option value="">Not recorded</option><option value="none">No DSA detected</option><option value="I">Class I only</option><option value="II">Class II only</option><option value="I+II">Class I and II</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="ctx-summary" class="ctx-summary" hidden></div>
+                        </div>
                         <div class="action-cluster">
                             <button type="button" class="btn-aurora" onclick="calculateRisk()" id="calculate-btn"><span>Calculate risk</span><span>↗</span></button>
                             <button type="button" class="btn-ghost" onclick="saveEstimate()">Save estimate</button>
@@ -1252,7 +1316,7 @@
     <script src="hla_3d.js?v=20260910b"></script>
     <script src="dashboard_home.js?v=20260914"></script>
     <script src="dna_hero.js?v=20260912b"></script>
-    <script src="app.js?v=20260910c"></script>
+    <script src="app.js?v=20260915"></script>
     <script src="motion.js?v=20260912d"></script>
 </body>
 </html>

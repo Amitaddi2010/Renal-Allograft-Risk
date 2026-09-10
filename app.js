@@ -656,7 +656,56 @@ function readRiskInputs() {
     const v = function (id) { const e = document.getElementById(id); return e ? e.value : null; };
     return { donorAge: v('donor-age'), donorSource: v('donor-source'), siblingDonor: v('sibling-donor'), standardInduction: v('standard-induction'),
              mmA: v('mm-a'), mmB: v('mm-b'), mmDRB1: v('mm-drb1'), mmDQB1: v('mm-dqb1'), mcsT: v('mcs-t'), mcsB: v('mcs-b'),
-             epletClass1: v('eplet-class1'), epletClass2: v('eplet-class2'), dominantEplet: v('dominant-eplet') };
+             epletClass1: v('eplet-class1'), epletClass2: v('eplet-class2'), dominantEplet: v('dominant-eplet'),
+             // recorded context: saved and exported, deliberately not model terms
+             context: readContext() };
+}
+
+/* ---------------- clinical context and DSA -------------------------------
+   These are captured for the record and for export. They are NOT fed into the
+   locked ElasticNet model: its coefficients were fitted on a fixed feature set,
+   and continuous DSA MFI did not discriminate rejection in this cohort
+   (Objective 1c, ROC-AUC 0.363 [0.207-0.518]). Scoring them here would invent a
+   model that was never validated. */
+function readContext() {
+    const v = function (id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+    return {
+        recipientAge: v('ctx-recipient-age'), recipientSex: v('ctx-recipient-sex'),
+        recipientBloodGroup: v('ctx-recipient-bg'), donorSex: v('ctx-donor-sex'),
+        donorBloodGroup: v('ctx-donor-bg'), dsaPeakMfi: v('ctx-dsa-peak'),
+        dsaCount: v('ctx-dsa-count'), dsaClass: v('ctx-dsa-class')
+    };
+}
+
+// ABO compatibility: which recipient groups can receive from a donor group
+const ABO_CAN_RECEIVE = { 'O': ['O'], 'A': ['O', 'A'], 'B': ['O', 'B'], 'AB': ['O', 'A', 'B', 'AB'] };
+function aboOf(group) { return String(group || '').replace(/[+-]/g, '').toUpperCase(); }
+
+function updateContext() {
+    const c = readContext();
+    const abo = document.getElementById('ctx-abo');
+    if (abo) {
+        const r = aboOf(c.recipientBloodGroup), d = aboOf(c.donorBloodGroup);
+        if (!r || !d) abo.value = '';
+        else abo.value = (ABO_CAN_RECEIVE[r] || []).indexOf(d) !== -1
+            ? 'Compatible (' + d + ' \u2192 ' + r + ')'
+            : 'Incompatible (' + d + ' \u2192 ' + r + ') \u2014 ABO-incompatible protocol';
+    }
+    const box = document.getElementById('ctx-summary');
+    if (!box) return;
+    const bits = [];
+    if (c.recipientAge) bits.push('recipient ' + c.recipientAge + ' y');
+    if (c.dsaPeakMfi) {
+        const m = parseFloat(c.dsaPeakMfi);
+        bits.push('peak DSA MFI ' + c.dsaPeakMfi + (isNaN(m) ? '' : m >= 1000 ? ' (above the usual 1000 threshold)' : ' (below the usual 1000 threshold)'));
+    }
+    if (c.dsaCount) bits.push(c.dsaCount + ' specificity(ies) at or above 1000');
+    if (c.dsaClass && c.dsaClass !== 'none') bits.push('class ' + c.dsaClass + ' DSA');
+    else if (c.dsaClass === 'none') bits.push('no DSA detected');
+    box.hidden = !bits.length;
+    box.innerHTML = bits.length
+        ? '<strong>Recorded:</strong> ' + bits.join(' \u00b7 ') + '. <span class="ux-muted">Not included in the predicted risk above.</span>'
+        : '';
 }
 function saveEstimate() {
     if (!window.DashboardHome) return;
@@ -670,6 +719,12 @@ function restoreEstimate(entry) {
     const i = entry.inputs || {};
     set('donor-age', i.donorAge); set('donor-source', i.donorSource); set('sibling-donor', i.siblingDonor); set('standard-induction', i.standardInduction);
     set('mm-a', i.mmA); set('mm-b', i.mmB); set('mm-drb1', i.mmDRB1); set('mm-dqb1', i.mmDQB1); set('mcs-t', i.mcsT); set('mcs-b', i.mcsB);
+    const c = i.context || {};
+    set('ctx-recipient-age', c.recipientAge); set('ctx-recipient-sex', c.recipientSex);
+    set('ctx-recipient-bg', c.recipientBloodGroup); set('ctx-donor-sex', c.donorSex);
+    set('ctx-donor-bg', c.donorBloodGroup); set('ctx-dsa-peak', c.dsaPeakMfi);
+    set('ctx-dsa-count', c.dsaCount); set('ctx-dsa-class', c.dsaClass);
+    if (typeof updateContext === 'function') updateContext();
     set('eplet-class1', i.epletClass1); set('eplet-class2', i.epletClass2); set('dominant-eplet', i.dominantEplet);
     updateTotalMM(); updateTotalEplets(); calculateRisk();
 }

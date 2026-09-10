@@ -261,3 +261,13 @@ body.is-landing { padding-left: 0 !important; }
     .ux-modal-card { padding: 18px; }
     .quintile-table td, .quintile-table th { font-size: 12px; padding-left: 8px; padding-right: 8px; }
 }
+
+/* Recorded clinical context: visibly separate from the model inputs, so nobody
+   reads these as things that move the predicted risk. */
+.ctx-note { font-size: 12.5px; color: #bbc7c6; line-height: 1.55; margin: -6px 0 14px; }
+.ctx-summary {
+    margin-top: 12px; padding: 10px 14px; border-radius: var(--radius-small);
+    background: rgba(1, 29, 28, 0.7); border-left: 3px solid #cbfffc;
+    font-size: 12.5px; line-height: 1.5; color: #bbc7c6;
+}
+.ctx-summary[hidden] { display: none !important; }
