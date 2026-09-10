@@ -651,13 +651,19 @@
     const REF_KEY = 'ramrt-eplet-reference';
     let inferPreference = null;   // the user's inference choice, remembered across a v3 detour
 
+    // v3 (hlaR, MIT) is the default: its licence permits commercial use, and it
+    // carries the eplet names the thesis registers actually use. v3.1 remains
+    // available for anyone reproducing the numbers this project validated
+    // against, and is what the self-test always checks.
     function storedReferenceVersion() {
-        try { return localStorage.getItem(REF_KEY) === 'v3' ? 'v3' : 'v31'; }
-        catch (e) { return 'v31'; }
+        try {
+            const v = localStorage.getItem(REF_KEY);
+            return v === 'v31' ? 'v31' : 'v3';
+        } catch (e) { return 'v3'; }
     }
 
     function applyReferenceVersion(version) {
-        const wantV3 = version === 'v3' && window.HLA_REFERENCE_V3;
+        const wantV3 = version === 'v3' && !!window.HLA_REFERENCE_V3;
         const ref = wantV3 ? window.HLA_REFERENCE_V3 : window.HLA_REF;
         if (!ref) return false;
         HLAEngine.setReference(ref);
@@ -812,12 +818,24 @@
     function runSelfTest() {
         const el = $('hla-selftest');
         if (!window.HLA_VALIDATION) { el.innerHTML = '<div class="hla-warn hla-warn-error">Validation vectors (hla_validation_vectors.js) not loaded.</div>'; return; }
-        const st = HLAEngine.selfTest(window.HLA_VALIDATION.vectors);
+        // The validation vectors were computed from the v3.1 workbooks, so the
+        // self-test is run against v3.1 whatever the user currently has selected,
+        // then the active reference is restored. Running it against v3 would fail
+        // every check for a reason that has nothing to do with correctness.
+        const active = storedReferenceVersion();
+        let switched = false;
+        if (active !== 'v31' && window.HLA_REF) {
+            HLAEngine.setReference(window.HLA_REF);
+            switched = true;
+        }
+        let st;
+        try { st = HLAEngine.selfTest(window.HLA_VALIDATION.vectors); }
+        finally { if (switched) applyReferenceVersion(active); }
         const rows = st.results.map(function (r) {
             return '<tr class="' + (r.ok ? 'hla-pass' : 'hla-fail') + '"><td>' + (r.ok ? 'PASS' : 'FAIL') + '</td><td>' + esc(r.test) + '</td><td>' + esc(r.detail) + '</td></tr>';
         }).join('');
         el.innerHTML = '<details class="ux-details" open><summary>Self-test results <span class="ux-count">' + st.pass + ' passed · ' + st.fail + ' failed</span></summary><div class="ux-details-body">' +
-            '<div class="hla-selftest-summary ' + (st.fail ? 'hla-fail' : 'hla-pass') + '">' + st.results.length + ' checks: per-allele eplet counts against the workbooks, antigen-level mismatch against thesis records, and repeat-run reproducibility.</div>' +
+            '<div class="hla-selftest-summary ' + (st.fail ? 'hla-fail' : 'hla-pass') + '">' + st.results.length + ' checks against the HLAMatchmaker 3.1 workbooks' + (active !== 'v31' ? ' (run on v3.1 regardless of the reference selected above)' : '') + ', antigen-level mismatch against thesis records, and repeat-run reproducibility.</div>' +
             '<div class="matrix-container"><table class="table-matrix hla-table"><thead><tr><th>Result</th><th>Check</th><th>Detail</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></details>';
     }
 

@@ -206,11 +206,11 @@ On the thesis dataset (132 pairs): **120 evaluable, median 31, IQR 24–41, rang
 
 ## ⚖️ Eplet reference version and licensing
 
-The HLA module can run on either of two eplet references, chosen in **Options → Eplet reference version**. The choice is remembered per browser.
+The HLA module can run on either of two eplet references, chosen in **Options → Eplet reference version**. The choice is remembered per browser. **v3 (hlaR, MIT) is the default**, because its licence permits commercial use and it carries the eplet names the thesis registers actually use; v3.1 remains available for reproducing the numbers this project validated against. The in-app self-test always runs against v3.1 whichever reference is selected, since the validation vectors were computed from those workbooks.
 
 | | HLAMatchmaker **v3.1** (default) | HLAMatchmaker **v3** (hlaR) |
 |---|---|---|
-| Source | `ABC_/DRDQDP_Antibody_Analysis_3.1.xlsb` | [hlaR](https://github.com/LarsenLab/hlaR) 1.0.0, Emory (CRAN) |
+| Source | `ABC_/DRDQDP_Antibody_Analysis_3.1.xlsb` (not default) | [hlaR](https://github.com/LarsenLab/hlaR) 1.0.0, Emory (CRAN) |
 | Licence | **None stated** | **MIT** |
 | Commercial use | Not established — see below | **Permitted with attribution** |
 | Distinct eplets | 297 / 256 / 38 (I / IIβ / IIα) | 141 / 168 / 33 |
