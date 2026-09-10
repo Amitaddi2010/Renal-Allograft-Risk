@@ -144,6 +144,7 @@ def main():
         c_bg = field(headers, 'Blood Gp')
         c_rel = field(headers, 'Relation')
         c_lab = field(headers, 'Lab No', 'Lab Id')
+        c_cr = field(headers, 'CR No', 'CR NO', 'CR No.')      # patient CR: the registry key
         # the donor block repeats Age/Sex/Blood Gp after the donor name
         c_dname = field(headers, 'Donor Name')
         def after(idx, *names):
@@ -156,6 +157,7 @@ def main():
                 if h in [n.lower() for n in names]:
                     return i
             return None
+        c_dcr = after(c_dname, 'CR No', 'CR NO', 'CR No.')
         c_dage = after(c_dname, 'Age')
         c_dsex = after(c_dname, 'Sex')
         c_dbg = after(c_dname, 'Blood Gp')
@@ -171,10 +173,12 @@ def main():
                 'year': sheet,
                 'lab_no': clean(r[c_lab]) if c_lab is not None and c_lab < len(r) else '',
                 'patient': name,
+                'pt_cr': clean(r[c_cr]) if c_cr is not None and c_cr < len(r) else '',
                 'pt_age': clean(r[c_age]) if c_age is not None and c_age < len(r) else '',
                 'pt_sex': clean(r[c_sex]) if c_sex is not None and c_sex < len(r) else '',
                 'pt_blood_group': clean(r[c_bg]) if c_bg is not None and c_bg < len(r) else '',
                 'donor': clean(r[c_dname]) if c_dname is not None and c_dname < len(r) else '',
+                'dn_cr': clean(r[c_dcr]) if c_dcr is not None and c_dcr < len(r) else '',
                 'dn_age': clean(r[c_dage]) if c_dage is not None and c_dage < len(r) else '',
                 'dn_sex': clean(r[c_dsex]) if c_dsex is not None and c_dsex < len(r) else '',
                 'dn_blood_group': clean(r[c_dbg]) if c_dbg is not None and c_dbg < len(r) else '',
@@ -210,7 +214,7 @@ def main():
     if not rows:
         sys.exit('no rows extracted')
 
-    cols = ['year', 'lab_no', 'patient', 'pt_age', 'pt_sex', 'pt_blood_group',
+    cols = ['year', 'lab_no', 'patient', 'pt_cr', 'dn_cr', 'pt_age', 'pt_sex', 'pt_blood_group',
             'donor', 'dn_age', 'dn_sex', 'dn_blood_group', 'relation',
             'n_specificities', 'n_with_mfi', 'peak_mfi', 'sum_mfi', 'n_mfi_ge_threshold']
     for locus in LOCI:
