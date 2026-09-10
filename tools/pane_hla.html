@@ -94,6 +94,14 @@
                             <summary>Options <span class="ux-muted" id="hla-opt-summary"></span></summary>
                             <div class="ux-details-body">
                                 <div class="control-field">
+                                    <label for="hla-refver" class="control-label">Eplet reference version</label>
+                                    <select id="hla-refver" class="control-select" onchange="HLAUI.setReferenceVersion(this.value)">
+                                        <option value="v31">HLAMatchmaker v3.1 &mdash; research use</option>
+                                        <option value="v3">HLAMatchmaker v3 (hlaR, MIT) &mdash; commercial use permitted</option>
+                                    </select>
+                                    <span class="control-caption" id="hla-refver-note"></span>
+                                </div>
+                                <div class="control-field">
                                     <label for="hla-infer" class="control-label">Fill in DRB3/4/5 and DQA1 when not typed</label>
                                     <label class="hla-check"><input type="checkbox" id="hla-infer" checked> Use the workbook linkage tables</label>
                                     <span class="control-caption">Inferred alleles are labelled everywhere; type the real alleles to override them.</span>

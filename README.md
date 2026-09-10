@@ -204,6 +204,25 @@ On the thesis dataset (132 pairs): **120 evaluable, median 31, IQR 24–41, rang
 
 `tools/crosscheck_hlar.py` compares our eplet tables against [hlaR](https://github.com/LarsenLab/hlaR) (Emory, MIT licence, on CRAN) — the only open-source implementation of HLAMatchmaker tables. Full write-up in [`validation/HLAR_CROSSCHECK.md`](validation/HLAR_CROSSCHECK.md). Headline: allele coverage is identical, ours is a superset (hlaR ships v3, we build from v3.1), and **51 eplet names used by v3-era tools do not exist in v3.1 at all** — including `130Q` and `160D`, which appear in the thesis's own Class II catalogue. That matters for how eplet names are reported in the thesis.
 
+## ⚖️ Eplet reference version and licensing
+
+The HLA module can run on either of two eplet references, chosen in **Options → Eplet reference version**. The choice is remembered per browser.
+
+| | HLAMatchmaker **v3.1** (default) | HLAMatchmaker **v3** (hlaR) |
+|---|---|---|
+| Source | `ABC_/DRDQDP_Antibody_Analysis_3.1.xlsb` | [hlaR](https://github.com/LarsenLab/hlaR) 1.0.0, Emory (CRAN) |
+| Licence | **None stated** | **MIT** |
+| Commercial use | Not established — see below | **Permitted with attribution** |
+| Distinct eplets | 297 / 256 / 38 (I / IIβ / IIα) | 141 / 168 / 33 |
+| Linked-allele inference | Yes | No — linkage tables come from the unlicensed workbooks and are omitted |
+| Thesis-era names (`130Q`, `160D`, `96R`, `84G`, `50Q`, `57E`) | absent | **present** |
+
+**Why the second option exists.** The v3.1 workbooks carry no licence, no copyright notice and no terms of use anywhere in the files. Their metadata shows Rene Duquesnoy / UPMC, last modified mid-2020, and **both distribution sites are now expired parked domains** (`hlamatchmaker.net` is for sale on HugeDomains, `epitopes.net` on DropCatch). With no grant of rights published anywhere, default copyright applies: commercial use cannot be inferred from the fact that it was once a free academic download. For commercial deployment, obtain written permission from UPMC, or run on the MIT-licensed v3 tables.
+
+**The two are not interchangeable.** On the built-in example pair, v3.1 reports 30 mismatched eplets and v3 reports 16. Switching version changes every eplet number in the app. See [`validation/HLAR_CROSSCHECK.md`](validation/HLAR_CROSSCHECK.md) for the full comparison. Note the useful side effect: the thesis registers use v3-era eplet names, so **v3 mode reproduces the thesis vocabulary that v3.1 cannot**.
+
+Attribution required by MIT is emitted into `hla_reference_v3.js` and shown in the interface when v3 is selected. Build with `python tools/build_hlar_reference.py <dir with hlaR ref CSVs>`.
+
 ## 📂 Repository Structure
 
 ```

@@ -6,7 +6,7 @@
     <title>RAMRT // PGIMER Renal Allograft Risk Terminal</title>
     <meta name="description" content="Precision renal allograft risk stratification terminal integrating non-HLA checkpoint genetics, molecular HLA eplets, and flow cytometric crossmatching — PGIMER Immunopathology.">
     <link rel="stylesheet" href="styles.css?v=20260910b">
-    <link rel="stylesheet" href="hla_styles.css?v=20260913b">
+    <link rel="stylesheet" href="hla_styles.css?v=20260916">
     <link rel="stylesheet" href="ux_styles.css?v=20260915">
     <link rel="stylesheet" href="dashboard_theme.css?v=20260912b">
     <link rel="stylesheet" id="theme-glass" href="dashboard_glass.css?v=20260910" disabled>
@@ -1090,6 +1090,14 @@
                             <summary>Options <span class="ux-muted" id="hla-opt-summary"></span></summary>
                             <div class="ux-details-body">
                                 <div class="control-field">
+                                    <label for="hla-refver" class="control-label">Eplet reference version</label>
+                                    <select id="hla-refver" class="control-select" onchange="HLAUI.setReferenceVersion(this.value)">
+                                        <option value="v31">HLAMatchmaker v3.1 &mdash; research use</option>
+                                        <option value="v3">HLAMatchmaker v3 (hlaR, MIT) &mdash; commercial use permitted</option>
+                                    </select>
+                                    <span class="control-caption" id="hla-refver-note"></span>
+                                </div>
+                                <div class="control-field">
                                     <label for="hla-infer" class="control-label">Fill in DRB3/4/5 and DQA1 when not typed</label>
                                     <label class="hla-check"><input type="checkbox" id="hla-infer" checked> Use the workbook linkage tables</label>
                                     <span class="control-caption">Inferred alleles are labelled everywhere; type the real alleles to override them.</span>
@@ -1309,9 +1317,10 @@
     <script src="hla_engine.js?v=20260908"></script>
     <script src="hla_validation_vectors.js?v=20260908"></script>
     <script src="ux.js?v=20260910b"></script>
+    <script src="hla_reference_v3.js?v=20260916"></script>
     <script src="hla_molecular_data.js?v=20260913"></script>
     <script src="hla_molecular.js?v=20260913"></script>
-    <script src="hla_ui.js?v=20260913b"></script>
+    <script src="hla_ui.js?v=20260916b"></script>
     <script src="hla_eplet_residues.js?v=20260908d"></script>
     <script src="hla_3d.js?v=20260910b"></script>
     <script src="dashboard_home.js?v=20260914"></script>

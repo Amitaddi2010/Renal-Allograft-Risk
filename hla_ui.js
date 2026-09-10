@@ -41,7 +41,7 @@
             setStatus('err', 'The reference database (hla_reference_data.js) or the engine (hla_engine.js) did not load.');
             return;
         }
-        HLAEngine.setReference(window.HLA_REF);
+        applyReferenceVersion(storedReferenceVersion());
         buildGrid();
         buildDatalists();
         const m = window.HLA_REF.meta;
@@ -631,6 +631,76 @@
         box.innerHTML = bits.join(' ');
     }
 
+
+    /* ---------------- eplet reference version --------------------------------
+       Two references ship with the app:
+
+         v3.1  parsed from the HLAMatchmaker 3.1 workbooks. More eplets, and the
+               version everything in this project was validated against - but the
+               workbooks carry no licence, no copyright notice and no terms, and
+               both distribution sites are now expired. Commercial use cannot be
+               assumed from them.
+         v3    the same tables as published by hlaR (Emory) under the MIT licence,
+               which does permit commercial use with attribution. Fewer eplets,
+               no DRB3/4/5 or DQA1 inference (those linkage tables come from the
+               unlicensed workbooks and are deliberately omitted), and it carries
+               the eplet names the thesis registers actually use, such as 130Q
+               and 160D, which v3.1 retired.
+
+       The two are not interchangeable - see validation/HLAR_CROSSCHECK.md. */
+    const REF_KEY = 'ramrt-eplet-reference';
+    let inferPreference = null;   // the user's inference choice, remembered across a v3 detour
+
+    function storedReferenceVersion() {
+        try { return localStorage.getItem(REF_KEY) === 'v3' ? 'v3' : 'v31'; }
+        catch (e) { return 'v31'; }
+    }
+
+    function applyReferenceVersion(version) {
+        const wantV3 = version === 'v3' && window.HLA_REFERENCE_V3;
+        const ref = wantV3 ? window.HLA_REFERENCE_V3 : window.HLA_REF;
+        if (!ref) return false;
+        HLAEngine.setReference(ref);
+        const sel = $('hla-refver');
+        if (sel) sel.value = wantV3 ? 'v3' : 'v31';
+        const note = $('hla-refver-note');
+        if (note) {
+            note.innerHTML = wantV3
+                ? 'MIT licence &mdash; Copyright &copy; 2020 Christian P. Larsen (hlaR, Emory). '
+                  + 'Commercial use permitted with attribution. Linked-allele inference is unavailable in this mode.'
+                : 'The 3.1 workbooks carry no licence or terms of use. Fine for research; '
+                  + 'do not assume commercial rights without written permission from UPMC.';
+        }
+        // v3 has no linkage tables, so inference is switched off there - but the
+        // user's own preference must survive a round trip back to v3.1, or the
+        // eplet count silently changes for a reason that has nothing to do with
+        // the reference version.
+        const inf = $('hla-infer');
+        if (inf) {
+            if (wantV3) {
+                if (!inf.disabled) inferPreference = inf.checked;
+                inf.checked = false;
+                inf.disabled = true;
+            } else {
+                inf.disabled = false;
+                if (inferPreference !== null) inf.checked = inferPreference;
+            }
+        }
+        return true;
+    }
+
+    function setReferenceVersion(version) {
+        if (!applyReferenceVersion(version)) {
+            flash('That reference is not loaded.', 'warn');
+            return;
+        }
+        try { localStorage.setItem(REF_KEY, version === 'v3' ? 'v3' : 'v31'); } catch (e) { /* ignore */ }
+        recalculate();
+        flash(version === 'v3'
+            ? 'Switched to HLAMatchmaker v3 (hlaR, MIT licence). Counts differ from v3.1.'
+            : 'Switched to HLAMatchmaker v3.1 (research use).');
+    }
+
     /* ---------------- actions ---------------- */
     function loadExample() {
         $('hla-recipient').value = EXAMPLE.recipient;
@@ -751,6 +821,6 @@
             '<div class="matrix-container"><table class="table-matrix hla-table"><thead><tr><th>Result</th><th>Check</th><th>Detail</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></details>';
     }
 
-    window.HLAUI = { copyBridge: copyBridge, downloadBridge: downloadBridge, saveExternal: saveExternal, runBatch: runBatch, downloadBatchCsv: downloadBatchCsv, clearBatch: clearBatch, loadBatchExample: loadBatchExample, init: init, recalculate: recalculate, setMode: setMode, loadExample: loadExample, clearAll: clearAll, copyReport: copyReport, downloadCsv: downloadCsv, sendToNomogram: sendToNomogram, runSelfTest: runSelfTest, saveRecent: function () { saveRecent(false); }, restore: restore, last: function () { return lastResult; } };
+    window.HLAUI = { setReferenceVersion: setReferenceVersion, copyBridge: copyBridge, downloadBridge: downloadBridge, saveExternal: saveExternal, runBatch: runBatch, downloadBatchCsv: downloadBatchCsv, clearBatch: clearBatch, loadBatchExample: loadBatchExample, init: init, recalculate: recalculate, setMode: setMode, loadExample: loadExample, clearAll: clearAll, copyReport: copyReport, downloadCsv: downloadCsv, sendToNomogram: sendToNomogram, runSelfTest: runSelfTest, saveRecent: function () { saveRecent(false); }, restore: restore, last: function () { return lastResult; } };
     document.addEventListener('DOMContentLoaded', init);
 })();
