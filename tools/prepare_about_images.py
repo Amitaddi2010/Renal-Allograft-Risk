@@ -50,6 +50,13 @@ JOBS = {
         (140, 74, 560, 599),
         (560, 700),
     ),
+    # Head-and-shoulders to match the other cards; the box stops well above the
+    # bottom-right corner, so the watermark in the supplied file is cropped out.
+    "dr-lekha-rani.jpg": (
+        "unnamed.jpg",
+        (196, 116, 684, 726),        # 488 x 610 = 4:5, head-and-shoulders like the others
+        (560, 700),
+    ),
     "dr-siddhartha-sharma.jpg": (
         "Dr Siddhartha Sharma.jpeg",
         (230, 28, 950, 928),         # 1179x1009 headshot: 4:5 box centred on the face
