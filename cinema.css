@@ -102,3 +102,119 @@ body.motion-off .cine-grain { animation: none !important; }
     .cine-reveal { opacity: 1 !important; translate: none !important; }
     .landing-section-title { clip-path: none !important; }
 }
+
+/* ==========================================================================
+   CINEMA II — transitions, kinetic type and camera moves
+   ========================================================================== */
+
+/* ---- 8 · view change: smash cut to black, then an iris opens from the click ----
+   The views switch synchronously underneath a fixed overlay. A deferred update
+   (the View Transitions API) would reorder the buttons' back-to-back calls -
+   switchView('calculator'); switchCalculatorTab('eplet') - and switchView
+   rewrites the URL hash, so the order has to stay as written. */
+@property --iris { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.cine-iris {
+    position: fixed; inset: 0; z-index: 3100; pointer-events: none;
+    background: radial-gradient(circle at var(--vt-x, 50%) var(--vt-y, 50%),
+                transparent var(--iris),
+                rgba(203, 255, 252, 0.55) calc(var(--iris) + 1px),
+                rgba(0, 130, 124, 0.35) calc(var(--iris) + 18px),
+                #010f0e calc(var(--iris) + 90px));
+    -webkit-mask-image: radial-gradient(circle at var(--vt-x, 50%) var(--vt-y, 50%), transparent var(--iris), #000 calc(var(--iris) + 1px));
+            mask-image: radial-gradient(circle at var(--vt-x, 50%) var(--vt-y, 50%), transparent var(--iris), #000 calc(var(--iris) + 1px));
+    animation: cineIris 0.95s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes cineIris {
+    0%   { --iris: 0px; opacity: 1; }
+    80%  { opacity: 1; }
+    100% { --iris: 150vmax; opacity: 0; }
+}
+
+/* ---- 9 · kinetic kickers and an accent rule under each section header ---- */
+body.cine-on .landing-section-header .group-kicker { font-variant-numeric: tabular-nums; }
+body.cine-on .landing-section-header { position: relative; }
+body.cine-on .landing-section-header::after {
+    content: ''; display: block; height: 1px; width: 120px; margin: 18px auto 0;
+    background: linear-gradient(90deg, transparent, #cbfffc, transparent);
+    transform: scaleX(0); transition: transform 1.2s cubic-bezier(0.77, 0, 0.18, 1) 0.35s;
+}
+body.cine-on .landing-section-header.is-in::after { transform: scaleX(1); }
+
+/* ---- 10 · figures count up ---- */
+.metric-card-val { font-variant-numeric: tabular-nums; }
+
+/* ---- 11 · camera moves on imagery: unmask, then settle ---- */
+body.cine-on .about-card.cine-reveal .about-photo-frame {
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 1.15s cubic-bezier(0.77, 0, 0.18, 1) calc(var(--i, 0) * 90ms + 0.15s);
+}
+body.cine-on .about-card.cine-reveal .about-photo { scale: 1.18; transition: scale 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 90ms + 0.15s), filter 0.45s ease; }
+body.cine-on .about-card.cine-reveal.is-in .about-photo-frame { clip-path: inset(0 0 0 0); }
+body.cine-on .about-card.cine-reveal.is-in .about-photo { scale: 1; }
+body.cine-on .feature-card.cine-reveal .feature-card-icon { scale: 0.4; opacity: 0; rotate: -25deg;
+    transition: scale 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s, opacity 0.6s ease 0.25s, rotate 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s; }
+body.cine-on .feature-card.cine-reveal.is-in .feature-card-icon { scale: 1; opacity: 1; rotate: 0deg; }
+
+/* ---- 12 · magnetic calls to action ---- */
+body.cine-on .cine-mag { translate: var(--mag-x, 0px) var(--mag-y, 0px); transition: translate 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+/* ---- 13 · trailing cursor ring (fine pointers, landing only) ---- */
+.cine-cursor {
+    position: fixed; top: 0; left: 0; z-index: 2700; pointer-events: none; display: none;
+    width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
+    border: 1px solid rgba(203, 255, 252, 0.55);
+    transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    will-change: transform;
+}
+.cine-cursor.is-hot { width: 56px; height: 56px; margin: -28px 0 0 -28px; background: rgba(203, 255, 252, 0.08); border-color: rgba(250, 209, 255, 0.7); }
+.cine-cursor.is-idle { opacity: 0; }
+body.cine-on.is-landing .cine-cursor { display: block; }
+
+/* ---- 14 · light leak that shifts with the section in view ---- */
+.cine-leak {
+    position: fixed; inset: 0; z-index: 2350; pointer-events: none; display: none;
+    mix-blend-mode: screen; opacity: 0.16;
+    background: radial-gradient(60vmax 45vmax at var(--lk-x, 85%) var(--lk-y, 10%), var(--lk-c, #00827c), transparent 70%);
+    transition: background 1.6s ease;
+}
+body.cine-on.is-landing .cine-leak { display: block; }
+@property --lk-x { syntax: '<percentage>'; inherits: false; initial-value: 85%; }
+@property --lk-y { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
+@property --lk-c { syntax: '<color>'; inherits: false; initial-value: #00827c; }
+.cine-leak { transition: --lk-x 1.8s ease, --lk-y 1.8s ease, --lk-c 1.8s ease; }
+body[data-cine-scene="hero"] .cine-leak           { --lk-x: 85%; --lk-y: 10%; --lk-c: #00827c; }
+body[data-cine-scene="landing-metrics"] .cine-leak { --lk-x: 10%; --lk-y: 30%; --lk-c: #cbfffc; }
+body[data-cine-scene="landing-features"] .cine-leak { --lk-x: 90%; --lk-y: 55%; --lk-c: #fad1ff; }
+body[data-cine-scene="landing-sandbox"] .cine-leak { --lk-x: 50%; --lk-y: 95%; --lk-c: #00827c; }
+body[data-cine-scene="landing-evidence-section"] .cine-leak { --lk-x: 15%; --lk-y: 15%; --lk-c: #cbfffc; }
+body[data-cine-scene="landing-about"] .cine-leak   { --lk-x: 55%; --lk-y: 5%;  --lk-c: #fad1ff; }
+
+/* ---- 15 · ticker band after the hero ---- */
+.cine-marquee {
+    position: relative; overflow: hidden; padding: 26px 0; margin: 0;
+    border-top: 1px solid rgba(203, 255, 252, 0.08); border-bottom: 1px solid rgba(203, 255, 252, 0.08);
+    background: linear-gradient(180deg, rgba(1, 29, 28, 0.0), rgba(1, 29, 28, 0.6), rgba(1, 29, 28, 0.0));
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.cine-marquee-skew { transform: skewX(calc(var(--cine-vel, 0) * -1deg)); transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.cine-marquee-track { display: flex; width: max-content; animation: cineMarquee 48s linear infinite; }
+.cine-marquee-item {
+    font-family: var(--font-matter); font-weight: 500; letter-spacing: -0.04em; line-height: 1;
+    font-size: clamp(40px, 6vw, 88px); white-space: nowrap; padding: 0 0.35em;
+    color: transparent; -webkit-text-stroke: 1px rgba(203, 255, 252, 0.34);
+}
+.cine-marquee-item:nth-child(4n + 2) { color: rgba(203, 255, 252, 0.07); }
+.cine-marquee-sep { align-self: center; color: #cbfffc; opacity: 0.55; font-size: clamp(16px, 2vw, 26px); padding: 0 0.3em; }
+@keyframes cineMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ---- switches for the new pieces ---- */
+@media (prefers-reduced-motion: reduce) {
+    .cine-marquee-track { animation: none !important; }
+    .cine-cursor, .cine-iris { display: none !important; }
+}
+body.motion-off .cine-marquee-track { animation: none !important; }
+body.motion-off .cine-cursor { display: none !important; }
+@media (pointer: coarse) { .cine-cursor { display: none !important; } }
+@media print { .cine-marquee, .cine-cursor, .cine-leak, .cine-iris { display: none !important; }
+    .about-photo-frame { clip-path: none !important; } .about-photo, .feature-card-icon { scale: 1 !important; opacity: 1 !important; rotate: none !important; } }
