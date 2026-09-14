@@ -331,19 +331,20 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
 /* ---- About section: the people behind the research and the software ------------ */
 .about-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
 
-/* One card size across the whole section. --about-cols is how many cards fit a
-   row; every card in both groups takes the same share of the width. Flex-wrap
-   rather than grid, so a partial row centres itself instead of sticking to the
-   left - five people in a four-column grid would otherwise leave one card
-   stranded under the first column. */
+/* One card size across the whole section: every card is a fixed 200px, and the
+   row wraps and centres, so the number per row follows the screen instead of the
+   cards stretching to fill it. Stretching was what made them balloon to ~400px on
+   laptop and tablet widths. 200px with 16px padding leaves 168px of content, just
+   enough for the longest email address (164px), and five cards (1072px) still fit
+   the 1120px section on desktop. */
 .about-grid-team, .about-grid-lead {
     display: flex; flex-wrap: wrap; justify-content: center;
-    gap: var(--about-gap); margin-top: 16px;
-    --about-gap: 20px; --about-cols: 5;
+    gap: 18px; margin-top: 16px;
+    --about-card-w: 200px;
 }
 .about-grid-team > .about-card, .about-grid-lead > .about-card {
-    flex: 0 0 calc((100% - (var(--about-cols) - 1) * var(--about-gap)) / var(--about-cols));
-    min-width: 0;
+    flex: 0 0 var(--about-card-w); width: var(--about-card-w); max-width: 100%;
+    min-width: 0; padding: 16px 16px 20px;
 }
 .about-group-kicker {
     font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ab-aqua);
