@@ -43,15 +43,20 @@ JOBS = {
         (340, 50, 690, 488),
         (560, 700),
     ),
-    # Supplied as a letterboxed screenshot: the photo sits at (48, 74)-(648, 599),
-    # and this 4:5 box is centred on the face inside that region.
     "dr-ritu-aggarwal.jpg": (
-        os.path.join(os.path.expanduser("~"), "Pictures", "Screenshots", "Screenshot 2026-09-09 101909.png"),
-        (140, 74, 560, 599),
+        "Dr. Ritu Aggarwal.png",
+        (160, 105, 720, 805),        # 896x1195: 560 x 700 head-and-shoulders, lanyard below frame centre
         (560, 700),
     ),
     # Head-and-shoulders to match the other cards; the box stops well above the
     # bottom-right corner, so the watermark in the supplied file is cropped out.
+    # 704x1521 phone export with black letterbox bars: the photo occupies y 241-1310.
+    # The box stays inside that band, so neither the bars nor the corner mark show.
+    "prof-ranjana-minz.jpg": (
+        "Prof. Ranjana W Minz.png",
+        (41, 282, 670, 1068),        # 629 x 786 = 4:5, centred on the face
+        (560, 700),
+    ),
     "dr-lekha-rani.jpg": (
         "unnamed.jpg",
         (196, 116, 684, 726),        # 488 x 610 = 4:5, head-and-shoulders like the others
