@@ -1,11 +1,13 @@
 /*
  * dashboard_home.js — dashboard home pane: recent HLA analyses, recent risk estimates (localStorage, this browser
- * only), reference-data status. Items are saved by hla_ui.js (HLAUI.saveRecent) and app.js (saveEstimate).
+ * only), reference-data status, and the control that clears everything saved here. Items are saved by hla_ui.js
+ * (HLAUI.saveRecent) and app.js (saveEstimate).
  */
 (function () {
     'use strict';
     const $ = function (id) { return document.getElementById(id); };
     const KEY_HLA = 'ramrt-recent-hla', KEY_RISK = 'ramrt-recent-risk', MAX = 20;
+    const EXT_PREFIX = 'ramrt-ext-';        // scores pasted back from external tools (hla_ui.js)
 
     function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
     function read(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { return []; } }
@@ -89,7 +91,75 @@
         ];
         el.innerHTML = tiles.map(function (t) { return '<div class="hla-tile"><div class="hla-tile-value hla-tile-value-sm">' + esc(t[1]) + '</div><div class="hla-tile-label">' + esc(t[0]) + '</div><div class="hla-tile-sub">' + esc(t[2]) + '</div></div>'; }).join('');
     }
-    function render() { renderHla(); renderRisk(); renderStatus(); }
+    /* ---------------------------------------------------------------- data saved in this browser */
+    function extKeys() {
+        const out = [];
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && k.indexOf(EXT_PREFIX) === 0) out.push(k);
+            }
+        } catch (e) { /* storage unavailable */ }
+        return out;
+    }
+
+    // Deletes everything the app has stored about real people: saved analyses, saved
+    // risk estimates and scores pasted back from external tools. Display preferences
+    // (theme, motion, reference version) are deliberately left alone - they say
+    // nothing about a patient.
+    function clearBrowserData() {
+        try {
+            localStorage.removeItem(KEY_HLA);
+            localStorage.removeItem(KEY_RISK);
+            extKeys().forEach(function (k) { localStorage.removeItem(k); });
+        } catch (e) { /* storage unavailable */ }
+        render();
+    }
+
+    let armed = null;
+    function renderPrivacy() {
+        const anchor = $('home-recent-risk');
+        if (!anchor) return;
+        const host = anchor.closest('.surface-card') || anchor.parentNode;
+        let sec = $('home-privacy');
+        if (!sec) {
+            sec = document.createElement('section');
+            sec.className = 'surface-card';
+            sec.id = 'home-privacy';
+            if (host.parentNode) host.parentNode.insertBefore(sec, host.nextSibling);
+        }
+        const n = read(KEY_HLA).length, r = read(KEY_RISK).length, x = extKeys().length;
+        const total = n + r + x;
+        const detail = total
+            ? n + ' saved analysis(es), ' + r + ' saved estimate(s), ' + x + ' imported external score(s).'
+            : 'Nothing is saved right now.';
+        sec.innerHTML =
+            '<div class="card-header-bar"><div><h2 class="card-title">Data saved in this browser</h2>' +
+            '<p class="card-subtitle">Saved work stays on this computer. It is never sent anywhere.</p></div></div>' +
+            '<p class="hla-na">' + esc(detail) + ' Display preferences (theme, motion, reference version) are kept.</p>' +
+            '<button type="button" class="btn-ghost btn-sm" id="home-clear-btn"' + (total ? '' : ' disabled') + '>' +
+            'Clear data saved in this browser</button>';
+        const btn = $('home-clear-btn');
+        if (!btn || !total) return;
+        btn.addEventListener('click', function () {
+            if (armed) {                                  // second press: do it
+                clearTimeout(armed); armed = null;
+                clearBrowserData();
+                return;
+            }
+            btn.textContent = 'Press again to delete ' + total + ' item(s)';
+            btn.classList.add('is-armed');
+            armed = setTimeout(function () {              // forget after a few seconds
+                armed = null;
+                if ($('home-clear-btn') === btn) {
+                    btn.textContent = 'Clear data saved in this browser';
+                    btn.classList.remove('is-armed');
+                }
+            }, 6000);
+        });
+    }
+
+    function render() { renderHla(); renderRisk(); renderStatus(); renderPrivacy(); }
 
     function openHla(i) {
         const e = read(KEY_HLA)[i];
@@ -110,7 +180,8 @@
         addRisk: function (entry) { add(KEY_RISK, entry, null); },
         openHla: openHla, openRisk: openRisk,
         removeHla: function (i) { remove(KEY_HLA, i); }, removeRisk: function (i) { remove(KEY_RISK, i); },
-        clearHla: function () { clear(KEY_HLA); }, clearRisk: function () { clear(KEY_RISK); }
+        clearHla: function () { clear(KEY_HLA); }, clearRisk: function () { clear(KEY_RISK); },
+        clearBrowserData: clearBrowserData
     };
     document.addEventListener('DOMContentLoaded', render);
 })();

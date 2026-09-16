@@ -403,3 +403,13 @@ body.is-landing .ramrt-nav, body.is-landing .ux-dock { display: none !important;
     font-family: var(--font-matter); font-size: 46px; font-weight: 500; letter-spacing: 0.06em;
     color: var(--ab-aqua); opacity: 0.55;
 }
+
+/* Clear-data control on the dashboard home pane: the second press deletes, so the
+   armed state has to read as a warning without introducing a new colour. */
+#home-privacy { grid-column: 1 / -1; }          /* full width under the two recent lists */
+#home-privacy .btn-ghost.is-armed {
+    border-color: var(--ab-aqua);
+    color: var(--ab-phosphor);
+    background: rgba(0, 130, 124, 0.18);
+}
+#home-privacy .btn-ghost[disabled] { opacity: 0.5; cursor: default; }

@@ -1,0 +1,5 @@
+# Research terminal of the Department of Immunopathology, PGIMER Chandigarh.
+# Not for indexing. The X-Robots-Tag header in vercel.json says the same thing to
+# crawlers that ignore this file; neither is an access control.
+User-agent: *
+Disallow: /
