@@ -20,14 +20,144 @@
  *   SESSION_SECRET    long random string; signs the session cookie
  *   SESSION_HOURS     optional, default 12
  */
-import { next } from '@vercel/functions';
-import {
-    parseAdmins, isAdminEmail, passwordMatches, createSession, readSession,
-    parseCookies, cookie, isPublicPath, safeNext, AUTH_PREFIX, LOGIN_PATH
-} from './auth_core.mjs';
+
+const ENC = new TextEncoder();
+
+/* ---------------------------------------------------------------- base64url */
+export function b64urlEncode(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+export function b64urlDecode(str) {
+    let s = String(str).replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    const bin = atob(s);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+}
+
+/* ---------------------------------------------------------------- primitives */
+function getCrypto() {
+    if (typeof crypto !== 'undefined' && crypto.subtle) return crypto;
+    if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
+    return null;
+}
+
+async function hmac(secret, message) {
+    const c = getCrypto();
+    const key = await c.subtle.importKey('raw', ENC.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    return new Uint8Array(await c.subtle.sign('HMAC', key, ENC.encode(message)));
+}
+
+async function sha256(text) {
+    const c = getCrypto();
+    return new Uint8Array(await c.subtle.digest('SHA-256', ENC.encode(String(text))));
+}
+
+export function equalBytes(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+    return diff === 0;
+}
+
+export async function passwordMatches(given, expected) {
+    if (typeof given !== 'string' || typeof expected !== 'string' || !expected) return false;
+    return equalBytes(await sha256(given), await sha256(expected));
+}
+
+/* ---------------------------------------------------------------- admin list */
+export function parseAdmins(raw) {
+    return String(raw || '')
+        .split(/[,\s;]+/)
+        .map(function (e) { return e.trim().toLowerCase(); })
+        .filter(function (e) { return e.indexOf('@') > 0; });
+}
+
+export function isAdminEmail(email, admins) {
+    const e = String(email || '').trim().toLowerCase();
+    return !!e && admins.indexOf(e) >= 0;
+}
+
+/* ---------------------------------------------------------------- session cookie */
+export async function createSession(email, secret, hours, nowMs) {
+    const now = Math.floor((nowMs === undefined ? Date.now() : nowMs) / 1000);
+    const payload = JSON.stringify({ e: String(email).toLowerCase(), x: now + Math.round((hours || 12) * 3600) });
+    const body = b64urlEncode(ENC.encode(payload));
+    return body + '.' + b64urlEncode(await hmac(secret, body));
+}
+
+export async function readSession(token, secret, nowMs) {
+    if (typeof token !== 'string' || token.indexOf('.') < 0) return null;
+    const cut = token.lastIndexOf('.');
+    const body = token.slice(0, cut), sig = token.slice(cut + 1);
+    if (!body || !sig) return null;
+    let expected;
+    try { expected = await hmac(secret, body); } catch (e) { return null; }
+    let given;
+    try { given = b64urlDecode(sig); } catch (e) { return null; }
+    if (!equalBytes(given, expected)) return null;
+    let claim;
+    try { claim = JSON.parse(new TextDecoder().decode(b64urlDecode(body))); } catch (e) { return null; }
+    if (!claim || typeof claim.e !== 'string' || typeof claim.x !== 'number') return null;
+    const now = Math.floor((nowMs === undefined ? Date.now() : nowMs) / 1000);
+    if (claim.x <= now) return null;
+    return { email: claim.e, expires: claim.x };
+}
+
+/* ---------------------------------------------------------------- cookies */
+export function parseCookies(header) {
+    const out = {};
+    String(header || '').split(';').forEach(function (part) {
+        const i = part.indexOf('=');
+        if (i < 0) return;
+        const k = part.slice(0, i).trim();
+        if (k) out[k] = decodeURIComponent(part.slice(i + 1).trim());
+    });
+    return out;
+}
+
+export function cookie(name, value, options) {
+    const o = options || {};
+    let s = name + '=' + encodeURIComponent(value) + '; Path=/; SameSite=Lax';
+    if (o.httpOnly !== false) s += '; HttpOnly';
+    if (o.secure !== false) s += '; Secure';
+    s += '; Max-Age=' + (o.maxAge === undefined ? 0 : Math.max(0, Math.round(o.maxAge)));
+    return s;
+}
+
+/* ---------------------------------------------------------------- paths */
+export const PUBLIC_EXACT = [
+    '/', '/index.html', '/robots.txt', '/favicon.ico', '/favicon.svg',
+    '/dna_hero.js', '/motion.js', '/cinema.js', '/public_landing.js'
+];
+export const PUBLIC_PREFIX = ['/images/', '/fonts/'];
+export const PUBLIC_SUFFIX = ['.css', '.woff', '.woff2', '.ttf', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.gif', '.ico', '.avif'];
+export const AUTH_PREFIX = '/auth/';
+export const LOGIN_PATH = '/login';
+
+export function isPublicPath(pathname) {
+    const p = String(pathname || '/').split('?')[0].toLowerCase();
+    if (PUBLIC_EXACT.indexOf(p) >= 0) return true;
+    for (let i = 0; i < PUBLIC_PREFIX.length; i++) if (p.indexOf(PUBLIC_PREFIX[i]) === 0) return true;
+    for (let i = 0; i < PUBLIC_SUFFIX.length; i++) {
+        const s = PUBLIC_SUFFIX[i];
+        if (p.length > s.length && p.slice(-s.length) === s) return true;
+    }
+    return false;
+}
+
+export function safeNext(raw) {
+    const v = String(raw || '');
+    if (!v || v[0] !== '/' || v.indexOf('//') === 0 || v.indexOf('\\') >= 0) return '/';
+    return v;
+}
 
 const SESSION_COOKIE = 'ramrt_session';
-const WHO_COOKIE = 'ramrt_admin';          // readable by the page, for "signed in as"; not a credential
+const WHO_COOKIE = 'ramrt_admin';
 
 function env(name, fallback) {
     const v = typeof process !== 'undefined' && process.env ? process.env[name] : undefined;
@@ -47,6 +177,18 @@ function redirect(to, extraHeaders) {
     h.set('Location', to);
     h.set('Cache-Control', 'no-store');
     return new Response(null, { status: 302, headers: h });
+}
+
+function vercelNext() {
+    const h = new Headers();
+    h.set('x-middleware-next', '1');
+    return new Response(null, { headers: h });
+}
+
+function getHeader(req, name) {
+    if (!req || !req.headers) return '';
+    if (typeof req.headers.get === 'function') return req.headers.get(name) || '';
+    return req.headers[name.toLowerCase()] || req.headers[name] || '';
 }
 
 /* ---------------------------------------------------------------- pages */
@@ -93,7 +235,7 @@ function loginPage(message, nextPath) {
     <p class="sub">Renal allograft risk terminal · PGIMER Chandigarh</p>
     ${err}
     <form method="post" action="/auth/login">
-      <input type="hidden" name="next" value="${nextPath.replace(/"/g, '&quot;')}">
+      <input type="hidden" name="next" value="${(nextPath || '/').replace(/"/g, '&quot;')}">
       <label for="email">Admin e-mail</label>
       <input id="email" name="email" type="email" autocomplete="username" required autofocus>
       <label for="password">Password</label>
@@ -117,9 +259,16 @@ function notConfiguredPage() {
     <p class="foot"><a href="/">← Back to the site</a></p>`, 'Not configured');
 }
 
-/* ---------------------------------------------------------------- gate */
-export default async function middleware(request) {
-    const url = new URL(request.url);
+/* ---------------------------------------------------------------- request logic */
+async function handleRequest(request) {
+    const rawUrl = request?.url || '/';
+    const host = getHeader(request, 'host') || 'localhost';
+    let url;
+    try {
+        url = new URL(rawUrl, rawUrl.startsWith('http') ? undefined : `https://${host}`);
+    } catch (_) {
+        url = new URL('/', `https://${host}`);
+    }
     const path = url.pathname;
 
     const secret = env('SESSION_SECRET');
@@ -128,7 +277,7 @@ export default async function middleware(request) {
     const hours = Number(env('SESSION_HOURS', '12')) || 12;
     const configured = !!(secret && password && admins.length);
 
-    const cookies = parseCookies(request.headers.get('cookie'));
+    const cookies = parseCookies(getHeader(request, 'cookie'));
     const session = configured ? await readSession(cookies[SESSION_COOKIE], secret) : null;
 
     /* ---- sign out */
@@ -142,18 +291,19 @@ export default async function middleware(request) {
     /* ---- sign in */
     if (path === AUTH_PREFIX + 'login') {
         if (!configured) return html(notConfiguredPage(), 503);
-        if (request.method !== 'POST') return redirect(LOGIN_PATH);
+        if (request?.method !== 'POST') return redirect(LOGIN_PATH);
         let form;
-        try { form = await request.formData(); } catch (e) { return html(loginPage('Could not read that form.', '/'), 400); }
+        try {
+            form = await request.formData();
+        } catch (e) {
+            return html(loginPage('Could not read that form.', '/'), 400);
+        }
         const email = String(form.get('email') || '');
         const target = safeNext(form.get('next'));
         const ok = await passwordMatches(String(form.get('password') || ''), password);
         const listed = isAdminEmail(email, admins);
 
         if (!ok || !listed) {
-            // One delay for either failure, so the response time does not say which
-            // of the two was wrong. This is friction, not rate limiting - see
-            // validation/ACCESS_CONTROL.md.
             await new Promise(function (r) { setTimeout(r, 400); });
             return html(listed
                 ? loginPage('That password is not correct.', target)
@@ -174,16 +324,30 @@ export default async function middleware(request) {
     }
 
     /* ---- everything else */
-    if (isPublicPath(path)) return next();
+    if (isPublicPath(path)) return vercelNext();
     if (!configured) return html(notConfiguredPage(), 503);
-    if (session) return next();
+    if (session) return vercelNext();
 
-    // A page request gets the sign-in screen; anything else (a script, the catalogue,
-    // a fetch from a page left open) gets a plain 401 so it fails visibly.
-    const wantsHtml = (request.headers.get('accept') || '').indexOf('text/html') >= 0;
+    const acceptHeader = getHeader(request, 'accept') || '';
+    const wantsHtml = acceptHeader.indexOf('text/html') >= 0;
     if (wantsHtml) return redirect(LOGIN_PATH + '?next=' + encodeURIComponent(path + url.search));
     return new Response('Sign in at /login to use the RAMRT terminal.', {
         status: 401,
         headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' }
     });
 }
+
+/* ---------------------------------------------------------------- entrypoint */
+export default async function proxy(request) {
+    try {
+        return await handleRequest(request);
+    } catch (err) {
+        console.error('Middleware execution error:', err);
+        return new Response('Middleware Error: ' + (err?.stack || err?.message || String(err)), {
+            status: 500,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
+    }
+}
+
+export { proxy as middleware, proxy };
