@@ -5,7 +5,7 @@
  *
  * These run the same functions the edge runs, so signing, tampering, expiry, the admin
  * list and the public/gated split are all covered here. What they cannot cover is
- * Vercel actually invoking middleware.mjs before serving a file - that has to be proven
+ * Vercel actually invoking middleware.js before serving a file - that has to be proven
  * on a deployment. See validation/ACCESS_CONTROL.md.
  */
 import {
@@ -88,7 +88,7 @@ await section('public vs gated', async function () {
     ['/app.js', '/hla_engine.js', '/hla_reference_data.js', '/hla_reference_v3.js', '/hla_molecular_data.js',
      '/hla_ui.js', '/dashboard_home.js', '/hla_validation_vectors.js', '/reference_sources/IE.xlsx',
      '/validation/HLAR_CROSSCHECK.md', '/tools/test_engine.js', '/vercel.json', '/package.json',
-     '/auth_core.mjs', '/middleware.mjs']
+     '/auth_core.mjs', '/middleware.js']
         .forEach(function (p) { ok('gated: ' + p, !isPublicPath(p)); });
 
     ok('case does not open a gate', !isPublicPath('/HLA_Reference_Data.JS'));

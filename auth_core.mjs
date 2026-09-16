@@ -1,6 +1,6 @@
 /*
  * auth_core.mjs — the decisions behind the access gate, kept apart from the request
- * handling in middleware.mjs so they can be tested offline (node tools/test_auth.mjs).
+ * handling in middleware.js so they can be tested offline (node tools/test_auth.mjs).
  *
  * Model: the landing page is public. Everything the calculator needs — the app script
  * with the risk model, the HLA engine, the reference tables, the immunogenic eplet

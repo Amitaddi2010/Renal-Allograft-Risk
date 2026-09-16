@@ -1,7 +1,7 @@
 /*
  * public_landing.js — keeps the landing page whole for a visitor who is not signed in.
  *
- * The gate in middleware.mjs serves the landing to everyone but withholds app.js, the
+ * The gate in middleware.js serves the landing to everyone but withholds app.js, the
  * HLA engine and the reference tables. Those <script> tags then come back 401 and
  * simply define nothing, so this file, loaded last, fills the gaps:
  *

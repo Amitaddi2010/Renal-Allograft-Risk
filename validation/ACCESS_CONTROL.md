@@ -6,7 +6,7 @@ set it up. Status: **written and tested offline; never yet deployed.** Until the
 
 ## 1. Where the gate is
 
-`middleware.mjs`, running on Vercel before any file is served. This is the only thing
+`middleware.js`, running on Vercel before any file is served. This is the only thing
 that protects the study data. A sign-in drawn inside the page would not: the site is
 static, so anyone could skip it and request `/hla_reference_data.js` or
 `/reference_sources/IE.xlsx` directly. Those requests pass through the middleware first.
@@ -39,7 +39,7 @@ records which administrator is claiming the session — anyone holding the passw
 type any of the listed addresses. It is not per-person authentication, and the audit
 value of the address is therefore weak. Per-person proof needs either per-person secrets
 or Google sign-in with the same allowlist, which is a straightforward change to
-`middleware.mjs` if you want it later.
+`middleware.js` if you want it later.
 
 Session: a cookie signed with HMAC-SHA-256 over `{address, expiry}`, `HttpOnly`,
 `Secure`, `SameSite=Lax`, default 12 hours. A tampered or expired cookie is refused. A
@@ -91,12 +91,10 @@ Known gaps, deliberately not solved yet:
 ## 5. If the middleware does not run
 
 The project has no framework, so Vercel is told where the entrypoint is by `proxy` in
-`vercel.json`, and the file is `.mjs` so Node treats it as a module without forcing
-`"type": "module"` on the repository (which would break the CommonJS scripts in
-`tools/`). If the gate does not fire, check in this order:
+`vercel.json` pointing to `middleware.js`. If the gate does not fire, check in this order:
 
 1. the build log shows `@vercel/functions` installed from `package.json`;
-2. `vercel.json` still contains `"proxy": { "entrypoint": "middleware.mjs" }`;
+2. `vercel.json` still contains `"proxy": { "entrypoint": "middleware.js" }`;
 3. the Functions tab lists a middleware invocation for a request;
 4. the environment variables are set for the environment you are testing.
 
@@ -116,5 +114,5 @@ node tools/test_engine.js    # 248 checks: unchanged by any of this
 through, who is turned away, the sign-in form, the redirect target, cookie tampering,
 expiry, sign-out, and that an unconfigured deployment serves nothing.
 
-What no test here can prove: that Vercel actually invokes `middleware.mjs` before serving
+What no test here can prove: that Vercel actually invokes `middleware.js` before serving
 a static file. Only the deployment checks in §4 show that.

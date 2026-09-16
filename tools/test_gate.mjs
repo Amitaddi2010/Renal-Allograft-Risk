@@ -1,5 +1,5 @@
 /*
- * test_gate.mjs — drives middleware.mjs itself, the way Vercel will.
+ * test_gate.mjs — drives middleware.js itself, the way Vercel will.
  *
  *     node tools/test_gate.mjs
  *
@@ -13,7 +13,7 @@ process.env.ADMIN_EMAILS = 'topquark200@example.test, amit.addi2010@example.test
 process.env.SESSION_SECRET = 'test-session-secret-0123456789abcdef';
 process.env.SESSION_HOURS = '12';
 
-const { default: middleware } = await import('../middleware.mjs');
+const { default: middleware } = await import('../middleware.js');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) {

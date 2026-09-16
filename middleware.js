@@ -1,5 +1,5 @@
 /*
- * middleware.mjs — the access gate, running on Vercel before any file is served.
+ * middleware.js — the access gate, running on Vercel before any file is served.
  *
  * This is the only thing that actually protects the study data. A sign-in drawn inside
  * the page would not: on a static site anyone can request /hla_reference_data.js or
