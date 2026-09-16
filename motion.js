@@ -477,6 +477,9 @@
             } else if (e.key === '3') {
                 if (typeof switchView === 'function') switchView('calculator');
                 if (typeof switchCalculatorTab === 'function') switchCalculatorTab('eplet');
+            } else if (e.key === '4') {
+                if (typeof switchView === 'function') switchView('calculator');
+                if (typeof switchCalculatorTab === 'function') switchCalculatorTab('external');
             } else if (e.key === '0' || e.key.toLowerCase() === 'h') {
                 if (typeof switchView === 'function') switchView('landing');
             }

@@ -530,7 +530,7 @@ function switchView(viewName) {
             navLaunchBtn.style.display = 'inline-flex';
         }
 
-        if (!/^#(dashboard|home|hla|risk)/.test(window.location.hash)) window.location.hash = 'dashboard';
+        if (!/^#(dashboard|home|hla|risk|external)/.test(window.location.hash)) window.location.hash = 'dashboard';
         calculateRisk();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -564,41 +564,45 @@ function scrollToSection(sectionId) {
 }
 
 /* ==========================================================================
-   CALCULATOR TAB SWITCHER (NOMOGRAM vs IMMUNOGENIC EPLET ADVISORY)
+   CALCULATOR TAB SWITCHER (NOMOGRAM vs IMMUNOGENIC EPLET ADVISORY vs EXTERNAL)
    ========================================================================== */
 function switchCalculatorTab(tabName) {
     const tabNomogram = document.getElementById('calc-tab-nomogram');
     const tabEplet = document.getElementById('calc-tab-eplet');
+    const tabExternal = document.getElementById('calc-tab-external');
     const paneNomogram = document.getElementById('pane-nomogram');
     const paneEplet = document.getElementById('pane-eplet');
+    const paneExternal = document.getElementById('pane-external');
 
     const paneHome = document.getElementById('pane-home');
     const tabHome = document.getElementById('calc-tab-home');
+
+    // Deactivate all tabs and hide all panes first
+    [tabNomogram, tabEplet, tabExternal, tabHome].forEach(function (b) { if (b) b.classList.remove('active'); });
+    [paneNomogram, paneEplet, paneExternal, paneHome].forEach(function (p) { if (p) p.classList.add('hidden-tab'); });
+
     if (tabName === 'home') {
-        [tabNomogram, tabEplet].forEach(function (b) { if (b) b.classList.remove('active'); });
         if (tabHome) tabHome.classList.add('active');
-        if (paneNomogram) paneNomogram.classList.add('hidden-tab');
-        if (paneEplet) paneEplet.classList.add('hidden-tab');
         if (paneHome) paneHome.classList.remove('hidden-tab');
         if (window.DashboardHome) DashboardHome.render();
         if (window.location.hash !== '#dashboard' && window.location.hash !== '#home') window.location.hash = 'dashboard';
         syncNavActive('home');
         return;
     }
-    if (paneHome) paneHome.classList.add('hidden-tab');
-    if (tabHome) tabHome.classList.remove('active');
     if (tabName === 'eplet') {
-        if (tabNomogram) tabNomogram.classList.remove('active');
         if (tabEplet) tabEplet.classList.add('active');
-        if (paneNomogram) paneNomogram.classList.add('hidden-tab');
         if (paneEplet) paneEplet.classList.remove('hidden-tab');
         if (window.HLAUI) HLAUI.recalculate();
         if (!/^#hla/.test(window.location.hash)) window.location.hash = 'hla';
         syncNavActive('eplet');
+    } else if (tabName === 'external') {
+        if (tabExternal) tabExternal.classList.add('active');
+        if (paneExternal) paneExternal.classList.remove('hidden-tab');
+        if (window.ExternalTools) ExternalTools.render();
+        if (window.location.hash !== '#external') window.location.hash = 'external';
+        syncNavActive('external');
     } else {
-        if (tabEplet) tabEplet.classList.remove('active');
         if (tabNomogram) tabNomogram.classList.add('active');
-        if (paneEplet) paneEplet.classList.add('hidden-tab');
         if (paneNomogram) paneNomogram.classList.remove('hidden-tab');
         calculateRisk();
         if (window.location.hash !== '#risk') window.location.hash = 'risk';
@@ -609,10 +613,10 @@ function switchCalculatorTab(tabName) {
 
 // Sidebar / nav highlighting follows the open calculator tab
 function syncNavActive(tab) {
-    const map = { 'nav-btn-home': 'home', 'nav-btn-calc': 'nomogram', 'nav-btn-eplet-adv': 'eplet' };
+    const map = { 'nav-btn-home': 'home', 'nav-btn-calc': 'nomogram', 'nav-btn-eplet-adv': 'eplet', 'nav-btn-external': 'external' };
     Object.keys(map).forEach(function (id) { const b = document.getElementById(id); if (b) b.classList.toggle('active', map[id] === tab); });
     const crumb = document.getElementById('module-crumb');
-    if (crumb) crumb.textContent = tab === 'eplet' ? 'HLA & eplets' : (tab === 'nomogram' ? 'Risk calculator' : 'Home');
+    if (crumb) crumb.textContent = tab === 'eplet' ? 'HLA & eplets' : (tab === 'nomogram' ? 'Risk calculator' : (tab === 'external' ? 'External HLA tools' : 'Home'));
     const landing = document.getElementById('nav-btn-landing');
     if (landing) landing.classList.remove('active');
 }
@@ -771,7 +775,7 @@ function updateAdvisoryEplets() {
     }
 }
 
-// Deep links: #landing, #dashboard, #risk, #hla, #hla-example, #hla-grid-example, #hla-3d-example, #hla-batch, #hla-batch-example
+// Deep links: #landing, #dashboard, #risk, #hla, #hla-example, #hla-grid-example, #hla-3d-example, #hla-batch, #hla-batch-example, #external
 function routeFromHash() {
     const h = window.location.hash;
     if (h === '#hla' || h === '#hla-example' || h === '#hla-grid-example' || h === '#hla-3d-example' || h === '#hla-batch' || h === '#hla-batch-example') {
@@ -787,6 +791,9 @@ function routeFromHash() {
     } else if (h === '#risk') {
         switchView('calculator');
         switchCalculatorTab('nomogram');
+    } else if (h === '#external') {
+        switchView('calculator');
+        switchCalculatorTab('external');
     } else if (h === '#dashboard' || h === '#home') {
         switchView('calculator');
         switchCalculatorTab('home');

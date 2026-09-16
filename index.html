@@ -55,6 +55,7 @@
             <button type="button" class="nav-link" id="nav-btn-home" onclick="switchView('calculator'); switchCalculatorTab('home'); closeNav();">Dashboard</button>
             <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">Risk calculator</button>
             <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">HLA &amp; eplets</button>
+            <button type="button" class="nav-link" id="nav-btn-external" onclick="switchView('calculator'); switchCalculatorTab('external'); closeNav();">External HLA tools</button>
             <button type="button" class="nav-link nav-link-secondary" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">← Back to site</button>
         </nav>
 
@@ -498,6 +499,10 @@
                 <button type="button" class="calc-tab-btn" id="calc-tab-eplet" onclick="switchCalculatorTab('eplet')">
                     <span>2 · HLA mismatch &amp; eplet analysis</span>
                     <span class="tab-badge-advisory">typing → mismatches → immunogenic eplets</span>
+                </button>
+                <button type="button" class="calc-tab-btn" id="calc-tab-external" onclick="switchCalculatorTab('external')">
+                    <span>3 · External HLA tools</span>
+                    <span class="tab-badge-advisory">HED · AAMS · EMS3D</span>
                 </button>
             </div>
 
@@ -1314,17 +1319,24 @@
                 </section>
             </div><!-- /#pane-eplet -->
 
+            <!-- EXTERNAL HLA TOOLS PANE -->
+            <div id="pane-external" class="calc-tab-pane hidden-tab">
+                <!-- Content rendered by external_tools.js -->
+            </div><!-- /#pane-external -->
+
             <!-- Quick Navigation & Keyboard Shortcut Strip -->
             <div class="kbd-shortcut-strip">
                 <span style="color: var(--ab-aqua, #cbfffc); font-weight: 500;">Keyboard Shortcuts:</span>
                 <span><kbd class="kbd-key">1</kbd> Dashboard</span>
                 <span><kbd class="kbd-key">2</kbd> Risk Nomogram</span>
                 <span><kbd class="kbd-key">3</kbd> HLA &amp; Eplets</span>
+                <span><kbd class="kbd-key">4</kbd> External Tools</span>
                 <span><kbd class="kbd-key">0</kbd> Overview</span>
             </div>
         </div>
     </div>
 
+    <script src="admin_gate.js?v=20260916"></script>
     <script src="hla_reference_data.js?v=20260908"></script>
     <script src="hla_engine.js?v=20260908"></script>
     <script src="hla_validation_vectors.js?v=20260908"></script>
@@ -1335,9 +1347,10 @@
     <script src="hla_ui.js?v=20260917"></script>
     <script src="hla_eplet_residues.js?v=20260908d"></script>
     <script src="hla_3d.js?v=20260910b"></script>
+    <script src="external_tools.js?v=20260916"></script>
     <script src="dashboard_home.js?v=20260914"></script>
     <script src="dna_hero.js?v=20260912b"></script>
-    <script src="app.js?v=20260915"></script>
+    <script src="app.js?v=20260916"></script>
     <script src="motion.js?v=20260912d"></script>
     <script src="cinema.js?v=20260914d"></script>
 </body>
