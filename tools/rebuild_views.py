@@ -238,4 +238,15 @@ if 'motion.css' not in s:
 if 'motion.js' not in s:
     s = re.sub(r'(<script src="app\.js[^"]*"></script>)', r'\1\n    <script src="motion.js?v=20260911"></script>', s, count=1)
 
+# The access gate withholds app.js and the engine from signed-out visitors;
+# public_landing.js keeps the landing working without them, so it loads last.
+if 'public_landing.js' not in s:
+    _m = None
+    for _name in ('cinema', 'motion', 'app'):
+        _m = re.search(r'<script src="' + _name + r'\.js[^"]*"></script>', s)
+        if _m:
+            break
+    if _m:
+        s = s[:_m.end()] + '\n    <script src="public_landing.js?v=20260916"></script>' + s[_m.end():]
+
 print('views rebuilt; hero:', s.count('id="dna-canvas"'), 'home pane:', s.count('id="pane-home"'), 'summary strip:', s.count('id="db-summary"'), 'drivers:', s.count('id="risk-drivers"'), 'evidence in home:', 'landing-evidence' in s.split('id="pane-home"')[1] if 'id="pane-home"' in s else False)

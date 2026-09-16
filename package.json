@@ -1,0 +1,9 @@
+{
+  "name": "ramrt-immunopathology",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Renal allograft risk terminal, Department of Immunopathology, PGIMER Chandigarh. Static site: no build step. This manifest exists only so Vercel can install the one package the access gate in middleware.mjs needs.",
+  "dependencies": {
+    "@vercel/functions": "^2.0.0"
+  }
+}
