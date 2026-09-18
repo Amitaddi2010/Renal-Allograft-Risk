@@ -1,0 +1,822 @@
+/* ==========================================================================
+   RAMRT UI — design tokens + modern dashboard layer
+   --------------------------------------------------------------------------
+   Loaded last, after the older stylesheets, so it owns the visual language.
+
+   Architecture (three layers, per the design-system convention):
+     1. PRIMITIVES  raw brand ramps. Never used directly by components.
+     2. SEMANTIC    role tokens (--bg, --surface-1, --text-1, --accent, ...)
+                    redefined per theme; this is the only layer components read.
+     3. COMPONENTS  shell, cards, tiles, tables, buttons, fields, chips, tabs.
+
+   Themes: [data-theme="dark"] (the Auros abyssal terminal, default) and
+   [data-theme="light"] (same palette on a paper canvas). "System" resolves to
+   one of the two in theme_mode.js before first paint, so there is no flash.
+
+   The palette is unchanged: abyss/deep/kelp teals, aqua #cbfffc, lavender
+   phosphor #fde9ff, aurora gradient. What changed is how they are organised.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- 1. primitives */
+:root {
+    /* teal ramp (dark surfaces) */
+    --p-abyss:      #011314;
+    --p-abyss-2:    #012624;
+    --p-deep:       #011d1c;
+    --p-kelp:       #003734;
+    --p-kelp-2:     #01463f;
+    --p-teal:       #00827c;
+    --p-teal-bright:#00b3a4;
+
+    /* teal ramp (light surfaces) */
+    --p-paper:      #f4f8f7;
+    --p-paper-2:    #ffffff;
+    --p-paper-3:    #eef4f3;
+    --p-ink:        #05221f;
+    --p-ink-2:      #234a46;
+    --p-ink-3:      #5b7370;
+    --p-teal-deep:  #046b64;
+    --p-teal-deeper:#02514c;
+    --p-line-light: #d8e6e3;
+
+    /* accents kept from the brand */
+    --p-aqua:       #cbfffc;
+    --p-mist:       #edfffe;
+    --p-silver:     #bbc7c6;
+    --p-slate:      #707777;
+    --p-phosphor:   #fde9ff;
+    --p-lavender:   #fad1ff;
+    --p-pink:       #ff1475;
+    --p-pink-soft:  #ff94bf;
+    --p-white:      #ffffff;
+
+    /* status */
+    --p-ok:         #00a884;
+    --p-ok-dark:    #0d7a62;
+    --p-warn:       #f0b429;
+    --p-warn-dark:  #8a5a00;
+    --p-danger:     #ef4444;
+    --p-danger-dark:#b42318;
+    --p-info:       #38bdf8;
+    --p-info-dark:  #0369a1;
+
+    /* radius, spacing rhythm, motion, layering */
+    --r-xs: 6px;
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 18px;
+    --r-pill: 999px;
+
+    --s-1: 4px;  --s-2: 8px;   --s-3: 12px; --s-4: 16px;
+    --s-5: 20px; --s-6: 24px;  --s-8: 32px; --s-10: 40px; --s-12: 48px;
+
+    --t-fast: 120ms;
+    --t-base: 180ms;
+    --t-slow: 260ms;
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+    --z-base: 0; --z-sticky: 40; --z-nav: 900; --z-dock: 1200; --z-modal: 2000;
+
+    --sidebar-w: 248px;
+    --topbar-h: 60px;
+    --content-max: 1360px;
+
+    --icon-sm: 16px; --icon-md: 20px; --icon-lg: 24px;
+    --tap-min: 44px;
+}
+
+/* ------------------------------------------------------------- 2. semantic: dark */
+:root,
+[data-theme="dark"] {
+    color-scheme: dark;
+
+    --bg:            var(--p-abyss);
+    --bg-pattern:    radial-gradient(1200px 600px at 78% -8%, rgba(0, 130, 124, 0.16), transparent 60%);
+    --surface-1:     var(--p-deep);          /* page-level panels, sidebar     */
+    --surface-2:     #032e2b;                /* cards                          */
+    --surface-3:     var(--p-kelp);          /* nested blocks, table heads     */
+    --surface-hover:  var(--p-kelp-2);
+    --surface-sunken: #01100f;
+
+    --border:        rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(203, 255, 252, 0.26);
+    --border-accent: rgba(203, 255, 252, 0.45);
+
+    --text-1:        var(--p-mist);          /* headings, primary values       */
+    --text-2:        #c9d6d4;                /* body                           */
+    --text-3:        #93a5a3;                /* captions, labels (>= 4.5:1)    */
+    --text-on-accent:#00201e;
+
+    --accent:        var(--p-aqua);
+    --accent-quiet:  rgba(203, 255, 252, 0.12);
+    --accent-strong: var(--p-teal-bright);
+    --stat:          var(--p-phosphor);
+    --accent-2:      var(--p-lavender);
+
+    --ok:            #57e3b6;   --ok-bg:      rgba(0, 168, 132, 0.16);
+    --warn:          #ffd479;   --warn-bg:    rgba(240, 180, 41, 0.16);
+    --danger:        #ff9a9a;   --danger-bg:  rgba(239, 68, 68, 0.16);
+    --info:          #8ad4ff;   --info-bg:    rgba(56, 189, 248, 0.16);
+
+    --focus:         var(--p-aqua);
+    --scrim:         rgba(1, 15, 16, 0.72);
+
+    --shadow-1: none;
+    --shadow-2: 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+    --shadow-3: 0 30px 70px -40px rgba(0, 0, 0, 0.95);
+
+    --grad-primary: linear-gradient(90deg, #cbfffc 0%, #edfffe 26%, #fffdfa 48%, #fad1ff 100%);
+    --grad-line:    linear-gradient(90deg, rgba(0,130,124,0) 0%, rgba(203,255,252,0.45) 50%, rgba(0,130,124,0) 100%);
+
+    /* legacy names used by the older stylesheets; repeated per scope on purpose:
+       a `var()` alias resolves where it is declared, not where it is used */
+    --ab-canvas: var(--bg);
+    --ab-deep: var(--surface-1);
+    --ab-kelp: var(--surface-2);
+    --ab-kelp-2: var(--surface-hover);
+    --ab-line: var(--border);
+    --ab-line-2: var(--border-strong);
+    --ab-text: var(--text-1);
+    --ab-mist: var(--text-1);
+    --ab-silver: var(--text-2);
+    --ab-slate: var(--text-3);
+    --ab-phosphor: var(--stat);
+    --ab-aqua: var(--accent);
+    --ab-teal: var(--accent-strong);
+    --ab-pink: var(--accent-2);
+    --color-liquid-abyss: var(--bg);
+    --color-liquid-deep: var(--surface-1);
+    --color-liquid-kelp: var(--surface-2);
+    --color-liquid-mist: var(--text-1);
+    --color-platinum: var(--text-1);
+    --color-silver-mist: var(--text-2);
+    --color-slate-deep: var(--text-3);
+    --color-lavender-phosphor: var(--stat);
+    --gradient-aurora: var(--grad-primary);
+    --gradient-bioluminescent: var(--grad-primary);
+
+}
+
+/* ------------------------------------------------------------ 2. semantic: light */
+[data-theme="light"] {
+    color-scheme: light;
+
+    --bg:            var(--p-paper);
+    --bg-pattern:    radial-gradient(1100px 560px at 82% -10%, rgba(0, 130, 124, 0.10), transparent 62%);
+    --surface-1:     var(--p-paper-2);
+    --surface-2:     var(--p-paper-2);
+    --surface-3:     var(--p-paper-3);
+    --surface-hover: #e4efed;
+    --surface-sunken:#e9f1ef;
+
+    --border:        var(--p-line-light);
+    --border-strong: #b3ccc8;
+    --border-accent: var(--p-teal-deep);
+
+    --text-1:        var(--p-ink);
+    --text-2:        var(--p-ink-2);
+    --text-3:        #4f6a67;
+    --text-on-accent:#ffffff;
+
+    --accent:        var(--p-teal-deep);
+    --accent-quiet:  rgba(4, 107, 100, 0.10);
+    --accent-strong: var(--p-teal-deeper);
+    --stat:          #6d3a8f;
+    --accent-2:      #9d4edd;
+
+    --ok:            #0b6b57;             --ok-bg:     rgba(13, 122, 98, 0.12);
+    --warn:          var(--p-warn-dark);  --warn-bg:   rgba(240, 180, 41, 0.18);
+    --danger:        var(--p-danger-dark);--danger-bg: rgba(239, 68, 68, 0.12);
+    --info:          var(--p-info-dark);  --info-bg:   rgba(56, 189, 248, 0.14);
+
+    --focus:         var(--p-teal-deep);
+    --scrim:         rgba(5, 34, 31, 0.45);
+
+    --shadow-1: 0 1px 2px rgba(5, 34, 31, 0.06), 0 1px 1px rgba(5, 34, 31, 0.04);
+    --shadow-2: 0 8px 24px -12px rgba(5, 34, 31, 0.18), 0 2px 6px -2px rgba(5, 34, 31, 0.08);
+    --shadow-3: 0 24px 60px -30px rgba(5, 34, 31, 0.28);
+
+    /* every stop keeps white text at 5.2:1 or better */
+    --grad-primary: linear-gradient(90deg, #0a7a70 0%, #056159 55%, #04564f 100%);
+    --grad-line:    linear-gradient(90deg, rgba(4,107,100,0) 0%, rgba(4,107,100,0.35) 50%, rgba(4,107,100,0) 100%);
+
+    /* legacy names used by the older stylesheets; repeated per scope on purpose:
+       a `var()` alias resolves where it is declared, not where it is used */
+    --ab-canvas: var(--bg);
+    --ab-deep: var(--surface-1);
+    --ab-kelp: var(--surface-2);
+    --ab-kelp-2: var(--surface-hover);
+    --ab-line: var(--border);
+    --ab-line-2: var(--border-strong);
+    --ab-text: var(--text-1);
+    --ab-mist: var(--text-1);
+    --ab-silver: var(--text-2);
+    --ab-slate: var(--text-3);
+    --ab-phosphor: var(--stat);
+    --ab-aqua: var(--accent);
+    --ab-teal: var(--accent-strong);
+    --ab-pink: var(--accent-2);
+    --color-liquid-abyss: var(--bg);
+    --color-liquid-deep: var(--surface-1);
+    --color-liquid-kelp: var(--surface-2);
+    --color-liquid-mist: var(--text-1);
+    --color-platinum: var(--text-1);
+    --color-silver-mist: var(--text-2);
+    --color-slate-deep: var(--text-3);
+    --color-lavender-phosphor: var(--stat);
+    --gradient-aurora: var(--grad-primary);
+    --gradient-bioluminescent: var(--grad-primary);
+
+}
+
+/* ------------------------------------------------------------------- 3. base */
+html { -webkit-text-size-adjust: 100%; }
+body {
+    background: var(--bg-pattern), var(--bg);
+    background-attachment: fixed;
+    color: var(--text-2);
+    font-family: var(--font-matter);
+    font-size: 15px;
+    line-height: 1.55;
+    letter-spacing: 0;
+    transition: background-color var(--t-base) var(--ease), color var(--t-base) var(--ease);
+}
+h1, h2, h3, h4, h5, h6, .card-title, .module-title, .section-heading-sm {
+    color: var(--text-1);
+    letter-spacing: -0.01em;
+}
+a { color: var(--accent); }
+::selection { background: var(--accent-quiet); color: var(--text-1); }
+
+/* one focus treatment everywhere; never removed */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+}
+:where(button, a, summary, label.hla-check, .calc-tab-btn, .nav-link) { cursor: pointer; }
+:where(button, a)[disabled], :where(button, a).is-disabled { cursor: not-allowed; }
+
+/* data reads better with fixed-width figures */
+.hla-num, .db-sum-value, .hla-tile-value, .stat-value, .kpi-value, td.hla-num, .table-matrix td,
+.risk-percentage, .hs-big, .metric-value { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* scrollbars follow the theme */
+* { scrollbar-color: var(--border-strong) transparent; scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--r-pill); border: 3px solid transparent; background-clip: content-box; }
+*::-webkit-scrollbar-thumb:hover { background: var(--accent); background-clip: content-box; }
+
+/* ------------------------------------------------------------ 3. app shell */
+@media (min-width: 861px) {
+    body:not(.is-landing) { padding-left: var(--sidebar-w); }
+    .ramrt-nav {
+        width: var(--sidebar-w);
+        background: var(--surface-1);
+        border-right: 1px solid var(--border);
+        padding: var(--s-5) var(--s-3) var(--s-4);
+        gap: var(--s-4);
+    }
+    .ramrt-nav .brand-wrapper { padding: 0 var(--s-3) var(--s-2); }
+    .nav-links { gap: 2px; }
+    .nav-links::before {
+        content: 'Navigation';
+        font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--text-3); padding: var(--s-2) var(--s-3) var(--s-2);
+    }
+    .nav-link {
+        position: relative;
+        display: flex; align-items: center; gap: 10px;
+        min-height: var(--tap-min);
+        padding: 10px var(--s-3);
+        border-radius: var(--r-sm);
+        font-size: 13px; font-weight: 500; letter-spacing: 0.01em; text-transform: none;
+        color: var(--text-2);
+        transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+    }
+    .nav-link:hover { background: var(--surface-hover); color: var(--text-1); }
+    .nav-link.active { background: var(--accent-quiet); color: var(--text-1); font-weight: 600; }
+    .nav-link.active::before {
+        content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        width: 3px; height: 20px; border-radius: 0 3px 3px 0; background: var(--accent);
+    }
+    .nav-link .nav-ico { flex: 0 0 var(--icon-md); width: var(--icon-md); height: var(--icon-md); opacity: 0.85; }
+    .nav-link.active .nav-ico { opacity: 1; color: var(--accent); }
+    .nav-action-wrap { margin-top: auto; display: flex; flex-direction: column; gap: var(--s-2); }
+}
+.page-wrapper { padding: 0 var(--s-8) var(--s-12); max-width: calc(var(--content-max) + 64px); margin: 0 auto; }
+@media (max-width: 1100px) { .page-wrapper { padding-left: var(--s-6); padding-right: var(--s-6); } }
+@media (max-width: 640px)  { .page-wrapper { padding-left: var(--s-4); padding-right: var(--s-4); } }
+
+/* sticky top bar */
+.dashboard-top-bar {
+    position: sticky; top: 0; z-index: var(--z-sticky);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+    min-height: var(--topbar-h);
+    margin: 0 calc(var(--s-8) * -1) var(--s-5);
+    padding: var(--s-3) var(--s-8);
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+}
+@media (max-width: 1100px) { .dashboard-top-bar { margin-left: calc(var(--s-6) * -1); margin-right: calc(var(--s-6) * -1); padding-left: var(--s-6); padding-right: var(--s-6); } }
+@media (max-width: 640px)  { .dashboard-top-bar { margin-left: calc(var(--s-4) * -1); margin-right: calc(var(--s-4) * -1); padding-left: var(--s-4); padding-right: var(--s-4); } }
+.db-crumb { font-size: 11.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+.db-crumb-current:last-child { color: var(--text-1); }
+.db-crumb-sep { color: var(--border-strong); }
+.topbar-actions { display: flex; align-items: center; gap: var(--s-2); margin-left: auto; }
+.dash-meta-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface-3); border: 1px solid var(--border); color: var(--text-2);
+    border-radius: var(--r-pill); padding: 6px 12px;
+    font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; white-space: nowrap;
+}
+@media (max-width: 1240px) { .dash-meta-badge { display: none; } }
+.active-pill { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px var(--ok-bg); }
+
+/* ------------------------------------------------------- 3. theme switcher */
+.theme-switch {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: var(--surface-3); border: 1px solid var(--border);
+    border-radius: var(--r-pill); padding: 3px;
+}
+.theme-switch button {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-width: 38px; height: 34px; padding: 0 10px;
+    border: none; background: transparent; color: var(--text-3);
+    border-radius: var(--r-pill); font: inherit; font-size: 12px; font-weight: 500;
+    transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.theme-switch button:hover { color: var(--text-1); background: var(--surface-hover); }
+.theme-switch button[aria-pressed="true"] { background: var(--accent); color: var(--text-on-accent); }
+.theme-switch button[aria-pressed="true"] svg { color: currentColor; }
+.theme-switch svg { width: var(--icon-sm); height: var(--icon-sm); }
+.theme-switch .ts-label { display: none; }
+@media (min-width: 900px) { .theme-switch .ts-label { display: inline; } }
+
+/* --------------------------------------------------------- 3. module header */
+.module-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: var(--s-4); flex-wrap: wrap; margin: var(--s-2) 0 var(--s-6);
+}
+.module-title { font-size: clamp(24px, 2.4vw, 32px); font-weight: 600; line-height: 1.15; margin: 0 0 6px; }
+.module-desc { color: var(--text-2); font-size: 14.5px; line-height: 1.6; margin: 0; max-width: 72ch; }
+
+/* --------------------------------------------------------------- 3. cards */
+.surface-card, .home-card, .lp-feature, .launch-banner-card, .stat-block,
+.ux-details, .protocol-panel, .hla-head {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-1);
+}
+.surface-card { padding: var(--s-6); }
+@media (min-width: 900px) { .surface-card { padding: var(--s-8); } }
+.surface-card + .surface-card { margin-top: var(--s-5); }
+.home-card { padding: var(--s-6); transition: border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease), transform var(--t-base) var(--ease); }
+.home-card:hover { border-color: var(--border-accent); box-shadow: var(--shadow-2); }
+.card-header-bar {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-4);
+    border-bottom: 1px solid var(--border); padding-bottom: var(--s-4); margin-bottom: var(--s-5);
+}
+.card-title { font-size: 16.5px; font-weight: 600; margin: 0; }
+.card-subtitle { color: var(--text-3); font-size: 13px; line-height: 1.55; margin: 6px 0 0; }
+.group-kicker {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: var(--s-2);
+}
+
+/* ----------------------------------------------------------- 3. KPI tiles */
+.db-summary {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: var(--s-3); background: none; border: none; border-radius: 0; overflow: visible;
+    margin-bottom: var(--s-6);
+}
+.db-sum-item {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: var(--s-4) var(--s-5);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md);
+    box-shadow: var(--shadow-1);
+}
+.db-sum-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text-3); }
+.db-sum-value { font-size: 30px; font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; color: var(--stat); }
+.db-sum-value small { font-size: 13px; color: var(--text-3); font-weight: 500; }
+.db-sum-note {
+    grid-column: 1 / -1; padding: var(--s-3) var(--s-4); font-size: 12.5px; color: var(--text-3);
+    background: var(--surface-1); border: 1px dashed var(--border); border-radius: var(--r-sm);
+}
+.hla-tiles-sm { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--s-3); margin-bottom: var(--s-5); }
+.hla-tile {
+    background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--r-sm);
+    padding: var(--s-3) var(--s-4); min-width: 0;
+}
+.hla-tile-value { font-size: 22px; font-weight: 600; line-height: 1.1; color: var(--text-1); }
+.hla-tile-label { font-size: 11.5px; color: var(--text-2); margin-top: 4px; line-height: 1.4; }
+.hla-tile-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+/* -------------------------------------------------------------- 3. tables */
+.matrix-container { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-1); }
+.table-matrix { width: 100%; border-collapse: separate; border-spacing: 0; background: none; }
+.table-matrix thead th {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--surface-3); color: var(--text-3);
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    text-align: left; padding: 10px var(--s-3); border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.table-matrix tbody td {
+    padding: 10px var(--s-3); font-size: 13px; color: var(--text-2);
+    border-bottom: 1px solid var(--border); vertical-align: top;
+}
+.table-matrix tbody tr:last-child td { border-bottom: none; }
+.table-matrix tbody tr { transition: background var(--t-fast) var(--ease); }
+.table-matrix tbody tr:hover td { background: var(--surface-hover); color: var(--text-1); }
+.table-matrix td strong { color: var(--text-1); font-weight: 600; }
+.hla-num { text-align: right; white-space: nowrap; }
+.hla-na { color: var(--text-3); font-size: 12px; }
+
+/* ------------------------------------------------------------- 3. buttons */
+.btn-aurora, .btn-ghost, .btn-primary, .arrow-btn, .ux-link-btn {
+    font-family: inherit;
+    transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease),
+                border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease),
+                opacity var(--t-fast) var(--ease);
+}
+.btn-aurora {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+    min-height: var(--tap-min); padding: 0 var(--s-5);
+    background: var(--grad-primary); color: var(--text-on-accent);
+    border: none; border-radius: var(--r-sm);
+    font-size: 13.5px; font-weight: 600; letter-spacing: 0.01em; text-transform: none;
+    box-shadow: var(--shadow-1);
+}
+.btn-aurora:hover { filter: brightness(1.06); box-shadow: var(--shadow-2); }
+.btn-aurora:active { filter: brightness(0.97); }
+.btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+    min-height: var(--tap-min); padding: 0 var(--s-4);
+    background: var(--surface-3); color: var(--text-1);
+    border: 1px solid var(--border); border-radius: var(--r-sm);
+    font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0;
+}
+.btn-ghost:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+.btn-sm { min-height: 36px; padding: 0 var(--s-3); font-size: 12.5px; }
+.btn-aurora[disabled], .btn-ghost[disabled] { opacity: 0.45; pointer-events: none; }
+.hla-toolbar { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; margin-top: var(--s-4); }
+.action-cluster { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-4); }
+.ux-link-btn { background: none; border: none; padding: 0; color: var(--accent); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+.ux-link-btn:hover { color: var(--accent-strong); }
+.arrow-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: var(--r-sm);
+    background: var(--surface-3); border: 1px solid var(--border); color: var(--text-2);
+}
+.arrow-btn:hover { background: var(--surface-hover); color: var(--text-1); }
+
+/* -------------------------------------------------------------- 3. fields */
+.control-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+.control-input, .control-select, textarea.control-input, .hla-textarea, .hla-gi {
+    width: 100%; box-sizing: border-box;
+    min-height: var(--tap-min); padding: 10px var(--s-3);
+    background: var(--surface-1); color: var(--text-1);
+    border: 1px solid var(--border); border-radius: var(--r-sm);
+    font-family: inherit; font-size: 14px; line-height: 1.5;
+    transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+.control-input::placeholder, .hla-textarea::placeholder { color: var(--text-3); opacity: 1; }
+.control-input:hover, .control-select:hover { border-color: var(--border-strong); }
+.control-input:focus, .control-select:focus, .hla-textarea:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-quiet);
+}
+textarea.control-input, .hla-textarea { min-height: 92px; resize: vertical; }
+.control-caption { display: block; font-size: 12px; color: var(--text-3); margin-top: 6px; line-height: 1.5; }
+.control-field { margin-bottom: var(--s-4); }
+.hla-check { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap-min); font-size: 13px; color: var(--text-2); }
+.hla-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.grid-cols-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s-4); }
+
+/* module cards: as many across as fit, so no half-empty row */
+.home-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--s-4); margin-bottom: var(--s-5); }
+.home-card-head { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-2); }
+.home-card-head .card-title { margin: 0; }
+.lp-feature-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; flex: 0 0 auto;
+    border-radius: var(--r-sm); background: var(--accent-quiet); color: var(--accent);
+}
+.db-sum-value:not(:has(small)):empty::after { content: '–'; color: var(--text-3); }
+
+/* --------------------------------------------------------- 3. tabs (segmented) */
+.calc-tab-bar {
+    display: flex; gap: var(--s-1); flex-wrap: wrap;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: var(--r-md); padding: var(--s-1); margin-bottom: var(--s-5);
+}
+.calc-tab-btn {
+    display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px;
+    flex: 1 1 auto; min-height: var(--tap-min); padding: 8px var(--s-4);
+    background: transparent; border: none; border-radius: var(--r-sm);
+    color: var(--text-3); font-family: inherit; font-size: 13px; font-weight: 500; text-align: left;
+    transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.calc-tab-btn:hover { background: var(--surface-hover); color: var(--text-1); }
+.calc-tab-btn.active { background: var(--surface-3); color: var(--text-1); font-weight: 600; box-shadow: inset 0 0 0 1px var(--border-strong); }
+.tab-badge-advisory { font-size: 10.5px; font-weight: 500; letter-spacing: 0.06em; color: var(--text-3); text-transform: none; }
+.calc-tab-btn.active .tab-badge-advisory { color: var(--accent); }
+/* the sidebar is the navigation on desktop; the tab bar is its phone equivalent */
+@media (min-width: 861px) { .calc-tab-bar { display: none; } }
+
+/* --------------------------------------------------- 3. chips, badges, status */
+.hla-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: var(--r-pill);
+    background: var(--surface-3); border: 1px solid var(--border);
+    color: var(--text-2); font-size: 11.5px; font-weight: 500; white-space: nowrap;
+}
+.hla-chip-ok { background: var(--ok-bg); border-color: transparent; color: var(--ok); }
+.hla-chip-warn { background: var(--warn-bg); border-color: transparent; color: var(--warn); }
+.hla-chip-err { background: var(--danger-bg); border-color: transparent; color: var(--danger); }
+.hla-chip-inferred { border-style: dashed; border-color: var(--border-strong); color: var(--text-2); }
+.hla-chip-ie { background: color-mix(in srgb, var(--accent-2) 22%, transparent); border-color: transparent; color: var(--accent-2); font-weight: 600; }
+.hla-chip-abv { background: var(--info-bg); border-color: transparent; color: var(--info); }
+.hla-chip-plain { background: var(--surface-3); color: var(--text-2); }
+.ux-count {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px;
+    padding: 0 7px; border-radius: var(--r-pill);
+    background: var(--accent-quiet); color: var(--accent); font-size: 11.5px; font-weight: 600;
+}
+.ux-status {
+    display: flex; align-items: flex-start; gap: var(--s-3);
+    padding: var(--s-3) var(--s-4); margin: var(--s-4) 0;
+    border: 1px solid var(--border); border-left: 3px solid var(--text-3);
+    border-radius: var(--r-sm); background: var(--surface-1);
+    font-size: 13.5px; line-height: 1.55; color: var(--text-2);
+}
+.ux-status-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; flex: 0 0 auto; background: var(--text-3); }
+.ux-status-ok { border-left-color: var(--ok); background: var(--ok-bg); color: var(--text-1); }
+.ux-status-ok .ux-status-dot { background: var(--ok); }
+.ux-status-warn { border-left-color: var(--warn); background: var(--warn-bg); color: var(--text-1); }
+.ux-status-warn .ux-status-dot { background: var(--warn); }
+.ux-status-err { border-left-color: var(--danger); background: var(--danger-bg); color: var(--text-1); }
+.ux-status-err .ux-status-dot { background: var(--danger); }
+.ux-status-idle { border-left-color: var(--border-strong); }
+.hla-warn { border-radius: var(--r-sm); border-left: 3px solid var(--border-strong); background: var(--surface-1); color: var(--text-2); padding: 10px var(--s-3); font-size: 12.5px; }
+.hla-warn-error { border-left-color: var(--danger); background: var(--danger-bg); }
+.hla-warn-warn { border-left-color: var(--warn); background: var(--warn-bg); }
+.hla-warn-info { border-left-color: var(--info); background: var(--info-bg); }
+.hla-warn-ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.hla-ref-info { font-size: 12.5px; line-height: 1.6; color: var(--text-3); }
+.hla-flash { font-size: 12.5px; color: var(--accent); min-height: 18px; margin-top: var(--s-2); }
+
+/* ------------------------------------------------------- 3. disclosure blocks */
+.ux-details { border-radius: var(--r-md); overflow: hidden; margin-top: var(--s-4); }
+.ux-details > summary {
+    display: flex; align-items: center; gap: var(--s-2);
+    list-style: none; padding: var(--s-3) var(--s-4); min-height: var(--tap-min);
+    color: var(--text-1); font-size: 13.5px; font-weight: 600;
+    background: var(--surface-2); transition: background var(--t-fast) var(--ease);
+}
+.ux-details > summary::-webkit-details-marker { display: none; }
+.ux-details > summary::before {
+    content: ''; width: 8px; height: 8px; flex: 0 0 auto;
+    border-right: 2px solid var(--text-3); border-bottom: 2px solid var(--text-3);
+    transform: rotate(-45deg); transition: transform var(--t-base) var(--ease); margin-right: 2px;
+}
+.ux-details[open] > summary::before { transform: rotate(45deg); }
+.ux-details > summary:hover { background: var(--surface-hover); }
+.ux-details-body { padding: var(--s-4); border-top: 1px solid var(--border); background: var(--surface-1); }
+
+/* ------------------------------------------------------------- 3. landing */
+.landing-header { background: color-mix(in srgb, var(--bg) 80%, transparent); border-bottom: 1px solid var(--border); }
+.lp-feature { padding: var(--s-6); }
+.lp-feature-icon { color: var(--accent); }
+
+/* --------------------------------------------------------------- 3. dock */
+.ux-dock { z-index: var(--z-dock); }
+.ux-dock-btn {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-1);
+    box-shadow: var(--shadow-2);
+}
+.ux-dock-btn:hover { background: var(--surface-hover); }
+.ux-dock-panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--shadow-3); color: var(--text-2); }
+
+/* ------------------------------------------------------------ 3. utilities */
+.u-hide { display: none !important; }
+.u-row { display: flex; align-items: center; gap: var(--s-2); }
+.u-muted { color: var(--text-3); }
+.ux-muted { color: var(--text-3); }
+.icon { width: var(--icon-md); height: var(--icon-md); flex: 0 0 auto; }
+.icon-sm { width: var(--icon-sm); height: var(--icon-sm); }
+
+/* ------------------------------------------------------------ 3. motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+    }
+}
+
+/* ------------------------------------------------------------- 3. print */
+@media print {
+    body { background: #fff; color: #000; }
+    .ramrt-nav, .ux-dock, .dashboard-top-bar, .calc-tab-bar, .hla-toolbar { display: none !important; }
+    .surface-card, .db-sum-item, .hla-tile { border: 1px solid #ccc; box-shadow: none; background: #fff; }
+    details { display: block; }
+    details > summary { display: none; }
+}
+
+/* ------------------------------------------------------- 3. inline icon buttons */
+.preset-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    min-height: 38px; padding: 0 var(--s-3);
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-pill);
+    color: var(--text-2); font-size: 12.5px; font-weight: 500;
+    transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.preset-chip:hover { background: var(--surface-hover); color: var(--text-1); border-color: var(--border-strong); }
+.preset-chip.active { background: var(--accent-quiet); border-color: var(--border-accent); color: var(--text-1); font-weight: 600; }
+.preset-chip svg, .btn-ghost svg, .btn-aurora svg { flex: 0 0 auto; }
+.hla-legend { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; font-size: 12px; color: var(--text-3); }
+
+/* ---------------------------------------------- 3. landing hero in light mode */
+/* The hero is a showpiece: the 3D helix and the aurora buttons were drawn for a
+   dark canvas. In light mode it stays a dark island by re-declaring the theme
+   tokens for that subtree only — everything inside reads tokens, so it follows. */
+[data-theme="light"] .hero-3d {
+    --bg: var(--p-abyss);
+    --surface-1: var(--p-deep);
+    --surface-2: #032e2b;
+    --surface-3: var(--p-kelp);
+    --surface-hover: var(--p-kelp-2);
+    --border: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(203, 255, 252, 0.28);
+    --border-accent: rgba(203, 255, 252, 0.45);
+    --text-1: var(--p-mist);
+    --text-2: #c9d6d4;
+    --text-3: #93a5a3;
+    --accent: var(--p-aqua);
+    --accent-quiet: rgba(203, 255, 252, 0.12);
+    --text-on-accent: #00201e;
+    --grad-primary: linear-gradient(90deg, #cbfffc 0%, #edfffe 26%, #fffdfa 48%, #fad1ff 100%);
+
+    /* legacy names used by the older stylesheets; repeated per scope on purpose:
+       a `var()` alias resolves where it is declared, not where it is used */
+    --ab-canvas: var(--bg);
+    --ab-deep: var(--surface-1);
+    --ab-kelp: var(--surface-2);
+    --ab-kelp-2: var(--surface-hover);
+    --ab-line: var(--border);
+    --ab-line-2: var(--border-strong);
+    --ab-text: var(--text-1);
+    --ab-mist: var(--text-1);
+    --ab-silver: var(--text-2);
+    --ab-slate: var(--text-3);
+    --ab-phosphor: var(--stat);
+    --ab-aqua: var(--accent);
+    --ab-teal: var(--accent-strong);
+    --ab-pink: var(--accent-2);
+    --color-liquid-abyss: var(--bg);
+    --color-liquid-deep: var(--surface-1);
+    --color-liquid-kelp: var(--surface-2);
+    --color-liquid-mist: var(--text-1);
+    --color-platinum: var(--text-1);
+    --color-silver-mist: var(--text-2);
+    --color-slate-deep: var(--text-3);
+    --color-lavender-phosphor: var(--stat);
+    --gradient-aurora: var(--grad-primary);
+    --gradient-bioluminescent: var(--grad-primary);
+    background: var(--p-abyss);
+    color: var(--text-2);
+}
+[data-theme="light"] .hero-3d .hero-3d-title,
+[data-theme="light"] .hero-3d .hero-3d-sub { color: var(--text-1); }
+[data-theme="light"] .hero-3d .hero-3d-sub { color: var(--text-2); }
+
+/* secondary hero actions need a visible container in both themes */
+.hero-actions .btn-ghost {
+    background: color-mix(in srgb, var(--surface-3) 70%, transparent);
+    border-color: var(--border-strong);
+}
+.hero-actions .btn-ghost:hover { background: var(--surface-hover); }
+
+/* the aliases below resolve where they are declared, so the hero island needs its own */
+[data-theme="light"] .hero-3d {
+    --gradient-aurora: linear-gradient(90deg, #cbfffc 0%, #edfffe 26%, #fffdfa 48%, #fad1ff 100%);
+    --gradient-bioluminescent: linear-gradient(90deg, #00827c 0%, #cbfffc 100%);
+}
+
+/* ------------------------------------------------------------- 3. modal */
+.ux-modal { background: var(--scrim); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.ux-modal-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-3); }
+.ux-modal-head { border-bottom: 1px solid var(--border); padding-bottom: var(--s-3); }
+.ux-modal-close { background: var(--surface-3); border: 1px solid var(--border); color: var(--text-1); border-radius: var(--r-sm); min-height: 36px; padding: 0 var(--s-3); }
+.ux-modal-close:hover { background: var(--surface-hover); }
+.ux-modal-lead { font-size: 13.5px; color: var(--text-2); line-height: 1.6; margin: var(--s-3) 0 var(--s-2); }
+.ux-modal-lead strong { color: var(--text-1); }
+.ux-glossary dt { color: var(--accent); font-weight: 600; }
+.ux-glossary dd { color: var(--text-2); }
+
+/* 3D viewer legend: the swatches mirror the colours used in the model, so they
+   get their own tokens that stay legible in both themes */
+:root, [data-theme="dark"] { --mol-target: #00c9b7; --mol-partner: #cbd5e1; --mol-peptide: #fbbf24; }
+[data-theme="light"] { --mol-target: #046b64; --mol-partner: #4a5b6a; --mol-peptide: #8a5a00; }
+.hla-chip-mol-target { border-color: var(--mol-target); color: var(--mol-target); font-weight: 600; }
+.hla-chip-mol-partner { border-color: var(--mol-partner); color: var(--mol-partner); }
+.hla-chip-mol-peptide { border-color: var(--mol-peptide); color: var(--mol-peptide); }
+
+/* risk gauge: the quintile bands are a fixed pale ramp in both themes, so their
+   labels are always dark ink rather than a theme colour */
+.ux-gauge-seg { color: #05221f; opacity: 0.92; font-weight: 600; }
+.ux-gauge-seg.active { opacity: 1; outline: 2px solid var(--text-1); outline-offset: 1px; }
+.ux-gauge-labels { color: var(--text-3); }
+.quintile-indicator { color: var(--text-1); }
+.quintile-subtext { color: var(--text-3); }
+.form-hint, .hla-hint { color: var(--text-3); font-size: 12.5px; line-height: 1.55; }
+[data-theme="light"] { --tag-inconclusive: #7b2fb5; }
+
+/* keyboard users get the same 2px ring on fields that buttons have; pointer focus
+   keeps the softer inner glow set above */
+.control-input:focus-visible, .control-select:focus-visible,
+.hla-textarea:focus-visible, .hla-gi:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+/* the ambient helix was drawn for the dark canvas; keep it a whisper on paper */
+[data-theme="light"] .dna-ambient { opacity: 0.18; }
+
+/* standalone controls keep a 24px target even when they look like text (WCAG 2.2);
+   links that sit inside a sentence keep the inline exception */
+.db-crumb .back-link-btn { display: inline-flex; align-items: center; min-height: 24px; padding: 0 2px; }
+
+/* landing marquee: outlined display type needs its own tokens, since a stroke drawn
+   for a dark canvas disappears on paper */
+:root, [data-theme="dark"] {
+    --marquee-stroke: rgba(203, 255, 252, 0.34);
+    --marquee-fill: rgba(203, 255, 252, 0.10);
+    --marquee-band: var(--surface-1);
+}
+[data-theme="light"] {
+    --marquee-stroke: rgba(4, 107, 100, 0.38);
+    --marquee-fill: rgba(4, 107, 100, 0.12);
+    --marquee-band: var(--surface-3);
+}
+
+/* risk ramp for the sandbox gauge, read by motion.js so it follows the theme */
+:root, [data-theme="dark"] {
+    --q1: #00d2c4; --q2: #44e5d8; --q3: #cbfffc; --q4: #fad1ff; --q5: #ff88a5;
+}
+[data-theme="light"] {
+    --q1: #067a70; --q2: #2b6f92; --q3: #6d3a8f; --q4: #a02a86; --q5: #b42350;
+}
+[data-theme="light"] .hero-3d {
+    --q1: #00d2c4; --q2: #44e5d8; --q3: #cbfffc; --q4: #fad1ff; --q5: #ff88a5;
+}
+
+/* ==========================================================================
+   INTERFACE SCALE
+   Renders the desktop UI at a chosen density without touching browser zoom.
+   `zoom` re-lays the content out (it is not a transform), so the page still
+   fills the window and text stays crisp — the same result as setting the
+   browser to 80%, but it travels with the app.
+
+   Only `vh` lengths need compensating: they resolve against the viewport
+   before the zoom is applied, so a 100vh panel would come out short. --vh and
+   --vw are pre-divided by the scale for exactly that. Phones stay at 1:1 so
+   body text never drops below the readable minimum.
+   ========================================================================== */
+:root {
+    --ui-scale: 1;
+    --vh: calc(1vh / var(--ui-scale));
+    --vw: calc(1vw / var(--ui-scale));
+}
+@media (min-width: 861px) {
+    body { zoom: var(--ui-scale); min-height: calc(100 * var(--vh)); }
+    .ramrt-nav { height: calc(100 * var(--vh)); max-height: calc(100 * var(--vh)); }
+    .hero-3d { min-height: calc(100 * var(--vh)); }
+    #particle-canvas, .dna-ambient { width: calc(100 * var(--vw)); height: calc(100 * var(--vh)); }
+    .ux-modal-card { max-height: calc(88 * var(--vh)); }
+}
+html { background: var(--bg); }
+
+.scale-switch { display: none; }
+@media (min-width: 1100px) {
+    .scale-switch {
+        display: inline-flex; align-items: center; gap: 2px;
+        background: var(--surface-3); border: 1px solid var(--border);
+        border-radius: var(--r-pill); padding: 3px;
+    }
+    .scale-switch .ss-ico { display: inline-flex; align-items: center; padding: 0 6px 0 8px; color: var(--text-3); }
+    .scale-switch .ss-ico svg { width: var(--icon-sm); height: var(--icon-sm); }
+    .scale-switch button {
+        min-width: 40px; height: 34px; padding: 0 8px;
+        border: none; background: transparent; color: var(--text-3);
+        border-radius: var(--r-pill); font: inherit; font-size: 12px; font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+    }
+    .scale-switch button:hover { color: var(--text-1); background: var(--surface-hover); }
+    .scale-switch button[aria-pressed="true"] { background: var(--accent); color: var(--text-on-accent); }
+}

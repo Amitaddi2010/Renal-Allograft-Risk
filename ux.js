@@ -41,40 +41,18 @@
         if (b) b.textContent = window.__ramrtStopAnim ? '▶ Turn background motion on' : '⏸ Turn background motion off';
     }
 
-    /* ---- theme: "abyss" (dark teal terminal, default) or "glass" (light frosted look) ---- */
-    function themeLink() { return $('theme-glass'); }
-    function currentTheme() { const l = themeLink(); return (l && !l.disabled) ? 'glass' : 'abyss'; }
-    function applyTheme(name) {
-        name = name === 'glass' ? 'glass' : 'abyss';
-        const l = themeLink();
-        if (l) l.disabled = (name !== 'glass');
-        document.documentElement.setAttribute('data-theme', name);
-        try { localStorage.setItem('ramrt-theme', name); } catch (e) { /* ignore */ }
-        const b = $('ux-theme-btn');
-        if (b) b.textContent = name === 'glass' ? '◑ Abyss look' : '◐ Light glass look';
-        if (typeof window.refreshDnaScenes === 'function') window.refreshDnaScenes();
-    }
-    (function initTheme() {
-        let t = 'abyss';
-        try { t = localStorage.getItem('ramrt-theme') === 'glass' ? 'glass' : 'abyss'; } catch (e) { /* ignore */ }
-        const l = themeLink();
-        if (l) l.disabled = (t !== 'glass');
-        document.documentElement.setAttribute('data-theme', t);
-    })();
+    /* theme (light / dark / system) lives in theme_mode.js and the switch in the top bar */
 
     function buildDock() {
         if ($('ux-dock')) return;
         const dock = document.createElement('div');
         dock.id = 'ux-dock'; dock.className = 'ux-dock';
         dock.innerHTML = '<button type="button" id="ux-help-btn" title="Plain-language explanations of the terms used on this page">? Help &amp; glossary</button>' +
-            '<button type="button" id="ux-theme-btn" title="Switch between the dark abyss look and the light glass look"></button>' +
             '<button type="button" id="ux-motion-btn" title="The animated background can be distracting or slow on some computers"></button>';
         document.body.appendChild(dock);
         $('ux-help-btn').addEventListener('click', openGlossary);
-        $('ux-theme-btn').addEventListener('click', function () { applyTheme(currentTheme() === 'glass' ? 'abyss' : 'glass'); });
         $('ux-motion-btn').addEventListener('click', function () { setMotion(!!window.__ramrtStopAnim); });
         updateMotionBtn();
-        applyTheme(currentTheme());
     }
 
     function buildGlossary() {
@@ -83,7 +61,7 @@
         m.id = 'ux-glossary-modal'; m.className = 'ux-modal';
         m.innerHTML = '<div class="ux-modal-card" role="dialog" aria-modal="true" aria-labelledby="ux-glossary-title">' +
             '<div class="ux-modal-head"><h3 id="ux-glossary-title">Help &amp; glossary</h3><button type="button" class="ux-modal-close" id="ux-glossary-close">Close ✕</button></div>' +
-            '<p style="font-size:13.5px;color:#bbc7c6;line-height:1.55;margin:0 0 6px;"><strong style="color:#fff;">How to use the calculator.</strong> Tab 2: paste or type the recipient and donor HLA alleles; the mismatch tables update as you type. Press <em>Send to risk calculator</em> to copy the antigen mismatches and eplet loads into tab 1, where donor age, induction and crossmatch values complete the rejection-risk estimate.</p>' +
+            '<p class="ux-modal-lead"><strong>How to use the calculator.</strong> Tab 2: paste or type the recipient and donor HLA alleles; the mismatch tables update as you type. Press <em>Send to risk calculator</em> to copy the antigen mismatches and eplet loads into tab 1, where donor age, induction and crossmatch values complete the rejection-risk estimate.</p>' +
             '<dl class="ux-glossary">' + GLOSSARY.map(function (g) { return '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>'; }).join('') + '</dl>' +
             '</div>';
         document.body.appendChild(m);
@@ -132,7 +110,10 @@
         }
     }
 
-    window.UX = { openGlossary: openGlossary, closeGlossary: closeGlossary, setMotion: setMotion, afterRisk: afterRisk, applyTheme: applyTheme, currentTheme: currentTheme, GLOSSARY: GLOSSARY };
+    window.UX = { openGlossary: openGlossary, closeGlossary: closeGlossary, setMotion: setMotion, afterRisk: afterRisk,
+        applyTheme: function (m) { if (window.ThemeMode) ThemeMode.set(m); },            /* kept for older callers */
+        currentTheme: function () { return window.ThemeMode ? ThemeMode.resolved() : 'dark'; },
+        GLOSSARY: GLOSSARY };
     document.addEventListener('DOMContentLoaded', function () {
         buildDock();
         buildGlossary();

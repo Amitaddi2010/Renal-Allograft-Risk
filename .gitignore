@@ -27,3 +27,13 @@ structures/
 # tools/fetch_imgt_alignments.py); the trimmed hla_molecular_data.js is tracked
 tools/imgt_cache/
 tools/imgt_alignments.json
+
+# HED/AAMS/EMS3D build intermediates (regenerate with tools/build_hla_scores_reference.py and
+# tools/ems3d/build_ems3d.py); the generated hla_scores_data.js and hla_ems3d_*.js are tracked
+tools/hla_scores_sequences.json
+tools/ems3d/work/
+tools/ems3d/.venv/
+tools/ems3d/apbs*/
+
+# Python bytecode
+__pycache__/

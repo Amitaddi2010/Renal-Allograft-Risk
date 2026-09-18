@@ -197,7 +197,7 @@
                         <div class="ux-details-body">
                             <div class="matrix-container">
                                 <table class="table-matrix hla-table" id="hla-mol-locus-table">
-                                    <thead><tr><th>Locus</th><th>AA mismatch</th><th>Solvent-accessible</th><th>Electrostatic</th><th>Hydropathy</th><th>Recipient HED</th></tr></thead>
+                                    <thead><tr><th>Locus</th><th>AA mismatch</th><th>Solvent-accessible</th><th>Charge difference</th><th>Hydropathy</th><th>Recipient HED</th></tr></thead>
                                     <tbody id="hla-mol-locus-body"></tbody>
                                 </table>
                             </div>
@@ -209,14 +209,10 @@
                                 </table>
                             </div>
                             <p class="hla-ref-info" style="margin-top:12px;">
-                                <strong>What these are.</strong> Our own implementations of three published methods, computed in this browser from IPD-IMGT/HLA protein alignments and published amino-acid constants:
-                                amino-acid mismatch in the style of <strong>HLA-EMMA</strong> (Kramer et al., HLA 2020) &mdash; donor residues the recipient carries on neither allele, with the solvent-accessible subset shown separately;
-                                <strong>electrostatic and hydropathy</strong> mismatch in the style of the Kosmoliaptsis scores; and <strong>HLA evolutionary divergence (HED)</strong>, the Grantham distance between a person&#39;s own two alleles across the peptide-binding domain (Pierini &amp; Lenz 2018).
-                                Solvent accessibility is computed with Shrake&ndash;Rupley on a representative structure per locus (HLA molecule only, peptide and co-receptors removed) and normalised by the Tien et al. 2013 maxima; a position counts as accessible at &ge; 25% relative ASA.
+                                <strong>What these are.</strong> The <strong>AAMS</strong>, <strong>EMS3D</strong> and <strong>HED</strong> tiles come from the <a href="#scores" class="ux-link-btn" style="margin-left:0;">HED &middot; AAMS &middot; EMS3D tab</a>, which implements the published Kosmoliaptsis and HLAdiv.net calculations and explains them. The other columns are our own measures computed in this browser from IPD-IMGT/HLA protein alignments: amino-acid mismatch in the style of <strong>HLA-EMMA</strong> (Kramer et al., HLA 2020) &mdash; donor residues the recipient carries on neither allele of the same locus, with the solvent-accessible subset shown separately &mdash; and the summed <strong>charge</strong> and <strong>hydropathy</strong> (Kyte&ndash;Doolittle) differences at those accessible positions. Solvent accessibility is computed with Shrake&ndash;Rupley on a representative structure per locus (HLA molecule only, peptide and co-receptors removed) and normalised by the Tien et al. 2013 maxima; a position counts as accessible at &ge; 25% relative ASA.
                             </p>
                             <p class="hla-ref-info">
-                                <strong>What these are not.</strong> They are not the output of HLA-EMMA, PIRCHE-II or the Kosmoliaptsis tools, and the values are <em>not</em> interchangeable with them &mdash; use them for ranking within this cohort, not as a substitute for those services.
-                                <strong>PIRCHE-II is deliberately absent:</strong> it needs a licensed peptide&ndash;MHC binding predictor, so it cannot be reproduced here honestly. HED describes one person&#39;s own genotype, not the donor&ndash;recipient relationship, and must not be read as a mismatch count.
+                                <strong>What these are not.</strong> The HLA-EMMA-style, charge and hydropathy columns are not the output of HLA-EMMA or PIRCHE-II and are <em>not</em> interchangeable with them &mdash; use them for ranking within this cohort. The charge difference is not the electrostatic mismatch score (EMS3D). <strong>PIRCHE-II is deliberately absent:</strong> it needs a licensed peptide&ndash;MHC binding predictor, so it cannot be reproduced here honestly. HED describes one person&#39;s own genotype, not the donor&ndash;recipient relationship, and must not be read as a mismatch count.
                             </p>
                         </div>
                     </details>
@@ -273,7 +269,6 @@
                                 <a class="ux-link-btn" href="https://www.pirche.com/" target="_blank" rel="noopener noreferrer">pirche.com &#8599;</a>
                                 <a class="ux-link-btn" href="https://hla-emma.com/" target="_blank" rel="noopener noreferrer">hla-emma.com &#8599;</a>
                                 <a class="ux-link-btn" href="https://tools.iedb.org/main/bcell/" target="_blank" rel="noopener noreferrer">IEDB B-cell tools &#8599;</a>
-                                <a class="ux-link-btn" href="https://hladiv.net/" target="_blank" rel="noopener noreferrer">hladiv.net &#8599;</a>
                             </div>
                             <pre id="hla-bridge-preview" class="hla-bridge-pre"></pre>
 

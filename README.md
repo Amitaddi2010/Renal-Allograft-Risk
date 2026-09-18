@@ -58,15 +58,25 @@ $$\text{Probability of 1-Year Acute Rejection} = \frac{1}{1 + e^{-\text{logit}(P
 
 ---
 
-## 🎨 RAMRT Design System
+## 🎨 RAMRT Design System (tokens + light/dark)
 
-The application is styled following the **RAMRT Design System** — an abyssal fintech terminal aesthetic:
-- **Canvas:** Liquid Abyss (`#012624`) with an interactive 3D rotating bioluminescent particle sphere.
-- **Surfaces:** Liquid Deep (`#011d1c`) for recessed panels and Liquid Kelp (`#003734`) for lifted feature cards.
-- **Strict Elevation:** Zero drop shadows or artificial box shadows; depth is communicated through water-immersion surface tiers.
-- **Typography:** Geometric display typography with tight negative tracking on headings and wide uppercase tracking on instrumentation labels.
-- **Accent:** Signature Aurora Gradient (`#cbfffc` $\rightarrow$ `#fad1ff`) for primary action triggers and Lavender Phosphor (`#fde9ff`) for glowing statistical counters.
-- **Responsive:** Fluid layout optimized for mobile screens (320px+), tablets, laptops, and wide monitors.
+The interface follows the *data-dense dashboard* pattern: a fixed icon sidebar, a sticky top bar, KPI tiles, and dense tables — built on a three-layer token system in [`ramrt_ui.css`](ramrt_ui.css), which is loaded last and owns the visual language.
+
+| Layer | What it holds | Example |
+|---|---|---|
+| **Primitives** | the brand ramps, never used directly | `--p-abyss #011314`, `--p-aqua #cbfffc`, `--p-phosphor #fde9ff` |
+| **Semantic** | the roles components read, redefined per theme | `--bg`, `--surface-1/2/3`, `--text-1/2/3`, `--accent`, `--stat`, `--ok/warn/danger/info`, `--border`, `--focus`, `--shadow-1/2/3` |
+| **Components** | shell, cards, KPI tiles, tables, buttons, fields, tabs, chips, disclosures, modal | `.surface-card`, `.db-sum-item`, `.table-matrix`, `.btn-aurora`, `.calc-tab-bar` |
+
+**The palette is unchanged** — abyss/deep/kelp teals, aqua, lavender phosphor and the aurora gradient. What changed is the organisation: colours are no longer hardcoded in components (336 literals across the older stylesheets were rewritten as tokens), so a second theme is a matter of redefining one block.
+
+**Theme mode.** A Light / Dark switch sits in the top bar ([`theme_mode.js`](theme_mode.js)). The choice is stored in `localStorage` under `ramrt-theme`; **dark is the default**, and the retired values (`system`, `abyss`, `glass`) are mapped over on first load. An inline script in `<head>` sets the theme before first paint, so there is no flash, and `<meta name="theme-color">` follows the theme. Dark is the Auros abyssal terminal; light puts the same palette on a paper canvas. The landing hero stays a dark island in both themes — the 3D helix and aurora buttons were drawn for a dark canvas — which is done by re-declaring the tokens for that subtree.
+
+**Interface scale.** A second control in the top bar renders the desktop UI at **80%** (the default), 90% or 100% density, so the app looks the way it does at 80% browser zoom without anyone touching browser zoom. It sets `--ui-scale`, which `ramrt_ui.css` applies as `zoom` above 860px — a real re-layout, so the page still fills the window and text stays crisp. `vh` lengths are the one thing `zoom` does not adjust, so the full-height panels use `--vh`/`--vw` (pre-divided by the scale). Phones stay at 1:1 so body text never drops below the readable minimum. The choice is stored under `ramrt-ui-scale`, and browser zoom still works on top of it.
+
+**Rules applied** (from the `ui-ux-pro-max` design skill, *Data-Dense Dashboard* style): SVG icons rather than emoji; one focus treatment (2px ring, 2px offset) on every control; 44px minimum touch targets; 150–260ms transitions on a shared easing token; 4/8px spacing rhythm; tabular figures for every number column; sticky table headers; `prefers-reduced-motion` honoured; breakpoints at 375 / 640 / 860 / 1100 / 1440.
+
+**Contrast.** Every text token pair is checked against WCAG AA in both themes (body text 9.8:1, captions ≥5.7:1, accents ≥5.7:1, primary button label ≥6.4:1), and each view is swept in the browser for text below 4.5:1 and targets under 24px.
 
 ---
 
@@ -88,7 +98,7 @@ Open your browser at `http://localhost:8080/`.
 
 ## 🧭 Using the app
 
-- **Structure**: two pages. The **landing page** is a single hero section with an animated 3D DNA helix (`dna_hero.js`, plain 2D-canvas perspective renderer, no library; a static frame under the reduced-motion setting) and two buttons: *Open dashboard* and *Try the example pair*. The **dashboard** follows the Auros "abyssal terminal" style system (`dashboard_theme.css`: teal surface stack abyss → deep → kelp, no shadows, 16 px cards, tracked uppercase labels, lavender-phosphor statistics, aurora-gradient primary button) with a sidebar (Dashboard, Risk calculator, HLA & eplets, Back to site), a summary strip (antigen mismatches, mismatched eplets, immunogenic eplets, predicted risk) and a home page with module shortcuts, recent HLA analyses and risk estimates (saved in the browser with *Save to recent* / *Save estimate*), reference-data status and the collapsible study evidence. Deep links: `#dashboard`, `#risk`, `#hla`, `#hla-example`, `#hla-3d-example`. A light frosted-glass alternative (`dashboard_glass.css`) can be switched on from the help dock ("Light glass look"); the choice is remembered per browser. `tools/rebuild_views.py` regenerates the landing page, summary strip and home pane idempotently.
+- **Structure**: two pages. The **landing page** is a single hero section with an animated 3D DNA helix (`dna_hero.js`, plain 2D-canvas perspective renderer, no library; a static frame under the reduced-motion setting) and two buttons: *Open dashboard* and *Try the example pair*. The **dashboard** follows the Auros "abyssal terminal" style system (`dashboard_theme.css`: teal surface stack abyss → deep → kelp, no shadows, 16 px cards, tracked uppercase labels, lavender-phosphor statistics, aurora-gradient primary button) with a sidebar (Dashboard, Risk calculator, HLA & eplets, HED · AAMS · EMS3D, Back to site), a sticky top bar with the breadcrumb and the theme switch, a summary strip (antigen mismatches, mismatched eplets, immunogenic eplets, predicted risk) and a home page with module shortcuts, recent HLA analyses and risk estimates (saved in the browser with *Save to recent* / *Save estimate*), reference-data status and the collapsible study evidence. Deep links: `#dashboard`, `#risk`, `#hla`, `#hla-example`, `#hla-3d-example`, `#scores`, `#scores-example`. A light frosted-glass alternative (`dashboard_glass.css`) can be switched on from the help dock ("Light glass look"); the choice is remembered per browser. `tools/rebuild_views.py` regenerates the landing page, summary strip and home pane idempotently.
 - **Risk calculator**: grouped inputs, a sticky results panel with the probability, risk band gauge, a "What drives this estimate" breakdown (each input's contribution to the log-odds from the locked coefficients), and collapsible band table, suggested actions and model-gain bars. Deep links: `#dashboard` (home), `#risk`, `#hla`, `#hla-example`, `#hla-grid-example`, `#hla-3d-example`. Views are rebuilt with `python tools/rebuild_views.py && python tools/splice_pane.py`.
 - **Three steps**: enter recipient and donor HLA typing (HLA & eplets), read the mismatch dashboard, then press *Send to risk calculator* to carry the antigen-level mismatches and eplet loads into the risk calculator and add donor age, induction and crossmatch values.
 - **Two input modes** on tab 2: *Paste typing* (any common notation, results update as you type) or *Enter by locus* (a grid with allele auto-complete from the reference database). Problems are shown in plain language with candidate alleles.
@@ -170,14 +180,46 @@ The HLA module also reports three measures the eplet tables cannot produce, beca
 | Measure | In the style of | What it counts |
 |---|---|---|
 | **Amino-acid mismatch** | HLA-EMMA (Kramer, *HLA* 2020) | Donor residues the recipient carries on neither allele, at polymorphic positions; the solvent-accessible subset is shown separately |
-| **Electrostatic / hydropathy mismatch** | Kosmoliaptsis scores | Summed charge and Kyte–Doolittle differences at those accessible positions, each donor residue compared with the chemically nearest recipient residue |
-| **HLA evolutionary divergence (HED)** | Pierini & Lenz 2018 | Grantham distance between *one person's own* two alleles across the peptide-binding domain — a genotype property, not a mismatch |
+| **Charge / hydropathy difference** | Kosmoliaptsis 2D scores (approximation) | Summed charge and Kyte–Doolittle differences at those accessible positions, each donor residue compared with the chemically nearest recipient residue. This is **not** EMS3D; the published AAMS and EMS3D are in tab 03 |
+| **HLA evolutionary divergence (HED)** | Pierini & Lenz 2018 | Shown from tab 03's implementation (the HLAdiv.net calculation); `hla_molecular.js` keeps its older per-domain estimate for the API only |
 
 **Data build.** `tools/fetch_imgt_alignments.py` downloads and parses the IMGT protein alignments (codon 1 is read from the file's own numbering line, so leader length is never assumed); `tools/build_molecular_reference.py` emits `hla_molecular_data.js` (0.4 MB): polymorphic positions, per-allele residues for all 2,588 alleles the eplet engine supports, per-position solvent accessibility, and the Grantham / hydropathy / charge constants. Accessibility uses Shrake–Rupley on a representative structure per locus with peptide, CD8 and TCR removed, normalised by Tien et al. 2013 maxima; a position counts as accessible at ≥ 25% relative ASA.
 
 **Validation** (in `node tools/test_engine.js`, 248 checks): Grantham distances reproduce the published matrix at ten spot values; residues reproduce textbook positions (DQB1 Asp57, Bw4/Bw6 at B-80, KIR C1/C2 at C-80, DRB1 86 G/V); the textbook single-residue pairs B\*44:02 vs B\*44:03 and A\*02:01 vs A\*02:06 yield exactly one mismatch, at positions 156 and 9 respectively.
 
 **Deliberately not implemented.** PIRCHE-II requires a licensed peptide–MHC binding predictor, so it cannot be reproduced honestly here; the app links out instead. ElliPro and the IEDB B-cell tools predict epitopes on any protein from structure and are not donor–recipient measures at all. These values are our own implementations and are **not numerically interchangeable** with HLA-EMMA, PIRCHE-II or the Kosmoliaptsis tools — use them for ranking within a cohort, not as a substitute for those services.
+
+## 🧮 HLA divergence & immunogenicity scores — HED, AAMS, EMS3D (tab 03)
+
+The third tab computes, inside the app, the scores that were previously only available from two external web tools: **HLA evolutionary divergence** (HLAdiv.net) and the Kosmoliaptsis **amino-acid mismatch score (AAMS)** and **three-dimensional electrostatic mismatch score (EMS3D)** (HLA Algorithms Shiny app). Nothing is sent to another site. Open it from the sidebar (*HED · AAMS · EMS3D*), with key `4`, or with `#scores` / `#scores-example`; *Use the pair from HLA & eplets* copies the pair typed in tab 02 (including any DRB3/4/5 or DQA1 inferred there). The AAMS, EMS3D and HED headline values also appear in tab 02's molecular block.
+
+| Score | Published method | What the app does |
+|---|---|---|
+| **HED** | Pierini & Lenz, *Mol Biol Evol* 2018; Chowell et al., *Nat Med* 2019 (HLAdiv.net) | Grantham (1974) integer distance averaged over mature residues 2–182 (class I exons 2+3); positions where either allele has no determined residue are left out, with the reference script's own loop bound. Class I mean = mean of HLA-A, -B, -C. DRB1/DQB1 use the script's class II region (β 6–94). Modes: per person, pair, and the HLAdiv batch TSV (`Sample`, `HLAI` = A,A,B,B,C,C) with a TSV download in the site's column layout. |
+| **AAMS** | Kosmoliaptsis et al., *Transplantation* 2009, 2011; *Am J Transplant* 2016 | For each donor molecule the recipient lacks: extracellular positions where the donor residue is absent from every recipient molecule of the comparison set — HLA-A/B/C pooled (class I), DRB1/3/4/5 pooled (DR), each chain within its locus for DQ and DP (heterodimer = α + β). Extracellular range from UniProt (class I 1–284, DRB 1–198); the Cambridge group has not published theirs. |
+| **EMS3D** | Mallon et al., *J Immunol* 2018 | Electrostatic distance ESD = √(2 − 2·SI) (Hodgkin index over a 3 Å skin 4 Å above the molecular surface); EMS3D = minimum ESD to the recipient's class I molecules (class I) or to the recipient's molecules of the same locus (class II). Precomputed, like the original tool. |
+
+DQ and DP chains are paired into heterodimers; for DQ the phase follows the DQA1\*01 ↔ DQB1\*05/06 pairing rule when that decides it, otherwise the typed order (a checkbox switches phase). Per-locus summaries give both the highest value (Kim et al. 2023) and the sum (Kosmoliaptsis et al. 2016).
+
+**Data.** `tools/build_hla_scores_reference.py` turns the cached IPD-IMGT/HLA 3.65.0 protein alignments into `hla_scores_data.js` (0.8 MB; every two-field allele of A, B, C, DRB1/3/4/5, DQA1, DQB1, DPA1, DPB1 without an expression suffix, residues merged across each two-field group, alleles known only over exons 2–3 completed from the closest fully sequenced allele and marked in lower case — HED never uses those residues). `tools/ems3d/build_ems3d.py` builds the EMS3D library in Docker (`tools/ems3d/Dockerfile`: APBS 3.4.1, PDB2PQR/PROPKA, OpenMM, PDBFixer) and writes `hla_ems3d_meta.js` (molecule names, loaded with the page) and `hla_ems3d_I.js`, `_DR.js`, `_DQ.js`, `_DP.js` (distance tables, fetched only when a pair needs them).
+
+```bash
+py tools/build_hla_scores_reference.py
+docker build -t ramrt-ems3d tools/ems3d
+docker run --rm -v "$PWD:/app" ramrt-ems3d python tools/ems3d/build_ems3d.py run --set core --workers 24 --apbs-slots 4 --dime 193
+docker run --rm -v "$PWD:/app" ramrt-ems3d python tools/ems3d/build_ems3d.py export --dime 193
+node tools/test_engine.js
+```
+
+**EMS3D library (built 2026-09-17).** 4,278 molecules: 1,880 class I alleles, DRB1 326, DRB3 33, DRB4 7, DRB5 15, 1,222 DQA1~DQB1 heterodimers (pairing rule applied), 795 DP heterodimers (DPA1\*01:03, \*02:01, \*02:02, \*03:01, \*04:01 × every engine DPB1); 76 molecules are not scored because an allele is no longer a suffix-free two-field name in IMGT 3.65. The within-locus distances match the published distribution closely (e.g. HLA-A median 0.352 vs 0.355, DRB1 0.289 vs 0.276, DP 0.246 vs 0.261). The final build took about 6 hours of wall clock in Docker on this machine (models ~25 s each; APBS is memory-bandwidth bound, ~0.3 molecules/s in parallel); intermediate files (1.7 GB) stay in the git-ignored `tools/ems3d/work/`, so adding molecules only computes the new ones.
+
+**Validation** is in [`validation/HLA_SCORES_VALIDATION.md`](validation/HLA_SCORES_VALIDATION.md); the key points: all nine worked HED examples on HLAdiv.net are reproduced to the last digit, as are the Lenz class II example outputs; residues 2–182 of IMGT 3.65 equal those of IMGT 3.37 (HLAdiv's allele set) for 11,281 of the 11,283 alleles present in both; the EMS3D grid density (193³ over 116 Å) differs from the published 353³ by at most 0.0044 ESD.
+
+**How it differs from the originals.** HED: HLAdiv.net covers class I alleles of IMGT 3.37; this app accepts any IMGT 3.65 allele and adds DRB1/DQB1. AAMS: the extracellular range is UniProt's. EMS3D: Mallon et al. used MODELLER multi-template models; MODELLER needs a licence, so each allele here is threaded onto one template from their list (class I 1K5N, DR 3PDO, DQ 1JK8, DP 4P5M) and relaxed with OpenMM (backbone and unchanged residues restrained). Individual EMS3D values therefore will not equal the Cambridge tool's; molecules not in the library are reported as *not scored*, and when some recipient molecules are unscored the value is shown as an upper bound (≤).
+
+**Precision of EMS3D.** One model fixes one arrangement of the side chains. Models of the same allele built from different random starting points differ by a median ESD of 0.16 (different alleles: 0.48), with vacuum relaxation, implicit solvent or no relaxation alike (`tools/ems3d/seed_check.py`, `protocol_check.py`). The library uses a fixed seed, so it is reproducible, but EMS3D differences below about 0.2 are within modelling noise, and published cut-offs for the Cambridge tool (e.g. HLA-DQ 0.37) do not transfer.
+
+---
 
 ## 🔗 The external tools (PIRCHE-II, HLA-EMMA, IEDB)
 
@@ -226,13 +268,19 @@ Attribution required by MIT is emitted into `hla_reference_v3.js` and shown in t
 ## 📂 Repository Structure
 
 ```
-├── index.html                 # Semantic RAMRT HTML terminal markup & inputs (tabs 01 nomogram, 02 HLA engine)
-├── styles.css                 # RAMRT design tokens, responsive breakpoints & layout
+├── index.html                 # Semantic RAMRT HTML terminal markup & inputs (tabs 01 nomogram, 02 HLA engine, 03 HED/AAMS/EMS3D)
+├── ramrt_ui.css               # Design tokens (light/dark) + the dashboard component layer
+├── theme_mode.js              # System / Light / Dark switch
+├── styles.css                 # Older layout layer (now reads tokens)
 ├── hla_styles.css             # Styles for the HLA mismatch & eplet engine pane
 ├── app.js                     # ElasticNet model math, 3D particle sphere & molecular canvas
 ├── hla_engine.js              # HLA parser, allele/antigen mismatch, eplet & immunogenic load engine (browser + Node)
 ├── hla_ui.js                  # Binds the engine to the dashboard, self-test, send-to-nomogram
 ├── hla_reference_data.js      # GENERATED reference database (HLAMatchmaker v3.1 tables + IE.xlsx)
+├── hla_scores.js              # HED, AAMS and EMS3D (browser + Node)
+├── hla_scores_ui.js           # Tab 03 (HED · AAMS · EMS3D)
+├── hla_scores_data.js         # GENERATED IMGT extracellular residues (tools/build_hla_scores_reference.py)
+├── hla_ems3d_*.js             # GENERATED EMS3D library (tools/ems3d/build_ems3d.py)
 ├── hla_validation_vectors.js  # GENERATED self-test vectors
 ├── reference_sources/         # Source workbooks (IE.xlsx tracked; .xlsb files excluded from git)
 ├── tools/                     # build_hla_reference.py, test_engine.js, build report, validation vectors

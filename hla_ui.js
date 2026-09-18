@@ -214,11 +214,20 @@
                 ie: E.overall.evaluated ? E.overall.ie : null,
                 abver: E.overall.evaluated ? E.overall.abver : null,
                 signature: a.signature || '',
-                error: errs.length ? errs.length + ' invalid allele' + (errs.length > 1 ? 's' : '') : null
+                error: errs.length ? errs.length + ' invalid allele' + (errs.length > 1 ? 's' : '') : null,
+                _analysis: a
             };
         });
         lastBatch = rows;
+        const pendingGroups = attachScores(rows);
         renderBatch(rows);
+        if (pendingGroups.length) {
+            HLAScores.ensureEms3d(pendingGroups, function () {
+                if (lastBatch !== rows) return;
+                attachScores(rows);
+                renderBatch(rows);
+            });
+        }
         $('hla-batch-csv-btn').disabled = false;
         const bad = rows.filter(function (r) { return r.error; }).length;
         flash(rows.length + ' pair' + (rows.length > 1 ? 's' : '') + ' calculated' +
@@ -227,6 +236,31 @@
     }
 
     function num(v) { return (v === null || v === undefined) ? '<span class="hla-na">n/a</span>' : String(v); }
+
+    // AAMS, EMS3D and HED per batch row (hla_scores.js); returns the EMS3D groups still loading
+    function attachScores(rows) {
+        const pending = [];
+        rows.forEach(function (r) {
+            if (!r._analysis) return;
+            const sc = scoresFor(r._analysis);
+            if (!sc) return;
+            const S = sc.scores;
+            let e1 = null, e2 = null;
+            S.molecules.forEach(function (m) {
+                if (m.ems3d.pending && pending.indexOf(m.group) === -1) pending.push(m.group);
+                if (m.ems3d.value === null) return;
+                if (m.klass === 'I') e1 = e1 === null ? m.ems3d.value : Math.max(e1, m.ems3d.value);
+                else e2 = e2 === null ? m.ems3d.value : Math.max(e2, m.ems3d.value);
+            });
+            r.aamsI = S.summary.classI.aamsScored ? S.summary.classI.aams : (S.summary.classI.n ? null : 0);
+            r.aamsII = S.summary.classII.aamsScored ? S.summary.classII.aams : (S.summary.classII.n ? null : 0);
+            r.ems3dI = e1 === null ? null : Math.round(e1 * 1000) / 1000;
+            r.ems3dII = e2 === null ? null : Math.round(e2 * 1000) / 1000;
+            r.hedRecipient = sc.hed.recipient.meanClassI === null ? null : Math.round(sc.hed.recipient.meanClassI * 100000) / 100000;
+            r.hedDonor = sc.hed.donor.meanClassI === null ? null : Math.round(sc.hed.donor.meanClassI * 100000) / 100000;
+        });
+        return pending;
+    }
 
     function renderBatch(rows) {
         const ok = rows.filter(function (r) { return r.epTotal !== null && r.epTotal !== undefined && !r.error; });
@@ -240,22 +274,29 @@
             '<div class="hla-batch-stat"><span class="hla-batch-stat-v">' + med('epTotal') + '</span><span class="hla-batch-stat-l">Median eplet MM</span></div>' +
             '<div class="hla-batch-stat"><span class="hla-batch-stat-v">' + med('ie') + '</span><span class="hla-batch-stat-l">Median immunogenic</span></div>' +
             '<div class="hla-batch-stat"><span class="hla-batch-stat-v">' + med('antigenMM') + '</span><span class="hla-batch-stat-l">Median antigen MM</span></div>';
-        const head = '<thead><tr><th>Row</th><th>Antigen MM</th><th>Class I eplets</th><th>Class II eplets</th><th>Total eplets</th><th>Immunogenic</th><th>Ab-verified</th><th>Notes</th></tr></thead>';
+        const head = '<thead><tr><th>Row</th><th>Antigen MM</th><th>Class I eplets</th><th>Class II eplets</th><th>Total eplets</th><th>Immunogenic</th><th>Ab-verified</th>' +
+            '<th>AAMS I</th><th>AAMS II</th><th>EMS3D I (max)</th><th>EMS3D II (max)</th><th>Recipient HED</th><th>Notes</th></tr></thead>';
         const body = rows.map(function (r) {
             if (r.error && r.epTotal === undefined) {
-                return '<tr class="hla-batch-bad"><td>' + esc(r.label) + '</td><td colspan="7">' + esc(r.error) + '</td></tr>';
+                return '<tr class="hla-batch-bad"><td>' + esc(r.label) + '</td><td colspan="12">' + esc(r.error) + '</td></tr>';
             }
             return '<tr><td>' + esc(r.label) + '</td><td class="hla-num">' + num(r.antigenMM) + '</td><td class="hla-num">' + num(r.epI) +
                 '</td><td class="hla-num">' + num(r.epII) + '</td><td class="hla-num"><strong>' + num(r.epTotal) + '</strong></td><td class="hla-num">' + num(r.ie) +
-                '</td><td class="hla-num">' + num(r.abver) + '</td><td class="hla-batch-note">' + (r.error ? esc(r.error) : '') + '</td></tr>';
+                '</td><td class="hla-num">' + num(r.abver) + '</td><td class="hla-num">' + num(r.aamsI) + '</td><td class="hla-num">' + num(r.aamsII) +
+                '</td><td class="hla-num">' + num(r.ems3dI === null || r.ems3dI === undefined ? null : r.ems3dI.toFixed(3)) +
+                '</td><td class="hla-num">' + num(r.ems3dII === null || r.ems3dII === undefined ? null : r.ems3dII.toFixed(3)) +
+                '</td><td class="hla-num">' + num(r.hedRecipient === null || r.hedRecipient === undefined ? null : r.hedRecipient.toFixed(2)) +
+                '</td><td class="hla-batch-note">' + (r.error ? esc(r.error) : '') + '</td></tr>';
         }).join('');
         $('hla-batch-results').innerHTML = '<div class="matrix-container hla-batch-wrap"><table class="table-matrix hla-batch-table">' + head + '<tbody>' + body + '</tbody></table></div>' +
-            '<p class="hla-ref-info">Eplet loads are computed from the HLAMatchmaker 3.1 tables bundled with this app, using the same cell-based comparison as the single-pair mode. Loci absent from a typing are skipped, so rows typed for fewer loci carry lower loads and are not comparable with fully typed rows.</p>';
+            '<p class="hla-ref-info">Eplet loads are computed from the HLAMatchmaker 3.1 tables bundled with this app, using the same cell-based comparison as the single-pair mode. Loci absent from a typing are skipped, so rows typed for fewer loci carry lower loads and are not comparable with fully typed rows. ' +
+            'AAMS (sum over mismatched donor molecules), EMS3D (highest per class; n/a when no mismatched molecule is in the EMS3D library) and the recipient&#39;s class I HED come from the <a href="#scores" class="ux-link-btn" style="margin-left:0;">HED &middot; AAMS &middot; EMS3D</a> calculations.</p>';
     }
 
     function downloadBatchCsv() {
         if (!lastBatch) return;
-        const cols = ['label', 'antigenMM', 'alleleMM', 'epI', 'epII', 'epTotal', 'ie', 'abver', 'signature', 'error', 'patient', 'donor'];
+        const cols = ['label', 'antigenMM', 'alleleMM', 'epI', 'epII', 'epTotal', 'ie', 'abver', 'aamsI', 'aamsII', 'ems3dI', 'ems3dII',
+                      'hedRecipient', 'hedDonor', 'signature', 'error', 'patient', 'donor'];
         const esc2 = function (v) { const t = (v === null || v === undefined) ? '' : String(v); return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
         const csv = cols.join(',') + '\n' + lastBatch.map(function (r) { return cols.map(function (c) { return esc2(r[c]); }).join(','); }).join('\n') + '\n';
         const a = document.createElement('a');
@@ -499,19 +540,32 @@
 
         block.hidden = false; section.hidden = false;
         const t = m.totals;
+        // HED, AAMS and EMS3D come from hla_scores.js, the same code as the HED · AAMS · EMS3D tab
+        const sc = scoresFor(res);
+        const hedR = sc ? sc.hed.recipient : null, hedD = sc ? sc.hed.donor : null;
+        const pending = sc && sc.scores.molecules.some(function (x) { return x.ems3d.pending; });
+        let emsMax = null;
+        if (sc) sc.scores.molecules.forEach(function (x) { if (x.ems3d.value !== null) emsMax = emsMax === null ? x.ems3d.value : Math.max(emsMax, x.ems3d.value); });
         $('hla-mol-tiles').innerHTML =
-            tile(t.aa, 'Amino-acid mismatches', 'Donor residues absent from both recipient alleles') +
-            tile(t.aaExposed, 'Solvent-accessible', 'The antibody-reachable subset (&ge; 25% relative ASA)') +
-            tile(t.electrostatic.toFixed(1), 'Electrostatic mismatch', 'Summed charge difference at accessible positions') +
-            tile(t.hydrophobic.toFixed(1), 'Hydropathy mismatch', 'Summed Kyte&ndash;Doolittle difference') +
-            tile(m.hed.recipientMean === null ? '&ndash;' : m.hed.recipientMean.toFixed(2),
-                 'Recipient HED', 'Divergence between the recipient&#39;s own alleles') +
-            tile(m.hed.donorMean === null ? '&ndash;' : m.hed.donorMean.toFixed(2),
-                 'Donor HED', 'Divergence between the donor&#39;s own alleles');
+            tile(sc ? String(sc.scores.summary.all.aams) : '&ndash;', 'AAMS (sum)',
+                 'Kosmoliaptsis amino-acid mismatch score &mdash; <a href="#scores" class="ux-link-btn" style="margin-left:0;">details</a>') +
+            tile(pending ? '&hellip;' : (emsMax === null ? '&ndash;' : emsMax.toFixed(3)), 'EMS3D (highest)',
+                 'Electrostatic distance to the closest recipient molecule') +
+            tile(hedR && hedR.meanClassI !== null ? hedR.meanClassI.toFixed(2) : '&ndash;',
+                 'Recipient HED', 'Class I mean, as HLAdiv.net') +
+            tile(t.aaExposed, 'Solvent-accessible AA mismatch', 'HLA-EMMA-style, &ge; 25% relative ASA') +
+            tile(t.electrostatic.toFixed(1), 'Charge difference', 'Summed at accessible positions (not EMS3D)') +
+            tile(hedD && hedD.meanClassI !== null ? hedD.meanClassI.toFixed(2) : '&ndash;',
+                 'Donor HED', 'Class I mean, as HLAdiv.net');
+        if (pending) {
+            const groups = sc.scores.molecules.filter(function (x) { return x.ems3d.pending; }).map(function (x) { return x.group; });
+            HLAScores.ensureEms3d(groups, function () { if (lastResult === res) renderMolecular(res); });
+        }
 
         const rows = m.evaluated.map(function (locus) {
             const p = m.perLocus[locus];
-            const hed = m.hed.recipient[locus];
+            const hed = hedR && hedR.perLocus[locus] && hedR.perLocus[locus].hed !== null
+                ? { hed: hedR.perLocus[locus].hed, homozygous: hedR.perLocus[locus].homozygous } : null;
             return '<tr><td>' + esc(locus) + '</td><td class="hla-num">' + p.aa +
                 '</td><td class="hla-num">' + p.aaExposed +
                 '</td><td class="hla-num">' + p.electrostatic.toFixed(2) +
@@ -536,6 +590,22 @@
                 (r.d.exposure === null ? '&ndash;' : r.d.exposure.toFixed(2)) + '</td></tr>';
         }).join('') : '<tr><td colspan="6"><span class="hla-na">No solvent-accessible mismatch</span></td></tr>';
         $('hla-count-mol').textContent = String(pos.length);
+    }
+
+    // alleles of one side of an HLAEngine result, by locus, for hla_scores.js
+    function typingOf(person) {
+        const out = {};
+        Object.keys((person && person.alleles) || {}).forEach(function (l) {
+            out[l] = (person.alleles[l] || []).map(function (a) { return a.name || a; });
+        });
+        return out;
+    }
+    function scoresFor(res) {
+        if (!window.HLAScores || !HLAScores.available() || !res || !res.recipient || !res.donor) return null;
+        try {
+            const r = typingOf(res.recipient), d = typingOf(res.donor);
+            return { scores: HLAScores.score(r, d), hed: { recipient: HLAScores.hedGenotype(r), donor: HLAScores.hedGenotype(d) } };
+        } catch (e) { return null; }
     }
 
     function tile(value, label, sub) {

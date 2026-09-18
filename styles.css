@@ -8,21 +8,21 @@
 
 :root {
     /* Surfaces */
-    --color-liquid-abyss: #012624;
-    --color-liquid-deep: #011d1c;
-    --color-liquid-kelp: #003734;
-    --color-slate-deep: #707777;
+    --color-liquid-abyss: var(--bg);
+    --color-liquid-deep: var(--surface-1);
+    --color-liquid-kelp: var(--surface-2);
+    --color-slate-deep: var(--text-3);
 
     /* Typographic Palette */
-    --color-liquid-mist: #edfffe;
-    --color-platinum: #ffffff;
-    --color-silver-mist: #bbc7c6;
+    --color-liquid-mist: var(--text-1);
+    --color-platinum: var(--text-1);
+    --color-silver-mist: var(--text-2);
     --color-ash: #f2f2f2;
-    --color-lavender-phosphor: #fde9ff;
+    --color-lavender-phosphor: var(--stat);
 
     /* Gradients */
-    --gradient-bioluminescent: linear-gradient(90deg, rgb(0, 130, 124) 0%, rgb(203, 255, 252) 100%);
-    --gradient-aurora: linear-gradient(90deg, rgb(203, 255, 252) 0%, rgb(237, 255, 254) 26.25%, rgb(255, 253, 250) 47.57%, rgb(250, 209, 255) 88.96%);
+    --gradient-bioluminescent: linear-gradient(90deg, rgb(0, 130, 124) 0%, var(--accent) 100%);
+    --gradient-aurora: linear-gradient(90deg, var(--accent) 0%, rgb(237, 255, 254) 26.25%, rgb(255, 253, 250) 47.57%, rgb(250, 209, 255) 88.96%);
 
     /* Typography */
     --font-matter: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -143,7 +143,7 @@ body {
     background: rgba(1, 38, 36, 0.94);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border);
     box-sizing: border-box;
     flex-wrap: nowrap;
 }
@@ -300,7 +300,7 @@ body {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgb(203, 255, 252);
+    background: var(--accent);
     box-shadow: 0 0 6px rgb(203, 255, 252);
 }
 
@@ -322,7 +322,7 @@ body {
     align-items: center;
     padding: var(--spacing-20) 0;
     margin-bottom: var(--spacing-20);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
     gap: var(--spacing-16);
 }
@@ -393,7 +393,7 @@ body {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-liquid-mist);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--border);
     border-radius: var(--radius-small);
     padding: 4px 10px;
 }
@@ -411,7 +411,7 @@ body {
 
 .tag-confirmed {
     background: rgba(0, 130, 124, 0.15);
-    color: #00827c;
+    color: var(--accent-strong);
 }
 
 .tag-null {
@@ -421,7 +421,7 @@ body {
 
 .tag-inconclusive {
     background: rgba(250, 209, 255, 0.18);
-    color: #fad1ff;
+    color: var(--tag-inconclusive, var(--accent-2));
 }
 
 /* ==========================================================================
@@ -476,8 +476,8 @@ body {
     gap: var(--spacing-24);
     width: 100%;
     margin-bottom: var(--section-gap);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     padding: var(--spacing-28) 0;
 }
 
@@ -549,7 +549,7 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: var(--spacing-24);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border);
     padding-bottom: var(--spacing-16);
     gap: var(--spacing-16);
 }
@@ -645,7 +645,7 @@ body {
 .control-input,
 .control-select {
     background-color: var(--color-liquid-deep);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
     border-radius: var(--radius-small);
     padding: 10px 12px;
     color: var(--color-platinum);
@@ -666,14 +666,14 @@ body {
 }
 
 .control-select option {
-    background-color: #011d1c;
-    color: #edfffe;
+    background-color: var(--surface-1);
+    color: var(--text-1);
     padding: 8px 12px;
 }
 
 .control-input:focus,
 .control-select:focus {
-    border-color: rgb(203, 255, 252);
+    border-color: var(--accent);
     background-color: rgba(1, 38, 36, 0.95);
 }
 
@@ -686,7 +686,7 @@ body {
 
 .control-input.calculated {
     background-color: rgba(1, 38, 36, 0.85);
-    border-color: rgba(203, 255, 252, 0.3);
+    border-color: var(--border-strong);
     color: var(--color-liquid-mist);
     font-family: var(--font-mono);
     font-weight: 500;
@@ -705,7 +705,7 @@ body {
 
 .btn-aurora {
     background: var(--gradient-aurora);
-    color: #222222;
+    color: var(--text-on-accent);
     border: none;
     border-radius: var(--radius-buttons);
     padding: 14px var(--spacing-28);
@@ -730,7 +730,7 @@ body {
 
 .btn-ghost {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-strong);
     color: var(--color-silver-mist);
     border-radius: var(--radius-buttons);
     padding: 14px var(--spacing-24);
@@ -757,7 +757,7 @@ body {
     gap: var(--spacing-20);
     margin-bottom: var(--spacing-20);
     padding-bottom: var(--spacing-20);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
 }
 
@@ -804,11 +804,11 @@ body {
 }
 
 .matrix-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--border);
 }
 
 .matrix-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--border-strong);
     border-radius: 6px;
 }
 
@@ -828,13 +828,13 @@ body {
     letter-spacing: 0.1em;
     color: var(--color-liquid-mist);
     padding: var(--spacing-12) var(--spacing-16);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border);
     white-space: nowrap;
 }
 
 .table-matrix td {
     padding: 12px var(--spacing-16);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--border);
     color: var(--color-silver-mist);
     vertical-align: middle;
 }
@@ -884,7 +884,7 @@ body {
 }
 
 .table-matrix tr.active-stratum {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--border);
 }
 
 .table-matrix tr.active-stratum td {
@@ -897,7 +897,7 @@ body {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: rgb(203, 255, 252);
+    background: var(--accent);
     box-shadow: 0 0 8px rgb(203, 255, 252);
     margin-right: 8px;
     vertical-align: middle;
@@ -908,7 +908,7 @@ body {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--border-strong);
     margin-right: 8px;
     vertical-align: middle;
 }
@@ -964,7 +964,7 @@ body {
    MODEL PROGRESSION PANEL
    ========================================================================== */
 .progression-panel {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border);
     padding-top: var(--spacing-16);
 }
 
@@ -995,7 +995,7 @@ body {
 .bar-track {
     width: 100%;
     height: 4px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--border);
     border-radius: 6px;
     overflow: hidden;
 }
@@ -1115,7 +1115,7 @@ body {
     max-width: var(--page-max-width);
     margin: var(--spacing-48) auto 0;
     padding-top: var(--spacing-20);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     font-size: 11px;
@@ -1179,7 +1179,7 @@ body {
         gap: var(--spacing-8);
         z-index: 1001;
         transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        border-left: 1px solid rgba(255, 255, 255, 0.06);
+        border-left: 1px solid var(--border);
         overflow-y: auto;
     }
 
@@ -1191,7 +1191,7 @@ body {
         font-size: 14px;
         padding: 14px 0;
         width: 100%;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid var(--border);
     }
 
     .mobile-nav-overlay {
@@ -1526,7 +1526,7 @@ body {
     display: flex;
     gap: var(--spacing-12);
     margin-bottom: var(--spacing-24);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid var(--border);
     padding-bottom: 0;
     flex-wrap: wrap;
 }
@@ -1554,15 +1554,15 @@ body {
 }
 
 .calc-tab-btn.active {
-    color: #cbfffc;
-    border-bottom-color: #cbfffc;
+    color: var(--accent);
+    border-bottom-color: var(--accent);
     background: rgba(203, 255, 252, 0.05);
 }
 
 .calc-tab-btn .tab-badge-advisory {
     font-size: 10px;
     background: rgba(250, 209, 255, 0.2);
-    color: #fad1ff;
+    color: var(--accent-2);
     border: 1px solid rgba(250, 209, 255, 0.4);
     padding: 1px 6px;
     border-radius: 6px;
@@ -1579,18 +1579,18 @@ body {
 
 .eplet-advisory-banner {
     background: rgba(250, 209, 255, 0.1);
-    border-left: 3px solid #fad1ff;
+    border-left: 3px solid var(--accent-2);
     border-radius: 6px;
     padding: 14px 18px;
     margin-bottom: var(--spacing-24);
     font-size: 13px;
     line-height: 1.55;
-    color: #fde9ff;
+    color: var(--stat);
 }
 
 .eplet-catalog-card {
-    background: rgba(1, 29, 28, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
     border-radius: var(--radius-small);
     padding: var(--spacing-20);
     margin-top: var(--spacing-16);
@@ -1609,15 +1609,15 @@ body {
 }
 
 .eplet-tag-matched {
-    background: rgba(203, 255, 252, 0.2);
-    border: 1px solid rgba(203, 255, 252, 0.5);
-    color: #edfffe;
+    background: var(--accent-quiet);
+    border: 1px solid var(--border-accent);
+    color: var(--text-1);
 }
 
 .eplet-tag-unmatched {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #707777;
+    background: var(--border);
+    border: 1px solid var(--border);
+    color: var(--text-3);
 }
 
 /* ==========================================================================
@@ -1637,13 +1637,13 @@ body {
     }
 
     body {
-        background: #ffffff;
+        background: var(--text-1);
         color: #1a1a1a;
     }
 
     .surface-card {
         border: 1px solid #ddd;
-        background: #ffffff;
+        background: var(--text-1);
     }
 
     .page-wrapper {

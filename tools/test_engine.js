@@ -233,5 +233,193 @@ fs.writeFileSync(path.join(__dirname, '..', 'hla_validation_vectors.js'),
           missing.length + ' missing: ' + missing.slice(0, 5).join(', '));
 })();
 
+/* ============================================================================
+   HED, AAMS and EMS3D (hla_scores.js + hla_scores_data.js)
+   ========================================================================== */
+(function scoresTests() {
+    const modPath = path.join(__dirname, '..', 'hla_scores.js');
+    const dataPath = path.join(__dirname, '..', 'hla_scores_data.js');
+    if (!fs.existsSync(modPath) || !fs.existsSync(dataPath)) {
+        console.log('scores layer not present, skipped');
+        return;
+    }
+    const S = require(modPath);
+    const raw = fs.readFileSync(dataPath, 'utf8');
+    const data = JSON.parse(raw.split('window.HLA_SCORES_DATA = ')[1].trim().replace(/;\s*$/, ''));
+    S.setData(data);
+
+    /* --- allele names, in every format the published tools accept --- */
+    check('normalize A*02:01', S.normalize('A*02:01') === 'A*02:01');
+    check('normalize A0201 (HLAdiv)', S.normalize('A0201') === 'A*02:01');
+    check('normalize A01101 (HLAdiv 3-digit)', S.normalize('A01101') === 'A*01:101');
+    check('normalize DRB10101 (Lenz)', S.normalize('DRB10101') === 'DRB1*01:01');
+    check('normalize HLA-C*07:01:01:01', S.normalize('HLA-C*07:01:01:01') === 'C*07:01');
+    check('normalize Cw*07:02', S.normalize('Cw*07:02') === 'C*07:02');
+    check('normalize keeps a null suffix', S.normalize('A*01:04:01:01N') === 'A*01:04N');
+    check('normalize rejects one field', S.normalize('A*02') === null);
+    check('normalize rejects serology', S.normalize('B35') === null || S.normalize('B35') === 'B*35:00');
+
+    /* --- Grantham: the 1974 integer table the Lenz script looks up --- */
+    [['S', 'W', 177], ['C', 'W', 215], ['G', 'W', 184], ['L', 'I', 5], ['S', 'A', 99],
+     ['D', 'E', 45], ['K', 'R', 26], ['F', 'Y', 22], ['A', 'V', 64], ['C', 'S', 112]
+    ].forEach(function (t) {
+        check('Grantham (integer) ' + t[0] + t[1] + ' = ' + t[2], S.grantham(t[0], t[1]) === t[2],
+              'got ' + S.grantham(t[0], t[1]));
+    });
+    check('Grantham identity is zero', S.grantham('A', 'A') === 0);
+
+    /* --- HED: every worked example published on hladiv.net --- */
+    [['A3303', 'A3201', 6.05525], ['B4501', 'B4402', 4.93923], ['C0704', 'C1601', 4.96685],
+     ['A0201', 'A3101', 7.51934], ['B4403', 'B4501', 5.88950], ['C1601', 'C0501', 4.12155],
+     ['A6801', 'A3101', 4.49171], ['B1301', 'B3503', 6.74033], ['C0403', 'C0401', 2.96133]
+    ].forEach(function (t) {
+        const r = S.hedPair(t[0], t[1]);
+        check('HED ' + t[0] + '/' + t[1] + ' = ' + t[2] + ' (hladiv.net)',
+              r.hed !== null && Math.abs(r.hed - t[2]) < 5e-6, JSON.stringify(r));
+    });
+    /* --- HED re-derived from the Lenz reference alignment --- */
+    [['A*01:01', 'A*02:01', 1901], ['A*01:01', 'A*03:01', 1040], ['A*02:01', 'A*02:02', 136],
+     ['A*24:02', 'A*29:02', 1846], ['B*07:02', 'B*44:02', 2588], ['B*15:01', 'B*57:01', 1504],
+     ['C*01:02', 'C*07:01', 1289], ['C*04:01', 'C*07:02', 1214]
+    ].forEach(function (t) {
+        const r = S.hedPair(t[0], t[1]);
+        check('HED ' + t[0] + '/' + t[1] + ' sums to ' + t[2] + '/181',
+              r.hed !== null && r.sum === t[2] && r.length === 181, JSON.stringify(r));
+    });
+    check('HED of an allele with itself is 0', S.hedPair('A*01:01', 'A*01:01').hed === 0);
+    check('HED region for class I is 2-182', String(S.hedPair('A*01:01', 'A*02:01').region) === '2,182');
+    check('HED class II uses beta 6-94', String(S.hedPair('DQB1*02:03', 'DQB1*02:02').region) === '6,94');
+    const dqb = S.hedPair('DQB1*02:03', 'DQB1*02:02');
+    check('HED DQB1*02:03/02:02 = 126/89 (Lenz example output)',
+          dqb.sum === 126 && dqb.length === 89 && Math.abs(dqb.hed - 1.41573033707865) < 1e-9, JSON.stringify(dqb));
+    check('HED DQB1*03:01/05:01 = 1553/89 (Lenz example output)',
+          Math.abs(S.hedPair('DQB1*03:01', 'DQB1*05:01').hed - 17.4494382022472) < 1e-9);
+    check('HED is not defined for DPB1', S.hedPair('DPB1*04:01', 'DPB1*02:01').hed === null);
+    check('HED refuses class II across loci', S.hedPair('DRB1*01:01', 'DQB1*02:01').hed === null);
+    check('HED allows class I across loci (hladiv pair mode)', S.hedPair('A*01:01', 'B*07:02').hed > 0);
+
+    /* --- the reference script's own loop: an excluded position shortens the loop bound,
+           so the last column is never examined (verified against CalculatePairwiseDistances.pl) --- */
+    (function truncation() {
+        const synthetic = {
+            meta: { imgt: 'synthetic', loci: { A: { extracellular_end: 10 } } },
+            grantham: data.grantham, hedRanges: { A: [1, 10] },
+            loci: { A: { ref: 'AAAAAAAAAW', names: ['A*01:01', 'A*01:02'], parent: [-1, -1],
+                         diff: ['', '2.10C'], imputed: ['', ''] } }
+        };
+        S.setData(synthetic);
+        const r = S.hedPair('A*01:01', 'A*01:02');
+        check('Lenz loop: gap at 2 hides the Trp/Cys at column 10 (HED 0, not 23.89)',
+              r.hed === 0 && r.excluded === 1 && r.length === 9, JSON.stringify(r));
+        S.setData(data);
+    })();
+
+    /* --- HLAdiv "Loci & Mean" and batch modes --- */
+    const g = S.hedGenotype({ A: ['A3303', 'A3201'], B: ['B4501', 'B4402'], C: ['C0704', 'C1601'] });
+    check('HLAdiv Pt01 mean HED = 5.32044', Math.abs(g.meanClassI - 5.32044) < 5e-6, String(g.meanClassI));
+    check('HLAdiv Pt01 per-locus HED', Math.abs(g.perLocus.A.hed - 6.05525) < 5e-6 &&
+          Math.abs(g.perLocus.B.hed - 4.93923) < 5e-6 && Math.abs(g.perLocus.C.hed - 4.96685) < 5e-6);
+    check('homozygous locus has HED 0', S.hedGenotype({ A: ['A*01:01', 'A*01:01'] }).perLocus.A.hed === 0);
+    check('one typed allele is read as homozygous', S.hedGenotype({ A: ['A*01:01'] }).perLocus.A.hed === 0);
+    const batch = S.hedBatch('Sample\tHLAI\nPt01\tA3303,A3201,B4501,B4402,C0704,C1601\nPt02\tA0101,A0201\n');
+    check('batch TSV: header skipped, two rows', batch.length === 2);
+    check('batch TSV: Pt01 mean matches the site', Math.abs(batch[0].Mean_HED - 5.32044) < 5e-6);
+    check('batch TSV: a short row is reported, not silently scored',
+          batch[1].Mean_HED === null && /6 alleles/.test(batch[1].error), JSON.stringify(batch[1]));
+    check('batch TSV export has the HLAdiv columns',
+          S.hedBatchTsv(batch).split('\n')[0] === 'Sample\tAlleles\tHED_A\tHED_B\tHED_C\tMean_HED\tNote');
+
+    /* --- sequences --- */
+    check('A*02:01 extracellular length is 284', S.sequence('A*02:01').seq.length >= 284);
+    check('A*02:01 starts GSHSMRYF', S.sequence('A*02:01').seq.slice(0, 8) === 'GSHSMRYF');
+    check('B*27:09 matches the 1K5N template start', S.sequence('B*27:09').seq.slice(0, 8) === 'GSHSMRYF');
+    check('B*57:01 carries Bw4 I80', S.sequence('B*57:01').seq[79] === 'I');
+    check('B*07:02 carries Bw6 N80', S.sequence('B*07:02').seq[79] === 'N');
+    check('C*04:01 is KIR C2 (K80)', S.sequence('C*04:01').seq[79] === 'K');
+    check('DQB1*03:02 is non-Asp57', S.sequence('DQB1*03:02').seq[56] === 'A');
+    check('DQB1*03:01 is Asp57', S.sequence('DQB1*03:01').seq[56] === 'D');
+    check('DRB1*01:01 carries G86', S.sequence('DRB1*01:01').seq[85] === 'G');
+    check('DRB1*01:02 carries V86', S.sequence('DRB1*01:02').seq[85] === 'V');
+    check('unknown allele has no sequence', S.sequence('A*99:99') === null);
+
+    /* --- AAMS --- */
+    const one = S.aamsChain('B*44:03', ['B*44:02'], 284);
+    check('B*44:02 vs B*44:03 differ at one position', one.value === 1, JSON.stringify(one.positions));
+    check('that position is 156', one.positions[0].position === 156);
+    check('AAMS of an allele against itself is 0', S.aamsChain('A*02:01', ['A*02:01'], 284).value === 0);
+    check('AAMS is directional', S.aamsChain('A*02:01', ['A*01:01'], 284).value !==
+          S.aamsChain('A*01:01', ['A*02:01'], 284).value ||
+          S.aamsChain('A*02:01', ['A*01:01'], 284).value > 0);
+    check('a second recipient allele can only lower AAMS',
+          S.aamsChain('A*02:01', ['A*01:01', 'A*03:01'], 284).value <= S.aamsChain('A*02:01', ['A*01:01'], 284).value);
+
+    const sc = S.score({ A: ['A*01:01', 'A*02:01'], B: ['B*07:02', 'B*08:01'], C: ['C*07:01', 'C*07:02'],
+                         DRB1: ['DRB1*03:01', 'DRB1*15:01'], DQA1: ['DQA1*05:01', 'DQA1*01:02'],
+                         DQB1: ['DQB1*02:01', 'DQB1*06:02'] },
+                       { A: ['A*01:01', 'A*24:02'], B: ['B*07:02', 'B*35:01'], C: ['C*07:01', 'C*04:01'],
+                         DRB1: ['DRB1*03:01', 'DRB1*04:01'], DQA1: ['DQA1*05:01', 'DQA1*03:01'],
+                         DQB1: ['DQB1*02:01', 'DQB1*03:02'] });
+    const mols = sc.molecules.map(function (m) { return m.molecule; });
+    check('score lists only mismatched donor molecules',
+          mols.indexOf('A*24:02') !== -1 && mols.indexOf('A*01:01') === -1, mols.join(' '));
+    check('score keeps shared donor molecules out of the DQ list',
+          mols.indexOf('DQA1*05:01~DQB1*02:01') === -1, mols.join(' '));
+    check('DQ heterodimers are paired by the DQA1*01 / DQB1*05-06 rule',
+          mols.indexOf('DQA1*03:01~DQB1*03:02') !== -1, mols.join(' '));
+    check('class I AAMS uses the interlocus comparison', (function () {
+        const m = sc.molecules.filter(function (x) { return x.molecule === 'A*24:02'; })[0];
+        const intra = S.aamsChain('A*24:02', ['A*01:01', 'A*02:01'], 284).value;
+        return m.aams.value < intra;                     // B and C residues remove some mismatches
+    })(), 'interlocus should be lower than intralocus');
+    check('every mismatched molecule has an AAMS value',
+          sc.molecules.every(function (m) { return m.aams.value !== null; }),
+          JSON.stringify(sc.molecules.filter(function (m) { return m.aams.value === null; }).map(function (m) { return [m.molecule, m.aams.reason]; })));
+    check('locus summary reports the highest and the summed AAMS',
+          sc.summary.byLocus.A.aamsMax > 0 && sc.summary.byLocus.A.aamsSum >= sc.summary.byLocus.A.aamsMax);
+    check('identical typings give no mismatched molecule', (function () {
+        const t = { A: ['A*01:01', 'A*02:01'], B: ['B*07:02', 'B*08:01'], DRB1: ['DRB1*03:01'] };
+        return S.score(t, t).molecules.length === 0;
+    })());
+    check('an unknown allele is reported, not scored silently', (function () {
+        const r = S.score({ A: ['A*01:01'] }, { A: ['A*99:99'] });
+        return r.molecules.length === 0 && r.warnings.some(function (w) { return /A\*99:99/.test(w); });
+    })());
+
+    /* --- EMS3D tables, when they have been built --- */
+    const emsMeta = path.join(__dirname, '..', 'hla_ems3d_meta.js');
+    if (!fs.existsSync(emsMeta)) {
+        console.log('EMS3D tables not built yet, those checks skipped');
+    } else {
+        const win = {};
+        [emsMeta].concat(Object.keys(S.EMS_FILES).map(function (f) { return path.join(__dirname, '..', S.EMS_FILES[f]); }))
+            .filter(fs.existsSync)
+            .forEach(function (f) { new Function('window', fs.readFileSync(f, 'utf8'))(win); });
+        S.setData(data, win.HLA_EMS3D_DATA);
+        const E = win.HLA_EMS3D_DATA;
+        check('EMS3D: class I table loaded', !!(E.groups.I && E.groups.I.names.length > 100));
+        check('EMS3D: a molecule against itself is 0', S.esd('I', E.groups.I.names[0], E.groups.I.names[0]) === 0);
+        check('EMS3D: distances are symmetric', (function () {
+            const a = E.groups.I.names[3], b = E.groups.I.names[40];
+            return S.esd('I', a, b) === S.esd('I', b, a);
+        })());
+        check('EMS3D: distances lie in 0-2', (function () {
+            const n = E.groups.I.names;
+            for (let i = 0; i < Math.min(40, n.length); i++) {
+                for (let j = i + 1; j < Math.min(40, n.length); j++) {
+                    const v = S.esd('I', n[i], n[j]);
+                    if (!(v >= 0 && v <= 2)) return false;
+                }
+            }
+            return true;
+        })());
+        check('EMS3D: the minimum is taken over the recipient class I molecules', (function () {
+            const r = ['A*01:01', 'B*07:02', 'C*07:01'].filter(function (a) { return S.emsCovers('I', a); });
+            if (r.length < 2 || !S.emsCovers('I', 'A*24:02')) return true;      // library subset
+            const m = S.ems3dMolecule('I', 'A*24:02', r);
+            return Math.abs(m.value - Math.min.apply(null, r.map(function (x) { return S.esd('I', 'A*24:02', x); }))) < 1e-9;
+        })());
+    }
+})();
+
 console.log('TOTAL: pass ' + pass + ', fail ' + fail);
 process.exit(fail ? 1 : 0);

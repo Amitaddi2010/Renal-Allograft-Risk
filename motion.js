@@ -234,9 +234,14 @@
             needle.style.transform = 'rotate(' + angle.toFixed(1) + 'deg)';
         }
 
-        // Color ramp according to quintile (1: Very Low to 5: Extreme)
-        const qColors = ['#00d2c4', '#44e5d8', '#cbfffc', '#fad1ff', '#ff88a5'];
-        const qColor = qColors[(quintile || 3) - 1] || '#cbfffc';
+        // Colour ramp per quintile, read from the theme tokens (--q1..--q5) so the
+        // gauge stays legible in light mode; the literals are the dark-theme fallback.
+        const fallback = ['#00d2c4', '#44e5d8', '#cbfffc', '#fad1ff', '#ff88a5'];
+        const themeStyles = getComputedStyle(wrap);
+        const qColors = fallback.map(function (hex, i) {
+            return (themeStyles.getPropertyValue('--q' + (i + 1)) || '').trim() || hex;
+        });
+        const qColor = qColors[(quintile || 3) - 1] || qColors[2];
 
         if (progArc) {
             // Arc length for r=78 semi-circle is ~245
@@ -479,7 +484,7 @@
                 if (typeof switchCalculatorTab === 'function') switchCalculatorTab('eplet');
             } else if (e.key === '4') {
                 if (typeof switchView === 'function') switchView('calculator');
-                if (typeof switchCalculatorTab === 'function') switchCalculatorTab('external');
+                if (typeof switchCalculatorTab === 'function') switchCalculatorTab('scores');
             } else if (e.key === '0' || e.key.toLowerCase() === 'h') {
                 if (typeof switchView === 'function') switchView('landing');
             }
@@ -504,6 +509,11 @@
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
+
+    // the gauge paints inline colours, so it has to be redrawn when the theme flips
+    window.addEventListener('ramrt:themechange', function () {
+        try { if (typeof calcSandboxRisk === 'function') calcSandboxRisk(); } catch (e) { /* sandbox not on this view */ }
+    });
 
     window.Motion = {
         toast: toast,

@@ -34,12 +34,12 @@ img, svg, canvas, video { max-width: 100%; }
 @media (min-width: 861px) and (max-width: 1249px) {
     /* the note needs a line of its own before the stat columns get crushed */
     .db-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .db-sum-note { grid-column: 1 / -1; border-top: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08)); }
+    .db-sum-note { grid-column: 1 / -1; border-top: 1px solid var(--ab-line, var(--border)); }
     .db-sum-item:nth-child(4) { border-right: none; }
 }
 @media (max-width: 400px) {
     .db-summary { grid-template-columns: 1fr; }
-    .db-sum-item { border-right: none; border-bottom: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08)); }
+    .db-sum-item { border-right: none; border-bottom: 1px solid var(--ab-line, var(--border)); }
 }
 
 /* ---- 4 · landing header: section links only where they fit ---------------- */
@@ -109,7 +109,7 @@ img, svg, canvas, video { max-width: 100%; }
     .btn-aurora:hover:not(:disabled)::after { opacity: 0; animation: none; }
     .btn-aurora:hover:not(:disabled) span:last-child,
     .arrow-btn:hover { transform: none; }
-    .home-card:hover, .lp-feature:hover { background: var(--ab-kelp, #003734); }
+    .home-card:hover, .lp-feature:hover { background: var(--ab-kelp, var(--surface-2)); }
     .home-card:hover .lp-feature-icon { transform: none; }
     .hla-arow:hover, .db-sum-item:hover, .hla-tile:hover, .stat-block:hover { background: transparent; }
     .calc-tab-btn:hover::after { transform: scaleX(0); }
@@ -170,10 +170,14 @@ img, svg, canvas, video { max-width: 100%; }
     .card-header-bar > div:first-child { flex: 1 1 260px; min-width: 0; }
     .ux-seg { flex: 0 1 auto; }
 }
+/* below 640 px the header is a column (styles.css), where a 260 px basis became an empty band */
+@media (max-width: 640px) {
+    .card-header-bar > div:first-child { flex: 0 0 auto; }
+}
 @media (max-width: 420px) {
     .ux-seg { width: 100%; }
     .ux-seg button { flex: 1 1 auto; text-align: center; }
-    .ux-seg button + button { border-left: none; border-top: 1px solid var(--ab-line, rgba(255, 255, 255, 0.08)); }
+    .ux-seg button + button { border-left: none; border-top: 1px solid var(--ab-line, var(--border)); }
 }
 
 /* a centred tooltip runs off a narrow screen; anchor it to the trigger instead */

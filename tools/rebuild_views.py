@@ -27,6 +27,7 @@ NAV = '''<nav class="nav-links" id="nav-links">
             <button type="button" class="nav-link" id="nav-btn-home" onclick="switchView('calculator'); switchCalculatorTab('home'); closeNav();">Dashboard</button>
             <button type="button" class="nav-link" id="nav-btn-calc" onclick="switchView('calculator'); switchCalculatorTab('nomogram'); closeNav();">Risk calculator</button>
             <button type="button" class="nav-link" id="nav-btn-eplet-adv" onclick="switchView('calculator'); switchCalculatorTab('eplet'); closeNav();">HLA &amp; eplets</button>
+            <button type="button" class="nav-link" id="nav-btn-scores" onclick="switchView('calculator'); switchCalculatorTab('scores'); closeNav();">HED · AAMS · EMS3D</button>
             <button type="button" class="nav-link nav-link-secondary" id="nav-btn-landing" onclick="switchView('landing'); closeNav();">← Back to site</button>
         </nav>'''
 s = s[:nav_start] + NAV + s[nav_end:]
@@ -234,7 +235,7 @@ if 'responsive.css' not in s:
     s = re.sub(r'(<link rel="stylesheet" href="motion\.css[^>]*>)',
                r'\1' + '\n    <link rel="stylesheet" href="responsive.css?v=20260911">', s, count=1)
 if 'motion.css' not in s:
-    s = s.replace('<link rel="stylesheet" id="theme-glass"', '<link rel="stylesheet" href="motion.css?v=20260911">\n    <link rel="stylesheet" id="theme-glass"', 1)
+    s = s.replace('<link rel="stylesheet" href="ramrt_ui.css', '<link rel="stylesheet" href="motion.css?v=20260911">\n    <link rel="stylesheet" href="ramrt_ui.css', 1)
 if 'motion.js' not in s:
     s = re.sub(r'(<script src="app\.js[^"]*"></script>)', r'\1\n    <script src="motion.js?v=20260911"></script>', s, count=1)
 

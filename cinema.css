@@ -74,7 +74,7 @@ body.cine-on .landing-section-header.is-in .landing-section-title { clip-path: i
 /* ---- 6 · progress line --------------------------------------------------------- */
 .cine-progress {
     position: fixed; top: 0; left: 0; height: 2px; width: 100%; z-index: 2600; pointer-events: none;
-    background: linear-gradient(90deg, #00827c, #cbfffc 60%, #fde9ff);
+    background: linear-gradient(90deg, var(--accent-strong), var(--accent) 60%, var(--stat));
     transform-origin: left; transform: scaleX(var(--cine-s, 0));
     display: none;
 }
@@ -84,7 +84,7 @@ body.is-landing .cine-progress { display: block; }
 .cine-light {
     position: fixed; inset: 0; z-index: 2400; pointer-events: none; display: none;
     background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 30%),
-                rgba(203, 255, 252, 0.07), transparent 60%);
+                var(--accent-quiet), transparent 60%);
     mix-blend-mode: screen; transition: opacity 0.4s ease;
 }
 body.cine-on.is-landing .cine-light { display: block; }
@@ -117,7 +117,7 @@ body.motion-off .cine-grain { animation: none !important; }
     position: fixed; inset: 0; z-index: 3100; pointer-events: none;
     background: radial-gradient(circle at var(--vt-x, 50%) var(--vt-y, 50%),
                 transparent var(--iris),
-                rgba(203, 255, 252, 0.55) calc(var(--iris) + 1px),
+                var(--border-accent) calc(var(--iris) + 1px),
                 rgba(0, 130, 124, 0.35) calc(var(--iris) + 18px),
                 #010f0e calc(var(--iris) + 90px));
     -webkit-mask-image: radial-gradient(circle at var(--vt-x, 50%) var(--vt-y, 50%), transparent var(--iris), #000 calc(var(--iris) + 1px));
@@ -135,7 +135,7 @@ body.cine-on .landing-section-header .group-kicker { font-variant-numeric: tabul
 body.cine-on .landing-section-header { position: relative; }
 body.cine-on .landing-section-header::after {
     content: ''; display: block; height: 1px; width: 120px; margin: 18px auto 0;
-    background: linear-gradient(90deg, transparent, #cbfffc, transparent);
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
     transform: scaleX(0); transition: transform 1.2s cubic-bezier(0.77, 0, 0.18, 1) 0.35s;
 }
 body.cine-on .landing-section-header.is-in::after { transform: scaleX(1); }
@@ -162,11 +162,11 @@ body.cine-on .cine-mag { translate: var(--mag-x, 0px) var(--mag-y, 0px); transit
 .cine-cursor {
     position: fixed; top: 0; left: 0; z-index: 2700; pointer-events: none; display: none;
     width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
-    border: 1px solid rgba(203, 255, 252, 0.55);
+    border: 1px solid var(--border-accent);
     transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
     will-change: transform;
 }
-.cine-cursor.is-hot { width: 56px; height: 56px; margin: -28px 0 0 -28px; background: rgba(203, 255, 252, 0.08); border-color: rgba(250, 209, 255, 0.7); }
+.cine-cursor.is-hot { width: 56px; height: 56px; margin: -28px 0 0 -28px; background: var(--accent-quiet); border-color: rgba(250, 209, 255, 0.7); }
 .cine-cursor.is-idle { opacity: 0; }
 body.cine-on.is-landing .cine-cursor { display: block; }
 
@@ -174,26 +174,26 @@ body.cine-on.is-landing .cine-cursor { display: block; }
 .cine-leak {
     position: fixed; inset: 0; z-index: 2350; pointer-events: none; display: none;
     mix-blend-mode: screen; opacity: 0.16;
-    background: radial-gradient(60vmax 45vmax at var(--lk-x, 85%) var(--lk-y, 10%), var(--lk-c, #00827c), transparent 70%);
+    background: radial-gradient(60vmax 45vmax at var(--lk-x, 85%) var(--lk-y, 10%), var(--lk-c, var(--accent-strong)), transparent 70%);
     transition: background 1.6s ease;
 }
 body.cine-on.is-landing .cine-leak { display: block; }
 @property --lk-x { syntax: '<percentage>'; inherits: false; initial-value: 85%; }
 @property --lk-y { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
-@property --lk-c { syntax: '<color>'; inherits: false; initial-value: #00827c; }
+@property --lk-c { syntax: '<color>'; inherits: false; initial-value: var(--accent-strong); }
 .cine-leak { transition: --lk-x 1.8s ease, --lk-y 1.8s ease, --lk-c 1.8s ease; }
-body[data-cine-scene="hero"] .cine-leak           { --lk-x: 85%; --lk-y: 10%; --lk-c: #00827c; }
-body[data-cine-scene="landing-metrics"] .cine-leak { --lk-x: 10%; --lk-y: 30%; --lk-c: #cbfffc; }
-body[data-cine-scene="landing-features"] .cine-leak { --lk-x: 90%; --lk-y: 55%; --lk-c: #fad1ff; }
-body[data-cine-scene="landing-sandbox"] .cine-leak { --lk-x: 50%; --lk-y: 95%; --lk-c: #00827c; }
-body[data-cine-scene="landing-evidence-section"] .cine-leak { --lk-x: 15%; --lk-y: 15%; --lk-c: #cbfffc; }
-body[data-cine-scene="landing-about"] .cine-leak   { --lk-x: 55%; --lk-y: 5%;  --lk-c: #fad1ff; }
+body[data-cine-scene="hero"] .cine-leak           { --lk-x: 85%; --lk-y: 10%; --lk-c: var(--accent-strong); }
+body[data-cine-scene="landing-metrics"] .cine-leak { --lk-x: 10%; --lk-y: 30%; --lk-c: var(--accent); }
+body[data-cine-scene="landing-features"] .cine-leak { --lk-x: 90%; --lk-y: 55%; --lk-c: var(--accent-2); }
+body[data-cine-scene="landing-sandbox"] .cine-leak { --lk-x: 50%; --lk-y: 95%; --lk-c: var(--accent-strong); }
+body[data-cine-scene="landing-evidence-section"] .cine-leak { --lk-x: 15%; --lk-y: 15%; --lk-c: var(--accent); }
+body[data-cine-scene="landing-about"] .cine-leak   { --lk-x: 55%; --lk-y: 5%;  --lk-c: var(--accent-2); }
 
 /* ---- 15 · ticker band after the hero ---- */
 .cine-marquee {
     position: relative; overflow: hidden; padding: 26px 0; margin: 0;
-    border-top: 1px solid rgba(203, 255, 252, 0.08); border-bottom: 1px solid rgba(203, 255, 252, 0.08);
-    background: linear-gradient(180deg, rgba(1, 29, 28, 0.0), rgba(1, 29, 28, 0.6), rgba(1, 29, 28, 0.0));
+    border-top: 1px solid var(--accent-quiet); border-bottom: 1px solid var(--accent-quiet);
+    background: linear-gradient(180deg, transparent, var(--marquee-band), transparent);
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
             mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
 }
@@ -202,10 +202,10 @@ body[data-cine-scene="landing-about"] .cine-leak   { --lk-x: 55%; --lk-y: 5%;  -
 .cine-marquee-item {
     font-family: var(--font-matter); font-weight: 500; letter-spacing: -0.04em; line-height: 1;
     font-size: clamp(40px, 6vw, 88px); white-space: nowrap; padding: 0 0.35em;
-    color: transparent; -webkit-text-stroke: 1px rgba(203, 255, 252, 0.34);
+    color: transparent; -webkit-text-stroke: 1px var(--marquee-stroke);
 }
-.cine-marquee-item:nth-child(4n + 2) { color: rgba(203, 255, 252, 0.07); }
-.cine-marquee-sep { align-self: center; color: #cbfffc; opacity: 0.55; font-size: clamp(16px, 2vw, 26px); padding: 0 0.3em; }
+.cine-marquee-item:nth-child(4n + 2) { color: var(--marquee-fill); }
+.cine-marquee-sep { align-self: center; color: var(--accent); opacity: 0.55; font-size: clamp(16px, 2vw, 26px); padding: 0 0.3em; }
 @keyframes cineMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* ---- switches for the new pieces ---- */
